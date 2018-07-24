@@ -1,9 +1,12 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
+using FalloutRPG.Models;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
@@ -26,15 +29,16 @@ namespace FalloutRPG.Modules.Roleplay
         {
             try
             {
-                _npcService.CreateNpc(type, name);
+                await _npcService.CreateNpc(type, name);
             }
             catch (Exception e)
             {
                 await ReplyAsync(Messages.FAILURE_EMOJI + e.Message);
-                return;
+                throw;
             }
             // used to show "Raider created" vs "raIDeR created" or whatever the user put in
-            string prettyType = _npcService.IsValidNpcType(type).ToString();
+            Models.NpcPreset preset = await _npcService.GetNpcPreset(type);
+            string prettyType = preset.Name;
 
             await ReplyAsync(String.Format(Messages.NPC_CREATED_SUCCESS, prettyType, name));
         }
@@ -190,6 +194,94 @@ namespace FalloutRPG.Modules.Roleplay
             [Command("unarmed")]
             public async Task RollUnarmed(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Unarmed")}");
             #endregion
+        }
+        #endregion
+
+        #region NPC Preset Commands
+        [Group("preset")]
+        [Alias("pre")]
+        [RequireUserPermission(GuildPermission.Administrator, Group = "Permission")]
+        [RequireOwner(Group = "Permission")]
+        public class NpcPresetModule : ModuleBase<SocketCommandContext>
+        {
+            private readonly NpcService _npcService;
+
+            public NpcPresetModule(NpcService npcService)
+            {
+                _npcService = npcService;
+            }
+
+            [Command("create")]
+            public async Task CreatePreset(string name)
+            {
+                if (await _npcService.CreateNpcPreset(name))
+                    await ReplyAsync("Done successfully");
+                else
+                    await ReplyAsync("Failed!");
+            }
+            
+            [Command("enable")]
+            public async Task EnablePreset(string name)
+            {
+                await _npcService.EditNpcPresetEnable(name, true);
+                await ReplyAsync("done!");
+            }
+
+            [Command("disable")]
+            public async Task DisablePreset(string name)
+            {
+                await _npcService.EditNpcPresetEnable(name, false);
+                await ReplyAsync("done!");
+            }
+
+            [Command("edit")]
+            public async Task EditPreset(string name, string attribute, int value)
+            {
+                if (await _npcService.EditNpcPreset(name, attribute, value))
+                    await ReplyAsync("Done successfully!");
+                else
+                    await ReplyAsync("failed! does a preset with the given name exist, and second parameter matches a skill or special?");
+            }
+
+            [Command("edit")]
+            public async Task EditPreset(string name, int str, int per, int end, int cha, int @int, int agi, int luc)
+            {
+                await _npcService.EditNpcPreset(name, "Strength", str);
+                await _npcService.EditNpcPreset(name, "Perception", per);
+                await _npcService.EditNpcPreset(name, "Endurance", end);
+                await _npcService.EditNpcPreset(name, "Charisma", cha);
+                await _npcService.EditNpcPreset(name, "Intelligence", @int);
+                await _npcService.EditNpcPreset(name, "Agility", agi);
+                await _npcService.EditNpcPreset(name, "Luck", luc);
+                await ReplyAsync("All done!");
+            }
+
+            [Command("initialize")]
+            [Alias("init")]
+            public async Task InitializePresetSkills(string name)
+            {
+                NpcPreset preset = await _npcService.GetNpcPreset(name);
+
+                _npcService.InitializeNpcPresetSkills(preset);
+
+                await _npcService.SaveNpcPreset(preset);
+
+                await ReplyAsync("Done!");
+            }
+
+            [Command("peek")]
+            public async Task PeekPreset(string name)
+            {
+                StringBuilder sb = new StringBuilder();
+
+                NpcPreset preset = await _npcService.GetNpcPreset(name);
+
+                foreach (var prop in typeof(NpcPreset).GetProperties())
+                {
+                    sb.Append($"{prop.Name}: {prop.GetValue(preset)}\n");
+                }
+                await ReplyAsync(sb.ToString());
+            }
         }
         #endregion
     }

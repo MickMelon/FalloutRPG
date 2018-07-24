@@ -171,7 +171,7 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Initializes a character's skills.
         /// </summary>
-        private void InitializeSkills(Character character)
+        public void InitializeSkills(Character character)
         {
             character.Skills = new SkillSheet()
             {
