@@ -27,23 +27,24 @@ namespace FalloutRPG.Services.Roleplay
             if (Npcs.Find(x => x.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase)) != null)
                 throw new Exception(Exceptions.NPC_CHAR_EXISTS);
 
-            var typeEnum = IsValidNpcType(npcType);
+            if(!IsValidNpcType(npcType))
+                throw new Exception(Exceptions.NPC_INVALID_TYPE);
 
             Character character = new Character
             {
                 FirstName = firstName,
-                Special = (Special)typeof(NpcSpecialPresets).GetProperty(typeEnum.ToString()).GetValue(null),
+                Special = GetPresetSpecial(npcType),
             };
 
-            character.Skills = (SkillSheet)typeof(NpcSkillPresets).GetMethod(typeEnum.ToString()).Invoke(null, new object[]{ character });
-
-            if (character.Skills == null)
-                throw new Exception(Exceptions.NPC_INVALID_TYPE);
+            character.Skills = GetPresetSkillSheet(npcType);
 
             Npcs.Add(character);
         }
 
         public Character FindNpc(string name) => Npcs.Find(x => x.FirstName.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+        public Special GetPresetSpecial(string presetName) => throw new NotImplementedException();
+        public SkillSheet GetPresetSkillSheet(string presetName) => throw new NotImplementedException();
 
         public string RollNpcSkill(string firstName, string skill)
         {
@@ -82,34 +83,9 @@ namespace FalloutRPG.Services.Roleplay
             return _rollService.GetSpecialRollResult(special, character) + " (\uD83D\uDCBBNPC)";
         }
 
-        public NpcType IsValidNpcType(string typeString)
+        public bool IsValidNpcType(string typeString)
         {
-            typeString = typeString.Trim();
-
-            if (Enum.TryParse(value: typeString, ignoreCase: true, result: out NpcType typeEnum))
-                return typeEnum;
-
-            throw new Exception(Exceptions.NPC_INVALID_TYPE);
-        }
-
-        public enum NpcType
-        {
-            Error,
-            Raider,
-            RaiderVeteran,
-            Mercenary,
-            Spy,
-            Merchant,
-            Protectron,
-            Assaultron,
-            Eyebot,
-            MisterHandy,
-            MisterGutsy,
-            Robobrain,
-            SentryBot,
-            Securitron,
-            SuperMutant,
-            FeralGhoul,
+            throw new NotImplementedException();
         }
     }
 }
