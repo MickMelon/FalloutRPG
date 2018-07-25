@@ -39,9 +39,10 @@ namespace FalloutRPG.Services.Roleplay
 
             NpcPreset preset = await GetNpcPreset(npcType);
 
-            // TODO: write a different error message if the preset is not enabled
-            if (preset == null || preset.Enabled == false)
+            if (preset == null)
                 throw new Exception(Exceptions.NPC_INVALID_TYPE);
+            if (preset.Enabled == false)
+                throw new Exception(Exceptions.NPC_INVALID_TYPE_DISABLED);
 
             Character character = new Character { FirstName = firstName, Special = preset.Special, Skills = preset.Skills };
 
@@ -122,16 +123,17 @@ namespace FalloutRPG.Services.Roleplay
             }
         }
 
-        public async Task EditNpcPresetEnable(string name, bool enabled)
+        public async Task<bool> EditNpcPresetEnable(string name, bool enabled)
         {
             NpcPreset preset = await GetNpcPreset(name);
 
             if (preset == null)
-                return;
+                return false;
 
             preset.Enabled = enabled;
 
             await SaveNpcPreset(preset);
+            return true;
         }
 
         public async Task<bool> EditNpcPreset(string name, string attribName, int value)

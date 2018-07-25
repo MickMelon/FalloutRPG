@@ -47,9 +47,18 @@
 
         // NPC Messages
         public const string NPC_CREATED_SUCCESS = SUCCESS_EMOJI + "NPC created with type: {0} and name: {1}";
+        public const string NPC_PRESET_CREATE = SUCCESS_EMOJI + "NPC preset: {0} created successfully. ({1})";
+        public const string NPC_PRESET_ENABLE = SUCCESS_EMOJI + "NPC preset: {0} enabled successfully. ({1})";
+        public const string NPC_PRESET_DISABLE = SUCCESS_EMOJI + "NPC preset: {0} disabled successfully. ({1})";
+        public const string NPC_PRESET_EDIT = SUCCESS_EMOJI + "NPC preset: {0} {1} value changed to {2}. ({3})";
 
         // NPC Error Messages
         public const string ERR_NPC_CHAR_NOT_FOUND = FAILURE_EMOJI + "An NPC with the name {0} could not be found.";
+        public const string ERR_NPC_PRESET_NOT_FOUND = FAILURE_EMOJI + "An NPC preset with the name {0} could not be found. ({1})";
+        public const string ERR_NPC_PRESET_CREATE = FAILURE_EMOJI + "NPC preset creation failed. ({0})";
+        public const string ERR_NPC_PRESET_ENABLE = FAILURE_EMOJI + "Failed to enable NPC preset: {0}. (Check for typos) ({1})";
+        public const string ERR_NPC_PRESET_DISABLE = FAILURE_EMOJI + "Failed to disable NPC preset: {0}. (Check for typos) ({1})";
+        public const string ERR_NPC_PRESET_EDIT = FAILURE_EMOJI + "Failed to modify NPC preset attribute. ({0})";
 
         // Gambling Messages
         public const string BET_PLACED = SUCCESS_EMOJI + "{0}, bet placed!";

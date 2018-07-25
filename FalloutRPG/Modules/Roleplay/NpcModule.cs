@@ -34,73 +34,12 @@ namespace FalloutRPG.Modules.Roleplay
             catch (Exception e)
             {
                 await ReplyAsync(Messages.FAILURE_EMOJI + e.Message);
-                throw;
+                return;
             }
             // used to show "Raider created" vs "raIDeR created" or whatever the user put in
-            Models.NpcPreset preset = await _npcService.GetNpcPreset(type);
-            string prettyType = preset.Name;
+            NpcPreset preset = await _npcService.GetNpcPreset(type);
 
-            await ReplyAsync(String.Format(Messages.NPC_CREATED_SUCCESS, prettyType, name));
-        }
-
-        [Command("skills")]
-        [Alias("skill")]
-        public async Task ShowSkillsAsync(string name)
-        {
-            var userInfo = Context.User;
-            var character = _npcService.FindNpc(name);
-
-            if (character == null)
-            {
-                await ReplyAsync(
-                    string.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, name) + $" {Context.User.Mention}");
-                return;
-            }
-
-            var embed = EmbedHelper.BuildBasicEmbed("NPC Skills",
-                $"**Name:** {character.FirstName}\n" +
-                $"**Barter:** {character.Skills.Barter}\n" +
-                $"**Energy Weapons:** {character.Skills.EnergyWeapons}\n" +
-                $"**Explosives:** {character.Skills.Explosives}\n" +
-                $"**Guns:** {character.Skills.Guns}\n" +
-                $"**Lockpick:** {character.Skills.Lockpick}\n" +
-                $"**Medicine:** {character.Skills.Medicine}\n" +
-                $"**Melee Weapons:** {character.Skills.MeleeWeapons}\n" +
-                $"**Repair:** {character.Skills.Repair}\n" +
-                $"**Science:** {character.Skills.Science}\n" +
-                $"**Sneak:** {character.Skills.Sneak}\n" +
-                $"**Speech:** {character.Skills.Speech}\n" +
-                $"**Survival:** {character.Skills.Survival}\n" +
-                $"**Unarmed:** {character.Skills.Unarmed}");
-
-            await ReplyAsync(userInfo.Mention, embed: embed);
-        }
-
-        [Command("special")]
-        [Alias("specials")]
-        public async Task ShowSpecialAsync(string name)
-        {
-            var userInfo = Context.User;
-            var character = _npcService.FindNpc(name);
-
-            if (character == null)
-            {
-                await ReplyAsync(
-                    string.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, name) + $" {Context.User.Mention}");
-                return;
-            }
-
-            var embed = EmbedHelper.BuildBasicEmbed("NPC S.P.E.C.I.A.L.:",
-                $"**Name:** {character.FirstName}\n" +
-                $"**STR:** {character.Special.Strength}\n" +
-                $"**PER:** {character.Special.Perception}\n" +
-                $"**END:** {character.Special.Endurance}\n" +
-                $"**CHA:** {character.Special.Charisma}\n" +
-                $"**INT:** {character.Special.Intelligence}\n" +
-                $"**AGI:** {character.Special.Agility}\n" +
-                $"**LUC:** {character.Special.Luck}");
-
-            await ReplyAsync(userInfo.Mention, embed: embed);
+            await ReplyAsync(String.Format(Messages.NPC_CREATED_SUCCESS, preset.Name, name));
         }
 
         [Command]
@@ -215,32 +154,45 @@ namespace FalloutRPG.Modules.Roleplay
             public async Task CreatePreset(string name)
             {
                 if (await _npcService.CreateNpcPreset(name))
-                    await ReplyAsync("Done successfully");
+                    await ReplyAsync(String.Format(Messages.NPC_PRESET_CREATE, name, Context.User.Mention));
                 else
-                    await ReplyAsync("Failed!");
+                    await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_CREATE, Context.User.Mention));
             }
-            
+
+            [Command("create")]
+            public async Task CreatePreset(string name, int str, int per, int end, int cha, int @int, int agi, int luc)
+            {
+                if (await _npcService.CreateNpcPreset(name, str, per, end, cha, @int, agi, luc, true))
+                    await ReplyAsync(String.Format(Messages.NPC_PRESET_CREATE, name, Context.User.Mention));
+                else
+                    await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_CREATE, Context.User.Mention));
+            }
+
             [Command("enable")]
             public async Task EnablePreset(string name)
             {
-                await _npcService.EditNpcPresetEnable(name, true);
-                await ReplyAsync("done!");
+                if (await _npcService.EditNpcPresetEnable(name, true))
+                    await ReplyAsync(String.Format(Messages.NPC_PRESET_ENABLE, name, Context.User.Mention));
+                else
+                    await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_ENABLE, name, Context.User.Mention));
             }
 
             [Command("disable")]
             public async Task DisablePreset(string name)
             {
-                await _npcService.EditNpcPresetEnable(name, false);
-                await ReplyAsync("done!");
+                if (await _npcService.EditNpcPresetEnable(name, false))
+                    await ReplyAsync(String.Format(Messages.NPC_PRESET_DISABLE, name, Context.User.Mention));
+                else
+                    await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_DISABLE, name, Context.User.Mention));
             }
 
             [Command("edit")]
             public async Task EditPreset(string name, string attribute, int value)
             {
                 if (await _npcService.EditNpcPreset(name, attribute, value))
-                    await ReplyAsync("Done successfully!");
+                    await ReplyAsync(String.Format(Messages.NPC_PRESET_EDIT, StringHelper.ToTitleCase(name), StringHelper.ToTitleCase(attribute), value, Context.User.Mention));
                 else
-                    await ReplyAsync("failed! does a preset with the given name exist, and second parameter matches a skill or special?");
+                    await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_EDIT, Context.User.Mention));
             }
 
             [Command("edit")]
@@ -269,18 +221,22 @@ namespace FalloutRPG.Modules.Roleplay
                 await ReplyAsync("Done!");
             }
 
-            [Command("peek")]
-            public async Task PeekPreset(string name)
+            [Command("view")]
+            public async Task ViewPresetInfo(string name)
             {
-                StringBuilder sb = new StringBuilder();
+                var dmChannel = await Context.User.GetOrCreateDMChannelAsync();
 
                 NpcPreset preset = await _npcService.GetNpcPreset(name);
 
+                if (preset == null)
+                    await dmChannel.SendMessageAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, name, Context.User.Mention));
+
+                StringBuilder sb = new StringBuilder();
+
                 foreach (var prop in typeof(NpcPreset).GetProperties())
-                {
                     sb.Append($"{prop.Name}: {prop.GetValue(preset)}\n");
-                }
-                await ReplyAsync(sb.ToString());
+
+                await dmChannel.SendMessageAsync(Context.User.Mention, embed: EmbedHelper.BuildBasicEmbed("Preset info:", sb.ToString()));
             }
         }
         #endregion
