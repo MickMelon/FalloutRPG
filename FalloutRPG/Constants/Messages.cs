@@ -6,6 +6,7 @@
         public const string SUCCESS_EMOJI = "✅ ";
         public const string STAR_EMOJI = "\u2B50 ";
         public const string ADM_EMOJI = "👮 ";
+        public const string NPC_SUFFIX = "(\uD83D\uDCBBNPC) ";
 
         // Character Messages
         public const string CHAR_CREATED_SUCCESS = SUCCESS_EMOJI + "Character created successfully. ({0})";
@@ -47,6 +48,8 @@
 
         // NPC Messages
         public const string NPC_CREATED_SUCCESS = SUCCESS_EMOJI + "NPC created with type: {0} and name: {1}";
+        public const string NPC_CANT_USE_SKILL = FAILURE_EMOJI + "{0} can't use this skill! " + NPC_SUFFIX;
+        public const string NPC_CANT_USE_SPECIAL = FAILURE_EMOJI + "{0} can't use this S.P.E.C.I.A.L. stat! " + NPC_SUFFIX;
         public const string NPC_PRESET_CREATE = SUCCESS_EMOJI + "NPC preset: {0} created successfully. ({1})";
         public const string NPC_PRESET_ENABLE = SUCCESS_EMOJI + "NPC preset: {0} enabled successfully. ({1})";
         public const string NPC_PRESET_DISABLE = SUCCESS_EMOJI + "NPC preset: {0} disabled successfully. ({1})";

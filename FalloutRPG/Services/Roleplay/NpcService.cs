@@ -170,9 +170,9 @@ namespace FalloutRPG.Services.Roleplay
             int skillAmount = (int)typeof(SkillSheet).GetProperty(skill).GetValue(character.Skills);
 
             if (skillAmount == 0)
-                return $"{Messages.FAILURE_EMOJI} {firstName} can't use this skill!" + " (\uD83D\uDCBBNPC)";
+                return String.Format(Messages.NPC_CANT_USE_SKILL, character.FirstName);
 
-            return _rollService.GetSkillRollResult(skill, character) + " (\uD83D\uDCBBNPC)";
+            return _rollService.GetSkillRollResult(skill, character) + " " + Messages.NPC_SUFFIX;
         }
 
         public string RollNpcSpecial(string firstName, string special)
@@ -181,14 +181,19 @@ namespace FalloutRPG.Services.Roleplay
 
             if (character == null)
             {
-                return Messages.FAILURE_EMOJI + "NPC was not found with given name.";
+                return String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, firstName);
             }
-            else if (character.Skills == null)
+            else if (character.Special == null)
             {
                 throw new Exception(Exceptions.NPC_NULL_SPECIAL);
             }
 
-            return _rollService.GetSpecialRollResult(special, character) + " (\uD83D\uDCBBNPC)";
+            int specialAmt = (int)typeof(Special).GetProperty(special).GetValue(character.Skills);
+
+            if (specialAmt == 0)
+                return String.Format(Messages.NPC_CANT_USE_SPECIAL, character.FirstName);
+
+            return _rollService.GetSpecialRollResult(special, character) + " " + Messages.NPC_SUFFIX;
         }
     }
 }
