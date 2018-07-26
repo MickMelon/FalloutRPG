@@ -141,7 +141,7 @@ namespace FalloutRPG.Services.Roleplay
             return resultPercent;
         }
 
-        private string GetRollMessage(string charName, string roll, double percent)
+        public string GetRollMessage(string charName, string roll, double percent)
         {
             var result = new StringBuilder();
 

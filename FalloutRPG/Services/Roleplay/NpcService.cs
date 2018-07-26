@@ -32,9 +32,9 @@ namespace FalloutRPG.Services.Roleplay
             Npcs = new List<Character>();
         }
 
-        public async Task CreateNpc(string npcType, string firstName)
+        public async Task CreateNpc(string npcType, string name)
         {
-            if (Npcs.Find(x => x.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase)) != null)
+            if (Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) != null)
                 throw new Exception(Exceptions.NPC_CHAR_EXISTS);
 
             NpcPreset preset = await GetNpcPreset(npcType);
@@ -44,12 +44,12 @@ namespace FalloutRPG.Services.Roleplay
             if (preset.Enabled == false)
                 throw new Exception(Exceptions.NPC_INVALID_TYPE_DISABLED);
 
-            Character character = new Character { FirstName = firstName, Special = preset.Special, Skills = preset.Skills };
+            Character character = new Character { Name = name, Special = preset.Special, Skills = preset.Skills };
 
             Npcs.Add(character);
         }
 
-        public Character FindNpc(string name) => Npcs.Find(x => x.FirstName.Equals(name, StringComparison.OrdinalIgnoreCase));
+        public Character FindNpc(string name) => Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
         /// <summary>
         /// Returns an NpcPreset of the given name if it exists, case-insensitively.
@@ -154,13 +154,13 @@ namespace FalloutRPG.Services.Roleplay
             return false;
         }
 
-        public string RollNpcSkill(string firstName, string skill)
+        public string RollNpcSkill(string name, string skill)
         {
-            var character = Npcs.Find(x => x.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase));
+            var character = Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
             if (character == null)
             {
-                return String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, firstName);
+                return String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, name);
             }
             else if (character.Skills == null)
             {
@@ -170,18 +170,18 @@ namespace FalloutRPG.Services.Roleplay
             int skillAmount = (int)typeof(SkillSheet).GetProperty(skill).GetValue(character.Skills);
 
             if (skillAmount == 0)
-                return String.Format(Messages.NPC_CANT_USE_SKILL, character.FirstName);
+                return String.Format(Messages.NPC_CANT_USE_SKILL, character.Name);
 
-            return _rollService.GetSkillRollResult(skill, character) + " " + Messages.NPC_SUFFIX;
+            return _rollService.GetRollMessage(character.Name, skill, _rollService.GetRollResult(skill, character)) + " " + Messages.NPC_SUFFIX;
         }
 
-        public string RollNpcSpecial(string firstName, string special)
+        public string RollNpcSpecial(string name, string special)
         {
-            var character = Npcs.Find(x => x.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase));
+            var character = Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
             if (character == null)
             {
-                return String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, firstName);
+                return String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, name);
             }
             else if (character.Special == null)
             {
@@ -191,9 +191,9 @@ namespace FalloutRPG.Services.Roleplay
             int specialAmt = (int)typeof(Special).GetProperty(special).GetValue(character.Skills);
 
             if (specialAmt == 0)
-                return String.Format(Messages.NPC_CANT_USE_SPECIAL, character.FirstName);
+                return String.Format(Messages.NPC_CANT_USE_SPECIAL, character.Name);
 
-            return _rollService.GetSpecialRollResult(special, character) + " " + Messages.NPC_SUFFIX;
+            return _rollService.GetRollMessage(character.Name, special, _rollService.GetRollResult(special, character)) + " " + Messages.NPC_SUFFIX;
         }
     }
 }
