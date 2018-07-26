@@ -1,9 +1,11 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
+using FalloutRPG.Constants;
 using FalloutRPG.Services.Roleplay;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Services
@@ -42,6 +44,31 @@ namespace FalloutRPG.Services
                 assembly: Assembly.GetEntryAssembly(),
                 services: _services);
             _client.MessageReceived += HandleCommandAsync;
+            _commands.CommandExecuted += OnCommandExecutedAsync;
+        }
+
+        private async Task OnCommandExecutedAsync(CommandInfo command, ICommandContext context, IResult result)
+        {
+            if (result is PreconditionResult preResult)
+            {
+                await context.Channel.SendMessageAsync(preResult.ErrorReason);
+            }
+            else if (!string.IsNullOrEmpty(result?.ErrorReason))
+            {
+                if (result.Error.Value.ToString().Equals("ObjectNotFound") ||
+                     result.Error.Value.ToString().Equals("BadArgCount"))
+                {
+                    await context.Channel.SendMessageAsync(string.Format(Messages.ERR_CMD_USAGE, context.User.Mention));
+                }
+                else if (result.Error.Value.ToString().Equals("UnknownCommand"))
+                {
+                    await context.Channel.SendMessageAsync(string.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
+                }
+                else
+                {
+                    await context.Channel.SendMessageAsync(result.ToString());
+                }                    
+            }
         }
 
         /// <summary>
@@ -50,8 +77,7 @@ namespace FalloutRPG.Services
         /// </summary>
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
-            var message = messageParam as SocketUserMessage;
-            if (message == null || message.Author.IsBot) return;
+            if (!(messageParam is SocketUserMessage message) || message.Author.IsBot) return;
 
             int argPos = 0;
             var context = new SocketCommandContext(_client, message);
@@ -67,6 +93,8 @@ namespace FalloutRPG.Services
                 context: context,
                 argPos: argPos,
                 services: _services);
+
+            await OnCommandExecutedAsync(null, context, result);
         }
     }
 }

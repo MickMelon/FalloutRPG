@@ -33,6 +33,10 @@
         public const string ADM_DELETE = ADM_EMOJI + "Deleted character successfully. ({0})";
         public const string ADM_CHANGED_NAME = ADM_EMOJI + "Character name changed successfully. ({0})";
 
+        // Command Error Messages
+        public const string ERR_CMD_USAGE = FAILURE_EMOJI + "Incorrect command usage. Use $help if you are stuck. ({0})";
+        public const string ERR_CMD_NOT_EXIST = FAILURE_EMOJI + "Command doesn't exist. Use $help if you are stuck. ({0})";
+
         // Character Error Messages
         public const string ERR_CHAR_NOT_FOUND = FAILURE_EMOJI + "Unable to find character. ({0})";
         public const string ERR_STORY_NOT_FOUND = FAILURE_EMOJI + "Unable to find character story. ({0})";

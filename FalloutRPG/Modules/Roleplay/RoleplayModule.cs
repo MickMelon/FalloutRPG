@@ -82,7 +82,7 @@ namespace FalloutRPG.Modules.Roleplay
             for (var i = 0; i < charList.Count; i++)
             {
                 var level = _expService.CalculateLevelForExperience(charList[i].Experience);
-                fieldTitlesList.Add($"{i + 1}: {charList[i].FirstName} {charList[i].LastName}");
+                fieldTitlesList.Add($"{i + 1}: {charList[i].Name}");
                 fieldContentsList.Add($"Level {level} / {charList[i].Experience} XP");
             }
 

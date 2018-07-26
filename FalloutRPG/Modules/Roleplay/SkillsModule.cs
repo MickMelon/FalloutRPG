@@ -57,7 +57,7 @@ namespace FalloutRPG.Modules.Roleplay
                 }
 
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $character skills",
-                    $"**Name:** {character.FirstName} {character.LastName}\n" +
+                    $"**Name:** {character.Name}\n" +
                     $"**Barter:** {character.Skills.Barter}\n" +
                     $"**Energy Weapons:** {character.Skills.EnergyWeapons}\n" +
                     $"**Explosives:** {character.Skills.Explosives}\n" +

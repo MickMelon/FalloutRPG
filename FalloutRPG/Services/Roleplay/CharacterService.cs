@@ -43,25 +43,23 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Creates a new character.
         /// </summary>
-        public async Task<Character> CreateCharacterAsync(ulong discordId, string firstName, string lastName)
+        public async Task<Character> CreateCharacterAsync(ulong discordId, string name)
         {
             if (await GetCharacterAsync(discordId) != null)
                 throw new Exception(Exceptions.CHAR_DISCORDID_EXISTS);
 
-            if (!StringHelper.IsOnlyLetters(firstName) || !StringHelper.IsOnlyLetters(lastName))
+            if (!StringHelper.IsOnlyLetters(name))
                 throw new Exception(Exceptions.CHAR_NAMES_NOT_LETTERS);
 
-            if (firstName.Length > 24 || lastName.Length > 24 || firstName.Length < 2 || lastName.Length < 2)
+            if (name.Length > 24 || name.Length < 2)
                 throw new Exception(Exceptions.CHAR_NAMES_LENGTH);
 
-            firstName = StringHelper.ToTitleCase(firstName);
-            lastName = StringHelper.ToTitleCase(lastName);
+            name = StringHelper.ToTitleCase(name);
 
             var character = new Character()
             {
                 DiscordId = discordId,
-                FirstName = firstName,
-                LastName = lastName,
+                Name = name,
                 Description = "",
                 Story = "",
                 Experience = 0,

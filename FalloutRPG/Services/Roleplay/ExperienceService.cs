@@ -55,7 +55,7 @@ namespace FalloutRPG.Services.Roleplay
             var userInfo = context.User;
             var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-            if (character == null) return;
+            if (character == null || context.Message.ToString().StartsWith("(")) return;
 
             var expToGive = GetRandomExperience();
 

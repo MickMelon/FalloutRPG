@@ -72,20 +72,6 @@ namespace FalloutRPG.Services
         }
         #endregion
 
-        #region NPC Help
-        /// <summary>
-        /// Shows the character help menu.
-        /// </summary>
-        public async Task ShowNpcHelpAsync(SocketCommandContext context)
-        {
-            var userInfo = context.User;
-            var embed = EmbedHelper.BuildBasicEmbedWithFields("Command: $help npc", string.Empty,
-                Pages.HELP_NPC_PAGE1_TITLES, Pages.HELP_NPC_PAGE1_CONTENTS);
-
-            await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
-        }
-        #endregion
-
         #region Roll Help
         /// <summary>
         /// Shows the roll help menu.

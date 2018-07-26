@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <Version>1.0.1</Version>
   </PropertyGroup>
 
@@ -13,13 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Migrations\20180711183943_SpecialPoints.cs" />
-    <Compile Include="Migrations\20180711183943_SpecialPoints.Designer.cs" />
+    <Compile Include="Migrations\20180720140220_Reset.cs" />
+    <Compile Include="Migrations\20180720140220_Reset.Designer.cs" />
     <Compile Include="Migrations\RpgContextModelSnapshot.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Addons.PassiveInteractive" Version="2.0.3-Beta" />
+    <PackageReference Include="Discord.Addons.PassiveInteractive" Version="2.0.3" />
     <PackageReference Include="Discord.Net" Version="2.0.0-beta2-00975" />
     <PackageReference Include="microsoft.entityframeworkcore.sqlserver" Version="2.1.1" />
     <PackageReference Include="microsoft.entityframeworkcore.tools" Version="2.1.1" />

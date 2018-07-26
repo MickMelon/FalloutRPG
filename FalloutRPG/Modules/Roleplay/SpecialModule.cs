@@ -51,7 +51,7 @@ namespace FalloutRPG.Modules.Roleplay
                 }
 
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $character special",
-                    $"**Name:** {character.FirstName} {character.LastName}\n" +
+                    $"**Name:** {character.Name}\n" +
                     $"**STR:** {character.Special.Strength}\n" +
                     $"**PER:** {character.Special.Perception}\n" +
                     $"**END:** {character.Special.Endurance}\n" +
