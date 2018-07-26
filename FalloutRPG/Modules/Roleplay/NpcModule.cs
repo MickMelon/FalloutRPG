@@ -205,7 +205,7 @@ namespace FalloutRPG.Modules.Roleplay
                 await _npcService.EditNpcPreset(name, "Intelligence", @int);
                 await _npcService.EditNpcPreset(name, "Agility", agi);
                 await _npcService.EditNpcPreset(name, "Luck", luc);
-                await ReplyAsync("All done!");
+                await ReplyAsync(String.Format(Messages.NPC_PRESET_EDIT_SPECIAL, name, Context.User.Mention));
             }
 
             [Command("initialize")]
@@ -218,7 +218,7 @@ namespace FalloutRPG.Modules.Roleplay
 
                 await _npcService.SaveNpcPreset(preset);
 
-                await ReplyAsync("Done!");
+                await ReplyAsync(String.Format(Messages.NPC_PRESET_SKILLS_INIT, name, Context.User.Mention));
             }
 
             [Command("view")]

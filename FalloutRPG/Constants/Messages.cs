@@ -54,6 +54,8 @@
         public const string NPC_PRESET_ENABLE = SUCCESS_EMOJI + "NPC preset: {0} enabled successfully. ({1})";
         public const string NPC_PRESET_DISABLE = SUCCESS_EMOJI + "NPC preset: {0} disabled successfully. ({1})";
         public const string NPC_PRESET_EDIT = SUCCESS_EMOJI + "NPC preset: {0} {1} value changed to {2}. ({3})";
+        public const string NPC_PRESET_EDIT_SPECIAL = SUCCESS_EMOJI + "NPC preset: {0} S.P.E.C.I.A.L. values changed. ({1})";
+        public const string NPC_PRESET_SKILLS_INIT = SUCCESS_EMOJI + "NPC preset: {0} Skills initialized according to its S.P.E.C.I.A.L. ({1})";
 
         // NPC Error Messages
         public const string ERR_NPC_CHAR_NOT_FOUND = FAILURE_EMOJI + "An NPC with the name {0} could not be found.";

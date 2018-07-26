@@ -26,6 +26,8 @@ namespace FalloutRPG.Constants
 
         // NPC Exception Message
         public const string NPC_CHAR_EXISTS = "A character with that name already exists!";
+        public const string NPC_LEVEL_TOO_HIGH = "The given level was too high for the NPC preset.";
+        public const string NPC_LEVEL_TOO_LOW = "The given level was too low for the NPC preset.";
         public const string NPC_INVALID_TYPE = "The specified NPC type was invalid.";
         public const string NPC_INVALID_TYPE_DISABLED = "The specified NPC type is not enabled yet.";
         public const string NPC_NULL_SKILLS = "The specified NPC's Skills were null.";
