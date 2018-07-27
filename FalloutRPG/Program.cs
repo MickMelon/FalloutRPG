@@ -76,6 +76,8 @@ namespace FalloutRPG
             .AddSingleton<StartupService>()
             .AddSingleton<CharacterService>()
             .AddSingleton<ExperienceService>()
+            .AddSingleton<NpcService>()
+            .AddSingleton<NpcPresetService>()
 
             // Casino
             .AddSingleton<GamblingService>()
