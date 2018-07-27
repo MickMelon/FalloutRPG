@@ -46,7 +46,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command]
         [Alias("help")]
-        public async Task ShowCharacterHelpAsync()
+        public async Task ShowNpcHelp()
         {
             await _helpService.ShowNpcHelpAsync(Context);
         }

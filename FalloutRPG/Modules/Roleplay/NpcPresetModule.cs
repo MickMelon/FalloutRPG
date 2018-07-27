@@ -3,6 +3,7 @@ using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
 using FalloutRPG.Models;
+using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,19 @@ namespace FalloutRPG.Modules.Roleplay
     public class NpcPresetModule : ModuleBase<SocketCommandContext>
     {
         private readonly NpcPresetService _presetService;
+        private readonly HelpService _helpService;
 
-        public NpcPresetModule(NpcPresetService presetService)
+        public NpcPresetModule(NpcPresetService presetService, HelpService helpService)
         {
             _presetService = presetService;
+            _helpService = helpService;
+        }
+
+        [Command]
+        [Alias("help")]
+        public async Task ShowNpcPresetHelp()
+        {
+            await _helpService.ShowNpcPresetHelpAsync(Context);
         }
 
         [Command("create")]
@@ -63,6 +73,11 @@ namespace FalloutRPG.Modules.Roleplay
         [Command("edit")]
         public async Task EditPreset(string name, string attribute, int value)
         {
+            if (attribute.Equals("Enabled", StringComparison.OrdinalIgnoreCase))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_EDIT, Context.User.Mention));
+                return;
+            }
             if (await _presetService.EditNpcPreset(name, attribute, value))
                 await ReplyAsync(String.Format(Messages.NPC_PRESET_EDIT, StringHelper.ToTitleCase(name), StringHelper.ToTitleCase(attribute), value, Context.User.Mention));
             else

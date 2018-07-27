@@ -83,6 +83,13 @@ namespace FalloutRPG.Services
                 Pages.HELP_NPC_PAGE1_TITLES, Pages.HELP_NPC_PAGE1_CONTENTS);
             await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
         }
+        public async Task ShowNpcPresetHelpAsync(SocketCommandContext context)
+        {
+            var userInfo = context.User;
+            var embed = EmbedHelper.BuildBasicEmbedWithFields("Command: $help npc preset", string.Empty,
+                Pages.HELP_NPC_PRESETS_PAGE1_TITLES, Pages.HELP_NPC_PRESETS_PAGE1_CONTENTS);
+            await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
+        }
         #endregion
 
         #region Roll Help

@@ -106,6 +106,28 @@
             "Creates a new NPC with slightly random stats influenced by the given NPC type.",
             "Gets a roll result based on the NPC's skills or S.P.E.C.I.A.L.."
         };
+        public static string[] HELP_NPC_PRESETS_PAGE1_TITLES = new string[]
+        {
+            "$npc preset create [Name]",
+            "$npc preset create [Name] [STR] [PER] [END] [CHA] [INT] [AGI] [LUC]",
+            "$npc preset enable [Name]",
+            "$npc preset disable [Name]",
+            "$npc preset edit [Name] [Attribute] [Value]",
+            "$npc preset edit [Name] [STR] [PER] [END] [CHA] [INT] [AGI] [LUC]",
+            "$npc preset init",
+            "$npc preset view",
+        };
+        public static string[] HELP_NPC_PRESETS_PAGE1_CONTENTS = new string[]
+        {
+            "Creates a new NPC preset with the given name. Note: this preset will be completely empty.",
+            "Creates a new NPC preset with the given name and S.P.E.C.I.A.L.. This preset will have its Skills set to what a player's would look like without 'Tag!'.",
+            "Enables the preset with the given name. This command must be run before users are able to create NPCs with that preset.",
+            "Disables the preset with the given name. Users will no longer be able to create NPCs with the given preset after execution.",
+            "Edits the specified attribute of the preset with the given name. 'Attribute' can be the name of a S.P.E.C.I.A.L. stat or Skill.",
+            "Edits the S.P.E.C.I.A.L. of the preset with the given name. Helpful for when you don't want to type the same command 7 times.",
+            "Sets the NPC preset's Skills to what they'd look like if it were a new player's without Tag!.",
+            "Sends a DM to you with all of the NPC preset's current properties (Skills, S.P.E.C.I.A.L., other stuff...)"
+        };
         #endregion
 
         #region Roll Help Pages
