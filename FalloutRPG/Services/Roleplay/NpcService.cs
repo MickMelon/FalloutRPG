@@ -13,17 +13,13 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class NpcService
     {
-        private readonly SkillsService _skillsService;
-        private readonly SpecialService _specialService;
         private readonly RollService _rollService;
         private readonly NpcPresetService _presetService;
 
         private readonly List<Character> Npcs;
         
-        public NpcService(SkillsService skillsService, SpecialService specialService, RollService rollService, NpcPresetService presetService, IRepository<NpcPreset> presetRepository)
+        public NpcService(SkillsService skillsService, RollService rollService, NpcPresetService presetService, IRepository<NpcPreset> presetRepository)
         {
-            _skillsService = skillsService;
-            _specialService = specialService;
             _rollService = rollService;
             _presetService = presetService;
 
@@ -50,46 +46,37 @@ namespace FalloutRPG.Services.Roleplay
 
         public Character FindNpc(string name) => Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
-        public string RollNpcSkill(string name, string skill)
+        public string RollNpcStat(string name, string stat)
         {
             var character = Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
             if (character == null)
-            {
                 return String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, name);
-            }
             else if (character.Skills == null)
-            {
-                throw new Exception(Exceptions.NPC_NULL_SKILLS);
-            }
-
-            int skillAmount = (int)typeof(SkillSheet).GetProperty(skill).GetValue(character.Skills);
-
-            if (skillAmount == 0)
-                return String.Format(Messages.NPC_CANT_USE_SKILL, character.Name);
-
-            return _rollService.GetRollMessage(character.Name, skill, _rollService.GetRollResult(skill, character)) + " " + Messages.NPC_SUFFIX;
-        }
-
-        public string RollNpcSpecial(string name, string special)
-        {
-            var character = Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-            if (character == null)
-            {
-                return String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, name);
-            }
+                throw new Exception(Exceptions.CHAR_SKILLS_NOT_SET);
             else if (character.Special == null)
+                throw new Exception(Exceptions.CHAR_SPECIAL_NOT_SET);
+
+            int attribAmt;
+
+            if (Globals.SKILL_NAMES.Contains(stat))
             {
-                throw new Exception(Exceptions.NPC_NULL_SPECIAL);
+                attribAmt = (int)typeof(SkillSheet).GetProperty(stat).GetValue(character.Skills);
+
+                if (attribAmt == 0)
+                    return String.Format(Messages.NPC_CANT_USE_SKILL, character.Name);
             }
+            else if (Globals.SPECIAL_NAMES.Contains(stat))
+            {
+                attribAmt = (int)typeof(Special).GetProperty(stat).GetValue(character.Special);
 
-            int specialAmt = (int)typeof(Special).GetProperty(special).GetValue(character.Skills);
+                if (attribAmt == 0)
+                    return String.Format(Messages.NPC_CANT_USE_SPECIAL, character.Name);
+            }
+            else
+                throw new ArgumentException(Exceptions.CHAR_INVALID_STAT_NAME, "stat");
 
-            if (specialAmt == 0)
-                return String.Format(Messages.NPC_CANT_USE_SPECIAL, character.Name);
-
-            return _rollService.GetRollMessage(character.Name, special, _rollService.GetRollResult(special, character)) + " " + Messages.NPC_SUFFIX;
+            return _rollService.GetRollMessage(character.Name, stat, _rollService.GetRollResult(stat, character)) + " " + Messages.NPC_SUFFIX;
         }
     }
 }

@@ -18,9 +18,10 @@ namespace FalloutRPG.Modules.Roleplay
         private readonly NpcPresetService _presetService;
         private readonly HelpService _helpService;
 
-        public NpcModule(NpcService npcService, HelpService helpService)
+        public NpcModule(NpcService npcService, NpcPresetService presetService, HelpService helpService)
         {
             _npcService = npcService;
+            _presetService = presetService;
             _helpService = helpService;
         }
 
@@ -64,75 +65,75 @@ namespace FalloutRPG.Modules.Roleplay
             #region SPECIAL Commands
             [Command("strength")]
             [Alias("str")]
-            public async Task RollStrength(string name) => await ReplyAsync($"{_npcService.RollNpcSpecial(name, "Strength")}");
+            public async Task RollStrength(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Strength")}");
 
             [Command("perception")]
             [Alias("per")]
-            public async Task RollPerception(string name) => await ReplyAsync($"{_npcService.RollNpcSpecial(name, "Perception")}");
+            public async Task RollPerception(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Perception")}");
 
             [Command("endurance")]
             [Alias("end")]
-            public async Task RollEndurance(string name) => await ReplyAsync($"{_npcService.RollNpcSpecial(name, "Endurance")}");
+            public async Task RollEndurance(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Endurance")}");
 
             [Command("charisma")]
             [Alias("cha")]
-            public async Task RollCharisma(string name) => await ReplyAsync($"{_npcService.RollNpcSpecial(name, "Charisma")}");
+            public async Task RollCharisma(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Charisma")}");
 
             [Command("intelligence")]
             [Alias("int")]
-            public async Task RollIntelligence(string name) => await ReplyAsync($"{_npcService.RollNpcSpecial(name, "Intelligence")}");
+            public async Task RollIntelligence(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Intelligence")}");
 
             [Command("agility")]
             [Alias("agi")]
-            public async Task RollAgility(string name) => await ReplyAsync($"{_npcService.RollNpcSpecial(name, "Agility")}");
+            public async Task RollAgility(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Agility")}");
 
             [Command("luck")]
             [Alias("luc", "lck")]
-            public async Task RollLuck(string name) => await ReplyAsync($"{_npcService.RollNpcSpecial(name, "Luck")}");
+            public async Task RollLuck(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Luck")}");
             #endregion
 
             #region Skills Commands
             [Command("barter")]
-            public async Task RollBarter(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Barter")}");
+            public async Task RollBarter(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Barter")}");
 
             [Command("energy weapons")]
             [Alias("energy weapon", "energyweapons", "energyweapon", "energy")]
-            public async Task RollEnergyWeapons(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "EnergyWeapons")}");
+            public async Task RollEnergyWeapons(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "EnergyWeapons")}");
 
             [Command("explosives")]
-            public async Task RollExplosives(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Explosives")}");
+            public async Task RollExplosives(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Explosives")}");
 
             [Command("guns")]
-            public async Task RollGuns(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Guns")}");
+            public async Task RollGuns(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Guns")}");
 
             [Command("lockpick")]
-            public async Task RollLockpick(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Lockpick")}");
+            public async Task RollLockpick(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Lockpick")}");
 
             [Command("medicine")]
             [Alias("medic", "doctor")]
-            public async Task RollMedicine(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Medicine")}");
+            public async Task RollMedicine(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Medicine")}");
 
             [Command("meleeweapons")]
             [Alias("melee", "meleeweapon", "melee weapons", "melee weapons")]
-            public async Task RollMeleeWeapons(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "MeleeWeapons")}");
+            public async Task RollMeleeWeapons(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "MeleeWeapons")}");
 
             [Command("repair")]
-            public async Task RollRepair(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Repair")}");
+            public async Task RollRepair(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Repair")}");
 
             [Command("science")]
-            public async Task RollScience(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Science")}");
+            public async Task RollScience(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Science")}");
 
             [Command("sneak")]
-            public async Task RollSneak(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Sneak")}");
+            public async Task RollSneak(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Sneak")}");
 
             [Command("speech")]
-            public async Task RollSpeech(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Speech")}");
+            public async Task RollSpeech(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Speech")}");
 
             [Command("survival")]
-            public async Task RollSurvival(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Survival")}");
+            public async Task RollSurvival(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Survival")}");
 
             [Command("unarmed")]
-            public async Task RollUnarmed(string name) => await ReplyAsync($"{_npcService.RollNpcSkill(name, "Unarmed")}");
+            public async Task RollUnarmed(string name) => await ReplyAsync($"{_npcService.RollNpcStat(name, "Unarmed")}");
             #endregion
         }
         #endregion

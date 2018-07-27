@@ -54,6 +54,7 @@
         public const string NPC_CREATED_SUCCESS = SUCCESS_EMOJI + "NPC created with type: {0} and name: {1}";
         public const string NPC_CANT_USE_SKILL = FAILURE_EMOJI + "{0} can't use this skill! " + NPC_SUFFIX;
         public const string NPC_CANT_USE_SPECIAL = FAILURE_EMOJI + "{0} can't use this S.P.E.C.I.A.L. stat! " + NPC_SUFFIX;
+        public const string NPC_CANT_USE_STAT = FAILURE_EMOJI + "{0} can't use this attribute! " + NPC_SUFFIX;
         public const string NPC_PRESET_CREATE = SUCCESS_EMOJI + "NPC preset: {0} created successfully. ({1})";
         public const string NPC_PRESET_ENABLE = SUCCESS_EMOJI + "NPC preset: {0} enabled successfully. ({1})";
         public const string NPC_PRESET_DISABLE = SUCCESS_EMOJI + "NPC preset: {0} disabled successfully. ({1})";

@@ -6,9 +6,9 @@ namespace FalloutRPG.Models
     public class NpcPreset : BaseModel
     {
         public string Name { get; set; }
-        public int BaseLevel { get; set; }
-        public int MinLevel { get; set; }
-        public int MaxLevel { get; set; }
+        //public int BaseLevel { get; set; }
+        //public int MinLevel { get; set; }
+        //public int MaxLevel { get; set; }
 
         public bool Enabled { get; set; }
 

@@ -14,6 +14,7 @@ namespace FalloutRPG.Constants
         public const string CHAR_SPECIAL_NOT_FOUND = "Unable to find SPECIAL for that character.";
         public const string CHAR_INVALID_TAG_NAMES = "One or more tag names were invalid.";
         public const string CHAR_INVALID_SKILL_NAME = "Skill name was invalid.";
+        public const string CHAR_INVALID_STAT_NAME = "Given stat parameter did not match a S.P.E.C.I.A.L. stat or Skill.";
         public const string CHAR_TAGS_NOT_UNIQUE = "One or more tag names were identical.";
         public const string CHAR_CHARACTER_IS_NULL = "Character is null.";
         public const string CHAR_NOT_ENOUGH_SKILL_POINTS = "Character does not have enough skill points.";
@@ -30,7 +31,5 @@ namespace FalloutRPG.Constants
         public const string NPC_LEVEL_TOO_LOW = "The given level was too low for the NPC preset.";
         public const string NPC_INVALID_TYPE = "The specified NPC type was invalid.";
         public const string NPC_INVALID_TYPE_DISABLED = "The specified NPC type is not enabled yet.";
-        public const string NPC_NULL_SKILLS = "The specified NPC's Skills were null.";
-        public const string NPC_NULL_SPECIAL = "The specified NPC's SPECIAL was null.";
     }
 }
