@@ -7,6 +7,7 @@ using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -123,7 +124,10 @@ namespace FalloutRPG.Modules.Roleplay
             StringBuilder sb = new StringBuilder();
 
             foreach (var prop in typeof(NpcPreset).GetProperties())
-                sb.Append($"{prop.Name}: {prop.GetValue(preset)}\n");
+            {
+                if (Globals.SKILL_NAMES.Contains(prop.Name) || Globals.SPECIAL_NAMES.Contains(prop.Name) || prop.Name.Equals("Enabled"))
+                    sb.Append($"{prop.Name}: {prop.GetValue(preset)}\n");
+            }
 
             await dmChannel.SendMessageAsync(Context.User.Mention, embed: EmbedHelper.BuildBasicEmbed("Preset info:", sb.ToString()));
         }
