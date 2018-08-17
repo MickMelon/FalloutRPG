@@ -40,6 +40,9 @@ namespace FalloutRPG.Services
         /// </summary>
         public async Task InstallCommandsAsync()
         {
+            _commands.AddTypeReader(typeof(Globals.SkillType), new Addons.SkillTypeReader());
+            _commands.AddTypeReader(typeof(Globals.SpecialType), new Addons.SpecialTypeReader());
+
             await _commands.AddModulesAsync(
                 assembly: Assembly.GetEntryAssembly(),
                 services: _services);

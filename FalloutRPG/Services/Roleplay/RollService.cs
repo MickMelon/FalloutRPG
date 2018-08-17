@@ -61,7 +61,7 @@ namespace FalloutRPG.Services.Roleplay
             }
         }
 
-        public async Task<string> GetSpRollAsync(IUser user, string specialToRoll)
+        public async Task<string> GetSpRollAsync(IUser user, Globals.SpecialType specialToRoll)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
 
@@ -75,10 +75,10 @@ namespace FalloutRPG.Services.Roleplay
                 return String.Format(Messages.ERR_SPECIAL_NOT_FOUND, user.Mention);
             }
 
-            return GetRollMessage(character.Name, specialToRoll, GetRollResult(specialToRoll, character));
+            return GetRollMessage(character.Name, specialToRoll.ToString(), GetRollResult(specialToRoll, character));
         }
 
-        public async Task<string> GetSkillRollAsync(IUser user, String skillToRoll)
+        public async Task<string> GetSkillRollAsync(IUser user, Globals.SkillType skillToRoll)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
 
@@ -97,10 +97,10 @@ namespace FalloutRPG.Services.Roleplay
                 return String.Format(Messages.ERR_SKILLS_NOT_FOUND, user.Mention);
             }
 
-            return GetRollMessage(character.Name, skillToRoll, GetRollResult(skillToRoll, character));
+            return GetRollMessage(character.Name, skillToRoll.ToString(), GetRollResult(skillToRoll, character));
         }
 
-        public double GetRollResult(String attribute, Character character)
+        public double GetRollResult(Globals.SkillType attribute, Character character)
         {
             var charSkills = character.Skills;
             var charSpecial = character.Special;
@@ -109,16 +109,41 @@ namespace FalloutRPG.Services.Roleplay
             int attributeValue = 0;
             int rng = 0;
 
-            if (Globals.SKILL_NAMES.Contains(attribute))
-            {
-                attributeValue = (int)typeof(SkillSheet).GetProperty(attribute).GetValue(charSkills);
-                rng = _rand.Next(1, 101);
-            }
-            else if (Globals.SPECIAL_NAMES.Contains(attribute))
-            {
-                attributeValue = (int)typeof(Special).GetProperty(attribute).GetValue(charSpecial);
-                rng = _rand.Next(1, 11);
-            }
+            attributeValue = (int)typeof(SkillSheet).GetProperty(attribute.ToString()).GetValue(charSkills);
+            rng = _rand.Next(1, 101);
+
+            // affects odds by the percentage of LUCK_INFLUENCE for each point of luck above or below 5.
+            // i.e. if you have 6 luck, and LUCK_INFLUENCE == 5, then now your odds are multiplied by 0.95,
+            // which is a good thing.
+            int luckDifference = charSpecial.Luck - 5;
+            double luckMultiplier = 1.0 - (luckDifference * (LUCK_INFLUENCE / 100.0));
+
+            double finalResult;
+
+            if (LUCK_INFLUENCE_ENABLED)
+                finalResult = rng * luckMultiplier;
+            else
+                finalResult = rng;
+
+            // compares your roll with your skills, and how much better you did than the bare minimum
+            double resultPercent = (attributeValue - finalResult) / attributeValue;
+            // make it pretty for chat
+            resultPercent = Math.Round(resultPercent * 100.0, 1);
+
+            return resultPercent;
+        }
+
+        public double GetRollResult(Globals.SpecialType attribute, Character character)
+        {
+            var charSkills = character.Skills;
+            var charSpecial = character.Special;
+
+            // match given attribute string to property in character
+            int attributeValue = 0;
+            int rng = 0;
+
+            attributeValue = (int)typeof(Special).GetProperty(attribute.ToString()).GetValue(charSpecial);
+            rng = _rand.Next(1, 11);
 
             // affects odds by the percentage of LUCK_INFLUENCE for each point of luck above or below 5.
             // i.e. if you have 6 luck, and LUCK_INFLUENCE == 5, then now your odds are multiplied by 0.95,
