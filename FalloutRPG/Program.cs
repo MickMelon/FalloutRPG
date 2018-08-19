@@ -45,6 +45,10 @@ namespace FalloutRPG
             await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
             await services.GetRequiredService<StartupService>().StartAsync();
 
+            Console.WriteLine("Ensuring database is up-to-date, this may take some time.");
+            await services.GetRequiredService<RpgContext>().Database.MigrateAsync();
+            Console.WriteLine("Database migration complete.");
+
             await Task.Delay(-1);
         }
 
@@ -85,8 +89,7 @@ namespace FalloutRPG
             .AddSingleton<InteractiveService>()
 
             // Database
-            .AddDbContext<RpgContext>(options =>
-                options.UseSqlServer(config["sqlserver-connection-string"]))
+            .AddEntityFrameworkSqlite().AddDbContext<RpgContext>(optionsAction: options => options.UseSqlite("Filename=CharacterDB.db"))
             .AddTransient<IRepository<Character>, EfRepository<Character>>()
             .AddTransient<IRepository<SkillSheet>, EfRepository<SkillSheet>>()
             .AddTransient<IRepository<Special>, EfRepository<Special>>()
