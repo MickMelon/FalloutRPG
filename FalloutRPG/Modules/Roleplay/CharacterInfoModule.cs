@@ -12,6 +12,32 @@ namespace FalloutRPG.Modules.Roleplay
     [Alias("char")]
     public class CharacterInfoModule : ModuleBase<SocketCommandContext>
     {
+        private readonly CharacterService _charService;
+
+        public CharacterInfoModule(CharacterService charService)
+        {
+            _charService = charService;
+        }
+
+        [Command("changename")]
+        [Ratelimit(1, Globals.RATELIMIT_SECONDS, Measure.Seconds)]
+        public async Task ChangeCharacterNameAsync([Remainder]string name)
+        {
+            var character = await _charService.GetCharacterAsync(Context.User.Id);
+            if (character == null) return;
+
+            if (!StringHelper.IsOnlyLetters(name))
+                return;
+
+            if (name.Length > 24 || name.Length < 2)
+                return;
+
+            character.Name = StringHelper.ToTitleCase(name);
+
+            await _charService.SaveCharacterAsync(character);
+            await ReplyAsync(string.Format(Messages.CHAR_CHANGED_NAME, Context.User.Mention));
+        }
+
         [Group("story")]
         public class CharacterStoryModule : ModuleBase<SocketCommandContext>
         {

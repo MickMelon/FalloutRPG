@@ -21,7 +21,7 @@ namespace FalloutRPG.Helpers
         /// </summary>
         public static bool IsOnlyLetters(string source)
         {
-            return Regex.IsMatch(source, @"^[a-zA-Z]+$");
+            return Regex.IsMatch(source, @"^[a-zA-Z ]+$");
         }
 
         /// <summary>

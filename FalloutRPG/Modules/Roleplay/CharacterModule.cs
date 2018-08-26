@@ -71,7 +71,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("create")]
         [Alias("new")]
-        public async Task CreateCharacterAsync(string name)
+        public async Task CreateCharacterAsync([Remainder]string name)
         {
             var userInfo = Context.User;
 
