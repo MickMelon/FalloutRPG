@@ -37,17 +37,12 @@ namespace FalloutRPG
         public async Task MainAsync()
         {
             config = BuildConfig();
-            CheckConnectionString();
 
             var services = BuildServiceProvider();
 
             services.GetRequiredService<LogService>();
             await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
             await services.GetRequiredService<StartupService>().StartAsync();
-
-            Console.WriteLine("Ensuring database is up-to-date, this may take some time.");
-            await services.GetRequiredService<RpgContext>().Database.MigrateAsync();
-            Console.WriteLine("Database migration complete.");
 
             await Task.Delay(-1);
         }
@@ -102,17 +97,5 @@ namespace FalloutRPG
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("Config.json")
             .Build();
-
-        /// <summary>
-        /// Sets the SQL Server connection string variable if it's valid.
-        /// </summary>
-        private bool CheckConnectionString()
-        {
-            var connectionString = config["sqlserver-connection-string"];
-            if (!string.IsNullOrEmpty(connectionString)) return true;
-
-            Console.WriteLine("You have an invalid SQL Server connection string set in Config.json");
-            return false;
-        }
     }
 }
