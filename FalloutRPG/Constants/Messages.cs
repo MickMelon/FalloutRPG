@@ -7,11 +7,18 @@
         public const string STAR_EMOJI = "\u2B50 ";
         public const string ADM_EMOJI = "👮 ";
         public const string NPC_SUFFIX = "(\uD83D\uDCBBNPC) ";
+        public const string QUESTION_EMOJI = "❓ ";
 
         // Character Messages
         public const string CHAR_CREATED_SUCCESS = SUCCESS_EMOJI + "Character created successfully. ({0})";
         public const string CHAR_STORY_SUCCESS = SUCCESS_EMOJI + "Character story updated successfully. ({0})";
         public const string CHAR_DESC_SUCCESS = SUCCESS_EMOJI + "Character description updated successfully. ({0})";
+        public const string CHAR_CHANGED_NAME = SUCCESS_EMOJI + "Character name successfully changed. ({0})";
+        public const string CHAR_ACTIVATED = SUCCESS_EMOJI + "Character {0} is now active. ({1})";
+        public const string CHAR_REMOVE_CONFIRM = QUESTION_EMOJI + "**Are you sure you want to delete `{0}` (level {1})? This action CANNOT be undone!**" +
+            " To confirm this action, reply with the name of the character. ({2})";
+        public const string CHAR_REMOVE_SUCCESS = SUCCESS_EMOJI + "The character `{0}` was deleted successfully. ({1})";
+        public const string CHAR_NOT_REMOVED = FAILURE_EMOJI + "The character `{0}` was **NOT** deleted. ({1})";
 
         // Stats Messages
         public const string EXP_LEVEL_UP = "Congratulations {0}, you have just advanced to level {1}!";
@@ -42,6 +49,9 @@
         public const string ERR_STORY_NOT_FOUND = FAILURE_EMOJI + "Unable to find character story. ({0})";
         public const string ERR_DESC_NOT_FOUND = FAILURE_EMOJI + "Unable to find character description. ({0})";
         public const string ERR_SPECIAL_NOT_FOUND = FAILURE_EMOJI + "Unable to find character SPECIAL. ({0})";
+        public const string ERR_CHAR_ALREADY_ACTIVE = FAILURE_EMOJI + "Character `{0}` is already active. ({1})";
+        public const string ERR_CHAR_CANT_REMOVE_ACTIVE = FAILURE_EMOJI + "Character `{0}` cannot be removed because it is your active character. " +
+            "Please switch by using the `$char activate [name]` command. ({1})";
 
         // Stats Error Messages
         public const string ERR_SKILLS_NOT_FOUND = FAILURE_EMOJI + "Unable to find character skills. ({0})";

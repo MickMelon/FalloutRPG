@@ -12,6 +12,8 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class CharacterService
     {
+        private const int MAX_CHARACTERS = 5;
+
         private readonly IRepository<Character> _charRepository;
         private readonly IRepository<SkillSheet> _skillRepository;
         private readonly IRepository<Special> _specialRepository;
@@ -27,38 +29,46 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
-        /// Gets a character from the repository by Discord ID.
+        /// Gets the active character from the repository by Discord ID.
         /// </summary>
-        public async Task<Character> GetCharacterAsync(ulong discordId)
-        {
-            var character = await _charRepository.Query.Where(x => x.DiscordId == discordId).FirstOrDefaultAsync();
-            if (character == null) return null;
+        public async Task<Character> GetCharacterAsync(ulong discordId) =>
+            await _charRepository.Query.Where(c => c.DiscordId == discordId && c.Active == true).Include(c => c.Special).Include(c => c.Skills).FirstOrDefaultAsync();
 
-            character.Special = await _specialRepository.Query.Where(x => x.CharacterId == character.Id).FirstOrDefaultAsync();
-            character.Skills = await _skillRepository.Query.Where(x => x.CharacterId == character.Id).FirstOrDefaultAsync();
-
-            return character;
-        }
+        /// <summary>
+        /// Gets all characters from the repository by Discord ID.
+        /// </summary>
+        /// <param name="discordId"></param>
+        /// <returns></returns>
+        public async Task<List<Character>> GetAllCharactersAsync(ulong discordId) =>
+            await _charRepository.Query.Where(c => c.DiscordId == discordId).Include(c => c.Special).Include(c => c.Skills).ToListAsync();
 
         /// <summary>
         /// Creates a new character.
         /// </summary>
         public async Task<Character> CreateCharacterAsync(ulong discordId, string name)
         {
-            if (await GetCharacterAsync(discordId) != null)
-                throw new Exception(Exceptions.CHAR_DISCORDID_EXISTS);
-
             if (!StringHelper.IsOnlyLetters(name))
                 throw new Exception(Exceptions.CHAR_NAMES_NOT_LETTERS);
 
             if (name.Length > 24 || name.Length < 2)
                 throw new Exception(Exceptions.CHAR_NAMES_LENGTH);
 
-            name = StringHelper.ToTitleCase(name);
+            var characters = await GetAllCharactersAsync(discordId);
 
+            if (characters != null)
+            {
+                if (CheckDuplicateNames(characters, name))
+                    throw new Exception(Exceptions.CHAR_NAMES_NOT_UNIQUE);
+
+                if (characters.Count >= MAX_CHARACTERS)
+                    throw new Exception(Exceptions.CHAR_TOO_MANY);
+            }
+
+            name = StringHelper.ToTitleCase(name);
             var character = new Character()
             {
                 DiscordId = discordId,
+                Active = false,
                 Name = name,
                 Description = "",
                 Story = "",
@@ -92,6 +102,9 @@ namespace FalloutRPG.Services.Roleplay
                     Unarmed = 0
                 }
             };
+
+            if (characters == null)
+                character.Active = true;
 
             await _charRepository.AddAsync(character);
             return character;
@@ -142,6 +155,20 @@ namespace FalloutRPG.Services.Roleplay
         {
             var characters = await _charRepository.FetchAllAsync();
             return characters.Count;
+        }
+
+        public async Task<bool> CheckDuplicateNames(ulong discordId, string name) =>
+            CheckDuplicateNames(await GetAllCharactersAsync(discordId), name);
+
+        private bool CheckDuplicateNames(List<Character> characters, string name)
+        {
+            if (characters == null) return true;
+
+            foreach (var character in characters)
+                if (character.Name == name)
+                    return true;
+
+            return false;
         }
     }
 }

@@ -62,7 +62,7 @@ namespace FalloutRPG.Modules
         }
 
         [Command("changename")]
-        public async Task ChangeCharacterNameAsync(IUser user, string name)
+        public async Task ChangeCharacterNameAsync(IUser user, [Remainder]string name)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
             if (character == null) return;

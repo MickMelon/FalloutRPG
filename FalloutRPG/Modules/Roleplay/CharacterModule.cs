@@ -7,6 +7,7 @@ using FalloutRPG.Helpers;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
@@ -71,7 +72,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("create")]
         [Alias("new")]
-        public async Task CreateCharacterAsync(string name)
+        public async Task CreateCharacterAsync([Remainder]string name)
         {
             var userInfo = Context.User;
 
@@ -84,6 +85,106 @@ namespace FalloutRPG.Modules.Roleplay
             {
                 await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
                 return;
+            }
+        }
+
+        [Command("activate")]
+        [Alias("active")]
+        public async Task ActivateCharacterAsync([Remainder]string name)
+        {
+            var chars = await _charService.GetAllCharactersAsync(Context.User.Id);
+
+            if (chars == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
+                return;
+            }
+
+            var charMatch = chars.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+            if (charMatch == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
+                return;
+            }
+
+            if (charMatch.Active)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CHAR_ALREADY_ACTIVE, charMatch.Name, Context.User.Mention));
+                return;
+            }
+
+            foreach (var character in chars.FindAll(x => x.Active))
+            {
+                character.Active = false;
+                await _charService.SaveCharacterAsync(character);
+            }
+
+            charMatch.Active = true;
+            await _charService.SaveCharacterAsync(charMatch);
+
+            await ReplyAsync(String.Format(Messages.CHAR_ACTIVATED, charMatch.Name, Context.User.Mention));
+        }
+
+        [Command("list")]
+        public async Task ListCharactersAsync()
+        {
+            var characters = await _charService.GetAllCharactersAsync(Context.User.Id);
+
+            if (characters == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
+                return;
+            }
+
+            var message = new StringBuilder();
+
+            for (var i = 0; i < characters.Count; i++)
+            {
+                message.Append($"{i + 1}: {characters[i].Name}\n");
+            }
+
+            var embed = EmbedHelper.BuildBasicEmbed("Command: $character list", message.ToString());
+
+            await ReplyAsync(Context.User.Mention, embed: embed);
+        }
+
+        [Command("remove")]
+        [Alias("delete")]
+        public async Task RemoveCharacterAsync([Remainder]string name)
+        {
+            var chars = await _charService.GetAllCharactersAsync(Context.User.Id);
+
+            if (chars == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
+                return;
+            }
+
+            var charMatch = chars.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+            if (charMatch == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
+                return;
+            }
+
+            if (charMatch.Active)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CHAR_CANT_REMOVE_ACTIVE, charMatch.Name, Context.User.Mention));
+                return;
+            }
+
+            await ReplyAsync(String.Format(Messages.CHAR_REMOVE_CONFIRM, charMatch.Name, charMatch.Level, Context.User.Mention));
+            var response = await NextMessageAsync();
+            if (response != null && response.Content.Equals(charMatch.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                await _charService.DeleteCharacterAsync(charMatch);
+                await ReplyAsync(String.Format(Messages.CHAR_REMOVE_SUCCESS, charMatch.Name, Context.User.Mention));
+            }
+            else
+            {
+                await ReplyAsync(String.Format(Messages.CHAR_NOT_REMOVED, charMatch.Name, Context.User.Mention));
             }
         }
     }
