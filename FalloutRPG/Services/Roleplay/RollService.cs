@@ -18,7 +18,7 @@ namespace FalloutRPG.Services.Roleplay
 
         private readonly Random _rand;
 
-        private int LUCK_INFLUENCE;
+        private double LUCK_INFLUENCE;
         private bool LUCK_INFLUENCE_ENABLED;
 
         public RollService(CharacterService charService, SpecialService specService, SkillsService skillsService, IConfiguration config)
@@ -45,8 +45,8 @@ namespace FalloutRPG.Services.Roleplay
 
                 if (LUCK_INFLUENCE_ENABLED)
                 {
-                    LUCK_INFLUENCE = int.Parse(_config["roleplay:luck-influence-percentage"]);
-                    if (LUCK_INFLUENCE <= 0 || LUCK_INFLUENCE > int.MaxValue)
+                    LUCK_INFLUENCE = double.Parse(_config["roleplay:luck-influence-percentage"]);
+                    if (LUCK_INFLUENCE <= 0 || LUCK_INFLUENCE > double.MaxValue)
                     {
                         Console.WriteLine("Luck influence settings improperly configured, check Config.json");
                         LUCK_INFLUENCE = 0;
@@ -120,15 +120,24 @@ namespace FalloutRPG.Services.Roleplay
 
             double finalResult;
 
-            if (LUCK_INFLUENCE_ENABLED)
+            // NEW FORMULA: y = 9 * sqrt{x} - (0.195x)
+            // ALTERNATE: 10 * sqrt{x} - (0.25x) - 1
+            // y = minimumSuccessRoll, x = attributeValue
+            // luck will now not work with skills over 250
+            double minimumSuccessRoll = Math.Round(10 * Math.Sqrt(attributeValue) - (0.25 * attributeValue) - 1);
+
+            if (LUCK_INFLUENCE_ENABLED && attributeValue < 100)
                 finalResult = rng * luckMultiplier;
             else
                 finalResult = rng;
 
             // compares your roll with your skills, and how much better you did than the bare minimum
-            double resultPercent = (attributeValue - finalResult) / attributeValue;
+            double resultPercent = (minimumSuccessRoll - finalResult) / minimumSuccessRoll;
             // make it pretty for chat
             resultPercent = Math.Round(resultPercent * 100.0, 1);
+
+            Console.WriteLine($"Skill: {attributeValue}, " +
+                $"MinSucRoll: {minimumSuccessRoll}, finalResult: {finalResult}, noLCKmult: {finalResult / luckMultiplier}, resultpercent: {resultPercent}");
 
             return resultPercent;
         }

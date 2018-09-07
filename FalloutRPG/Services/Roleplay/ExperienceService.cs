@@ -18,10 +18,10 @@ namespace FalloutRPG.Services.Roleplay
         private List<ulong> experienceEnabledChannels;
         private Random random;
 
-        private const int DEFAULT_EXP_GAIN = 100;
-        private const int DEFAULT_EXP_RANGE_FROM = 10;
-        private const int DEFAULT_EXP_RANGE_TO = 50;
-        private const int COOLDOWN_INTERVAL = 60000;
+        private const int DEFAULT_EXP_GAIN = 1000000;
+        private const int DEFAULT_EXP_RANGE_FROM = 1000000;
+        private const int DEFAULT_EXP_RANGE_TO = 1000000;
+        private const int COOLDOWN_INTERVAL = 6000;
 
         private readonly CharacterService _charService;
         private readonly SkillsService _skillsService;
