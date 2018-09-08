@@ -21,7 +21,7 @@ namespace FalloutRPG.Services.Roleplay
         // Measured in seconds (not milliseconds):
         private const int NPC_ACTIVE_DURATION = 43200;
         
-        public NpcService(SkillsService skillsService, RollService rollService, NpcPresetService presetService, IRepository<NpcPreset> presetRepository, Random rand)
+        public NpcService(SkillsService skillsService, RollService rollService, NpcPresetService presetService, IRepository<NpcPreset> presetRepository)
         {
             _rollService = rollService;
             _presetService = presetService;
