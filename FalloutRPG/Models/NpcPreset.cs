@@ -21,6 +21,15 @@ namespace FalloutRPG.Models
         public int Agility { get; set; }
         public int Luck { get; set; }
 
+        // On NPC creation, +/- these amounts randomly
+        public int StrengthRange { get; set; }
+        public int PerceptionRange { get; set; }
+        public int EnduranceRange { get; set; }
+        public int CharismaRange { get; set; }
+        public int IntelligenceRange { get; set; }
+        public int AgilityRange { get; set; }
+        public int LuckRange { get; set; }
+
         [NotMapped]
         public Special Special
         {
@@ -50,6 +59,20 @@ namespace FalloutRPG.Models
         public int Speech { get; set; }
         public int Survival { get; set; }
         public int Unarmed { get; set; }
+
+        public int BarterRange { get; set; }
+        public int EnergyWeaponsRange { get; set; }
+        public int ExplosivesRange { get; set; }
+        public int GunsRange { get; set; }
+        public int LockpickRange { get; set; }
+        public int MedicineRange { get; set; }
+        public int MeleeWeaponsRange { get; set; }
+        public int RepairRange { get; set; }
+        public int ScienceRange { get; set; }
+        public int SneakRange { get; set; }
+        public int SpeechRange { get; set; }
+        public int SurvivalRange { get; set; }
+        public int UnarmedRange { get; set; }
 
         [NotMapped]
         public SkillSheet Skills
