@@ -62,7 +62,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             // Check to make sure the given attribName matches a Skill or S.P.E.C.I.A.L. attribute (or the enabled property), otherwise we might be modifying an important property
             if (Globals.SKILL_NAMES.Contains(attribName, StringComparer.OrdinalIgnoreCase) || Globals.SPECIAL_NAMES.Contains(attribName, StringComparer.OrdinalIgnoreCase) ||
-                attribName.Equals("Enabled", StringComparison.OrdinalIgnoreCase))
+                attribName.Equals("Enabled", StringComparison.OrdinalIgnoreCase) || attribName.Contains("Range"))
             {
                 NpcPreset preset = await GetNpcPreset(name);
 

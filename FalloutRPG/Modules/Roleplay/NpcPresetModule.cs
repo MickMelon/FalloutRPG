@@ -72,6 +72,14 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("edit")]
+        public async Task EditPreset(string name, Globals.SpecialType special, int value) =>
+            await EditPreset(name, special.ToString(), value);
+
+        [Command("edit")]
+        public async Task EditPreset(string name, Globals.SkillType skill, int value) =>
+            await EditPreset(name, skill.ToString(), value);
+
+        [Command("edit")]
         public async Task EditPreset(string name, string attribute, int value)
         {
             if (attribute.Equals("Enabled", StringComparison.OrdinalIgnoreCase))
@@ -79,6 +87,7 @@ namespace FalloutRPG.Modules.Roleplay
                 await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_EDIT, Context.User.Mention));
                 return;
             }
+
             if (await _presetService.EditNpcPreset(name, attribute, value))
                 await ReplyAsync(String.Format(Messages.NPC_PRESET_EDIT, StringHelper.ToTitleCase(name), StringHelper.ToTitleCase(attribute), value, Context.User.Mention));
             else
@@ -95,6 +104,7 @@ namespace FalloutRPG.Modules.Roleplay
             await _presetService.EditNpcPreset(name, "Intelligence", @int);
             await _presetService.EditNpcPreset(name, "Agility", agi);
             await _presetService.EditNpcPreset(name, "Luck", luc);
+
             await ReplyAsync(String.Format(Messages.NPC_PRESET_EDIT_SPECIAL, name, Context.User.Mention));
         }
 
@@ -124,12 +134,10 @@ namespace FalloutRPG.Modules.Roleplay
             StringBuilder sb = new StringBuilder();
 
             foreach (var prop in typeof(NpcPreset).GetProperties())
-            {
-                if (Globals.SKILL_NAMES.Contains(prop.Name) || Globals.SPECIAL_NAMES.Contains(prop.Name) || prop.Name.Equals("Enabled"))
+                if (Globals.SKILL_NAMES.Contains(prop.Name) || Globals.SPECIAL_NAMES.Contains(prop.Name) || prop.Name.Equals("Enabled") || prop.Name.Contains("Range"))
                     sb.Append($"{prop.Name}: {prop.GetValue(preset)}\n");
-            }
 
-            await dmChannel.SendMessageAsync(Context.User.Mention, embed: EmbedHelper.BuildBasicEmbed("Preset info:", sb.ToString()));
+            await dmChannel.SendMessageAsync(Context.User.Mention, embed: EmbedHelper.BuildBasicEmbed($"Preset info for {preset.Name}:", sb.ToString()));
         }
     }
 }

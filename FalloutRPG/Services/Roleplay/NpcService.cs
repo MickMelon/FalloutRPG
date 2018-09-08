@@ -4,6 +4,7 @@ using FalloutRPG.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace FalloutRPG.Services.Roleplay
 {
@@ -13,8 +14,12 @@ namespace FalloutRPG.Services.Roleplay
         private readonly NpcPresetService _presetService;
 
         private readonly List<Character> Npcs;
+        private readonly Dictionary<Character, Timer> NpcTimers;
 
         private readonly Random _rand;
+
+        // Measured in seconds (not milliseconds):
+        private const int NPC_ACTIVE_DURATION = 43200;
         
         public NpcService(SkillsService skillsService, RollService rollService, NpcPresetService presetService, IRepository<NpcPreset> presetRepository, Random rand)
         {
@@ -22,6 +27,7 @@ namespace FalloutRPG.Services.Roleplay
             _presetService = presetService;
 
             Npcs = new List<Character>();
+            NpcTimers = new Dictionary<Character, Timer>();
 
             _rand = new Random();
         }
@@ -38,7 +44,7 @@ namespace FalloutRPG.Services.Roleplay
             if (preset.Enabled == false)
                 throw new Exception(Exceptions.NPC_INVALID_TYPE_DISABLED);
 
-            Character character = new Character
+            Character newNpc = new Character
             {
                 Name = name,
                 Special = new Special
@@ -69,7 +75,14 @@ namespace FalloutRPG.Services.Roleplay
                 }
             };
 
-            Npcs.Add(character);
+            var timer = new Timer();
+            timer.Elapsed += (sender, e) => OnDurationElasped(sender, e, newNpc);
+            timer.Interval = NPC_ACTIVE_DURATION;
+            timer.Enabled = true;
+
+            NpcTimers.Add(newNpc, timer);
+
+            Npcs.Add(newNpc);
         }
 
         public Character FindNpc(string name) => Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
@@ -90,6 +103,8 @@ namespace FalloutRPG.Services.Roleplay
             if (attribAmt == 0)
                 return String.Format(Messages.NPC_CANT_USE_SPECIAL, character.Name);
 
+            ResetNpcTimer(character);
+
             return _rollService.GetRollMessage(character.Name, stat.ToString(), _rollService.GetRollResult(stat, character)) + " " + Messages.NPC_SUFFIX;
         }
 
@@ -109,7 +124,32 @@ namespace FalloutRPG.Services.Roleplay
             if (attribAmt == 0)
                 return String.Format(Messages.NPC_CANT_USE_SKILL, character.Name);
 
+            ResetNpcTimer(character);
+
             return _rollService.GetRollMessage(character.Name, stat.ToString(), _rollService.GetRollResult(stat, character)) + " " + Messages.NPC_SUFFIX;
+        }
+
+        /// <summary>
+        /// Adds a user's Discord ID to the cooldowns.
+        /// </summary>
+        public void ResetNpcTimer(Character npc)
+        {
+            var timer = NpcTimers[npc];
+            timer.Stop();
+            timer.Start();
+        }
+
+        /// <summary>
+        /// Called when a cooldown has finished.
+        /// </summary>
+        private void OnDurationElasped(object sender, ElapsedEventArgs e, Character npc)
+        {
+            var timer = NpcTimers[npc];
+            timer.Enabled = false;
+            timer.Dispose();
+
+            NpcTimers.Remove(npc);
+            Npcs.Remove(npc);
         }
     }
 }
