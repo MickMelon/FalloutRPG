@@ -61,8 +61,10 @@ namespace FalloutRPG.Modules.Roleplay
                 _npcService = npcService;
             }
 
+            [Command]
             public async Task RollSpecial(string name, Globals.SpecialType type) => await ReplyAsync(_npcService.RollNpcStat(name, type));
 
+            [Command]
             public async Task RollSkill(string name, Globals.SkillType type) => await ReplyAsync(_npcService.RollNpcStat(name, type));
         }
     }
