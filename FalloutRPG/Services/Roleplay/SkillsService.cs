@@ -8,7 +8,7 @@ namespace FalloutRPG.Services.Roleplay
     public class SkillsService
     {
         private const int DEFAULT_SKILL_POINTS = 10;
-        private const int MAX_SKILL_LEVEL = 300;
+        public const int MAX_SKILL_LEVEL = 200;
 
         private readonly CharacterService _charService;
         private readonly SpecialService _specService;

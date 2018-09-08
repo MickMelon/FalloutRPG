@@ -19,6 +19,7 @@ namespace FalloutRPG.Services.Roleplay
         private readonly Random _rand;
 
         private double LUCK_INFLUENCE;
+        private int LUCK_INFLUENCE_SKILL_CUTOFF;
         private bool LUCK_INFLUENCE_ENABLED;
 
         public RollService(CharacterService charService, SpecialService specService, SkillsService skillsService, IConfiguration config)
@@ -46,18 +47,27 @@ namespace FalloutRPG.Services.Roleplay
                 if (LUCK_INFLUENCE_ENABLED)
                 {
                     LUCK_INFLUENCE = double.Parse(_config["roleplay:luck-influence-percentage"]);
-                    if (LUCK_INFLUENCE <= 0 || LUCK_INFLUENCE > double.MaxValue)
+                    LUCK_INFLUENCE_SKILL_CUTOFF = int.Parse(_config["roleplay:luck-influence-skill-cutoff"]);
+
+                    if (LUCK_INFLUENCE <= 0 || LUCK_INFLUENCE > 100 ||
+                        LUCK_INFLUENCE_SKILL_CUTOFF <= 0 || LUCK_INFLUENCE_SKILL_CUTOFF > SkillsService.MAX_SKILL_LEVEL)
                     {
                         Console.WriteLine("Luck influence settings improperly configured, check Config.json");
                         LUCK_INFLUENCE = 0;
+                        LUCK_INFLUENCE_SKILL_CUTOFF = 0;
                     }
                 }
                 else
+                {
                     LUCK_INFLUENCE = 0;
+                    LUCK_INFLUENCE_SKILL_CUTOFF = 0;
+                }
             }
             catch (Exception)
             {
                 Console.WriteLine("Luck influence settings improperly configured, check Config.json");
+                LUCK_INFLUENCE = 0;
+                LUCK_INFLUENCE_SKILL_CUTOFF = 0;
             }
         }
 
@@ -120,24 +130,21 @@ namespace FalloutRPG.Services.Roleplay
 
             double finalResult;
 
-            // NEW FORMULA: y = 9 * sqrt{x} - (0.195x)
-            // ALTERNATE: 10 * sqrt{x} - (0.25x) - 1
-            // y = minimumSuccessRoll, x = attributeValue
-            // luck will now not work with skills over 250
-            double minimumSuccessRoll = Math.Round(10 * Math.Sqrt(attributeValue) - (0.25 * attributeValue) - 1);
+            // NEW FORMULA:
+            // 10 * Sqrt(x) - (0.225x) - 1 (cap at 200 skill)
+            // luck will now not work with skills over LUCK_INFLUENCE_SKILL_CUTOFF
+            double maxSuccessRoll = Math.Round(10 * Math.Sqrt(attributeValue) - (0.225 * attributeValue) - 1);
 
-            if (LUCK_INFLUENCE_ENABLED && attributeValue < 100)
+            // Ensures that Luck influence never guarantees success
+            if (LUCK_INFLUENCE_ENABLED && attributeValue < LUCK_INFLUENCE_SKILL_CUTOFF && 95 * luckMultiplier > maxSuccessRoll)
                 finalResult = rng * luckMultiplier;
             else
                 finalResult = rng;
 
             // compares your roll with your skills, and how much better you did than the bare minimum
-            double resultPercent = (minimumSuccessRoll - finalResult) / minimumSuccessRoll;
+            double resultPercent = (maxSuccessRoll - finalResult) / maxSuccessRoll;
             // make it pretty for chat
             resultPercent = Math.Round(resultPercent * 100.0, 1);
-
-            Console.WriteLine($"Skill: {attributeValue}, " +
-                $"MinSucRoll: {minimumSuccessRoll}, finalResult: {finalResult}, noLCKmult: {finalResult / luckMultiplier}, resultpercent: {resultPercent}");
 
             return resultPercent;
         }
@@ -152,7 +159,7 @@ namespace FalloutRPG.Services.Roleplay
             int rng = 0;
 
             attributeValue = (int)typeof(Special).GetProperty(attribute.ToString()).GetValue(charSpecial);
-            rng = _rand.Next(1, 11);
+            rng = _rand.Next(1, 101);
 
             // affects odds by the percentage of LUCK_INFLUENCE for each point of luck above or below 5.
             // i.e. if you have 6 luck, and LUCK_INFLUENCE == 5, then now your odds are multiplied by 0.95,
@@ -162,13 +169,16 @@ namespace FalloutRPG.Services.Roleplay
 
             double finalResult;
 
-            if (LUCK_INFLUENCE_ENABLED)
+            double maxSuccessRoll = Math.Round(32.2 * Math.Sqrt(attributeValue) - 7);
+
+            // prevents luck from guaranteeing success
+            if (LUCK_INFLUENCE_ENABLED && 95 * luckMultiplier > maxSuccessRoll)
                 finalResult = rng * luckMultiplier;
             else
                 finalResult = rng;
 
             // compares your roll with your skills, and how much better you did than the bare minimum
-            double resultPercent = (attributeValue - finalResult) / attributeValue;
+            double resultPercent = (maxSuccessRoll - finalResult) / maxSuccessRoll;
             // make it pretty for chat
             resultPercent = Math.Round(resultPercent * 100.0, 1);
 
