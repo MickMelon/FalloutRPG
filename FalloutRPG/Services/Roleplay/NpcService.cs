@@ -77,7 +77,7 @@ namespace FalloutRPG.Services.Roleplay
 
             var timer = new Timer();
             timer.Elapsed += (sender, e) => OnDurationElasped(sender, e, newNpc);
-            timer.Interval = NPC_ACTIVE_DURATION;
+            timer.Interval = NPC_ACTIVE_DURATION * 1000;
             timer.Enabled = true;
 
             NpcTimers.Add(newNpc, timer);
