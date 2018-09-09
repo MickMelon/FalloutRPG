@@ -49,11 +49,15 @@ namespace FalloutRPG.Services.Roleplay
                     LUCK_INFLUENCE = double.Parse(_config["roleplay:luck-influence-percentage"]);
                     LUCK_INFLUENCE_SKILL_CUTOFF = int.Parse(_config["roleplay:luck-influence-skill-cutoff"]);
 
-                    if (LUCK_INFLUENCE <= 0 || LUCK_INFLUENCE > 100 ||
-                        LUCK_INFLUENCE_SKILL_CUTOFF <= 0 || LUCK_INFLUENCE_SKILL_CUTOFF > SkillsService.MAX_SKILL_LEVEL)
+                    if (LUCK_INFLUENCE <= 0 || LUCK_INFLUENCE > 100)
                     {
                         Console.WriteLine("Luck influence settings improperly configured, check Config.json");
                         LUCK_INFLUENCE = 0;
+                        
+                    }
+                    if (LUCK_INFLUENCE_SKILL_CUTOFF <= 0 || LUCK_INFLUENCE_SKILL_CUTOFF > SkillsService.MAX_SKILL_LEVEL)
+                    {
+                        Console.WriteLine("Luck influence skill cutoff setting improperly configured, check Config.json");
                         LUCK_INFLUENCE_SKILL_CUTOFF = 0;
                     }
                 }
