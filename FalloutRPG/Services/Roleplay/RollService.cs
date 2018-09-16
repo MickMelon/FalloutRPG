@@ -109,7 +109,7 @@ namespace FalloutRPG.Services.Roleplay
             int attributeValue = 0;
             int rng = 0;
 
-            attributeValue = (int)typeof(SkillSheet).GetProperty(attribute.ToString()).GetValue(charSkills);
+            attributeValue = _skillsService.GetSkill(character, attribute);
             rng = _rand.Next(1, 101);
 
             // affects odds by the percentage of LUCK_INFLUENCE for each point of luck above or below 5.
@@ -142,7 +142,7 @@ namespace FalloutRPG.Services.Roleplay
             int attributeValue = 0;
             int rng = 0;
 
-            attributeValue = (int)typeof(Special).GetProperty(attribute.ToString()).GetValue(charSpecial);
+            attributeValue = _specService.GetSpecial(character, attribute);
             rng = _rand.Next(1, 11);
 
             // affects odds by the percentage of LUCK_INFLUENCE for each point of luck above or below 5.

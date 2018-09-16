@@ -24,6 +24,7 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task ChangeCharacterNameAsync([Remainder]string name)
         {
             var character = await _charService.GetCharacterAsync(Context.User.Id);
+            
             if (character == null) return;
 
             if (!StringHelper.IsOnlyLetters(name))
@@ -32,7 +33,12 @@ namespace FalloutRPG.Modules.Roleplay
             if (name.Length > 24 || name.Length < 2)
                 return;
 
-            character.Name = StringHelper.ToTitleCase(name);
+            var fixedName = StringHelper.ToTitleCase(name);
+
+            if (await _charService.CheckDuplicateNames(Context.User.Id, fixedName))
+                return;
+
+            character.Name = fixedName;
 
             await _charService.SaveCharacterAsync(character);
             await ReplyAsync(string.Format(Messages.CHAR_CHANGED_NAME, Context.User.Mention));

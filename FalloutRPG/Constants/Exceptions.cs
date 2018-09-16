@@ -8,6 +8,7 @@ namespace FalloutRPG.Constants
         public const string CHAR_DISCORDID_EXISTS = "A character already exists with specified Discord ID.";
         public const string CHAR_NAMES_NOT_LETTERS = "Character name must only consist of letters.";
         public const string CHAR_NAMES_LENGTH = "Character name must be between 2-24 letters each.";
+        public const string CHAR_NAMES_NOT_UNIQUE = "Character name was not unique for your Discord ID.";
         public const string CHAR_SPECIAL_LENGTH = "The input special length did not equal 7.";
         public const string CHAR_SPECIAL_DOESNT_ADD_UP = "SPECIAL does not add up to 40.";
         public const string CHAR_SPECIAL_NOT_IN_RANGE = "One or more SPECIAL attributes were not between 1 and 10.";
@@ -23,5 +24,6 @@ namespace FalloutRPG.Constants
         public const string CHAR_INVALID_SPECIAL_NAME = "SPECIAL name is invalid.";
         public const string CHAR_NOT_ENOUGH_SPECIAL_POINTS = "Not enough SPECIAL points.";
         public const string CHAR_SPECIAL_POINTS_GOES_OVER_MAX = "Unable to add SPECIAL points because it will take skill above the max level.";
+        public const string CHAR_TOO_MANY = "You have reached the limit of characters per account.";
     }
 }

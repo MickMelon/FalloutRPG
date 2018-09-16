@@ -50,6 +50,18 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
+        /// Returns the value of the specified character's given special.
+        /// </summary>
+        /// <returns>Returns 0 if character or special values are null.</returns>
+        public int GetSpecial(Character character, Globals.SpecialType special)
+        {
+            if (character == null || !IsSpecialSet(character))
+                return 0;
+
+            return (int)typeof(Special).GetProperty(special.ToString()).GetValue(character.Special);
+        }
+
+        /// <summary>
         /// Checks if each number in SPECIAL is between 1 and 10
         /// and ensures there are 7 elements in the input array.
         /// </summary>
