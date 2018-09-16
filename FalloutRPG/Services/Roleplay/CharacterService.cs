@@ -165,7 +165,7 @@ namespace FalloutRPG.Services.Roleplay
             if (characters == null) return true;
 
             foreach (var character in characters)
-                if (character.Name == name)
+                if (character.Name.Equals(name))
                     return true;
 
             return false;
