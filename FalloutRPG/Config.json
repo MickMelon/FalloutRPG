@@ -1,8 +1,7 @@
 ﻿{
   "prefix": "!",
-  "sqlserver-connection-string": "",
   "tokens": {
-    "discord": ""
+    "discord": "NDYyNzAzMzU1NTA5MDgwMDY1.DpVC5Q.XNz9sl1vnu206P0c4ufbhGSN5uQ"
   },
   "gambling": {
     "enabled-channels": [ "" ],

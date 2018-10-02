@@ -36,7 +36,6 @@ namespace FalloutRPG
         public async Task MainAsync()
         {
             config = BuildConfig();
-            CheckConnectionString();
 
             var services = BuildServiceProvider();
 
@@ -81,8 +80,8 @@ namespace FalloutRPG
             .AddSingleton<InteractiveService>()
 
             // Database
-            .AddDbContext<RpgContext>(options =>
-                options.UseSqlServer(config["sqlserver-connection-string"]))
+            .AddEntityFrameworkSqlite()
+                .AddDbContext<RpgContext>(optionsAction: options => options.UseSqlite("Filename=CharacterDB.db"))
             .AddTransient<IRepository<Player>, EfRepository<Player>>()
             .AddTransient<IRepository<Character>, EfRepository<Character>>()
             .AddTransient<IRepository<SkillSheet>, EfRepository<SkillSheet>>()
@@ -97,17 +96,5 @@ namespace FalloutRPG
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("Config.json")
             .Build();
-
-        /// <summary>
-        /// Sets the SQL Server connection string variable if it's valid.
-        /// </summary>
-        private bool CheckConnectionString()
-        {
-            var connectionString = config["sqlserver-connection-string"];
-            if (!string.IsNullOrEmpty(connectionString)) return true;
-
-            Console.WriteLine("You have an invalid SQL Server connection string set in Config.json");
-            return false;
-        }
     }
 }
