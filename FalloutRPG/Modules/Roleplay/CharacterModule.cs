@@ -52,7 +52,12 @@ namespace FalloutRPG.Modules.Roleplay
             var description = string.IsNullOrEmpty(character.Description) ? "No description." : character.Description;
             var story = string.IsNullOrEmpty(character.Story) ? "No story." : character.Story;
 
+            string campaignString = "None";
+            if (character.Campaign != null)
+                campaignString = character.Campaign.Name;
+            
             var embed = EmbedHelper.BuildBasicEmbed($"{character.Name}",
+                $"**Campaign:** {campaignString}\n" +
                 $"**Description:** {description}\n" +
                 $"**Story:** ($char story)\n" +
                 $"**Level:** {level}\n" +
@@ -78,7 +83,7 @@ namespace FalloutRPG.Modules.Roleplay
 
             try
             {
-                await _charService.CreatePlayerCharacterAsync(userInfo.Id, name);
+                await _charService.CreatePlayerCharacterAsync(userInfo.Id, name, Context.Channel.Id);
                 await ReplyAsync(string.Format(Messages.CHAR_CREATED_SUCCESS, userInfo.Mention));
             }
             catch (Exception e)

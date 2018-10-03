@@ -18,11 +18,35 @@ namespace FalloutRPG.Modules.Roleplay
     {
         private readonly CampaignService _campaignService;
         private readonly PlayerService _playerService;
+        private readonly CharacterService _characterService;
 
-        public CampaignModule(CampaignService campaignService, PlayerService playerService)
+        public CampaignModule(CampaignService campaignService, PlayerService playerService, CharacterService characterService)
         {
             _campaignService = campaignService;
             _playerService = playerService;
+            _characterService = characterService;
+        }
+
+        [Command("join")]
+        public async Task JoinCharacterToCampaign()
+        {
+            var character = await _characterService.GetPlayerCharacterAsync(Context.User.Id);
+            if (character == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
+                return;
+            }
+
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+            if (campaign == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_CHANNEL_COMMAND, Context.User.Mention));
+                return;
+            }
+            // ask for confirmation?
+            character.Campaign = campaign;
+            await _characterService.SaveCharacterAsync(character);
+            
         }
 
         [Command("create")]

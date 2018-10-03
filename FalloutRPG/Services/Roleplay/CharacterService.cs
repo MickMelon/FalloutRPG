@@ -37,9 +37,11 @@ namespace FalloutRPG.Services.Roleplay
         /// Gets the active character from the repository by Discord ID.
         /// </summary>
         public async Task<PlayerCharacter> GetPlayerCharacterAsync(ulong discordId) =>
-            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId && c.Active == true).Include(c => c.Special).Include(c => c.Skills).FirstOrDefaultAsync();
-        public async Task<PlayerCharacter> GetPlayerCharacterAsync(Player player) =>
-            await GetPlayerCharacterAsync(player.DiscordId);
+            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId && c.Active == true)
+            .Include(c => c.Special)
+            .Include(c => c.Skills)
+            .Include(c => c.Campaign)
+            .FirstOrDefaultAsync();
 
         /// <summary>
         /// Gets all characters from the repository by Discord ID.
@@ -48,13 +50,11 @@ namespace FalloutRPG.Services.Roleplay
         /// <returns></returns>
         public async Task<List<PlayerCharacter>> GetAllPlayerCharactersAsync(ulong discordId) =>
             await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId).Include(c => c.Special).Include(c => c.Skills).ToListAsync();
-        public async Task<List<PlayerCharacter>> GetAllPlayerCharactersAsync(Player player) =>
-            await GetAllPlayerCharactersAsync(player.DiscordId);
 
         /// <summary>
         /// Creates a new character.
         /// </summary>
-        public async Task<PlayerCharacter> CreatePlayerCharacterAsync(Player player, string name)
+        public async Task<PlayerCharacter> CreatePlayerCharacterAsync(ulong discordId, string name, ulong channelId)
         {
             if (!StringHelper.IsOnlyLetters(name))
                 throw new Exception(Exceptions.CHAR_NAMES_NOT_LETTERS);
@@ -62,6 +62,7 @@ namespace FalloutRPG.Services.Roleplay
             if (name.Length > 24 || name.Length < 2)
                 throw new Exception(Exceptions.CHAR_NAMES_LENGTH);
 
+            var player = await _playerService.GetPlayerAsync(discordId);
             var characters = await GetAllPlayerCharactersAsync(player.DiscordId);
 
             if (characters.Count > 0)
@@ -76,7 +77,6 @@ namespace FalloutRPG.Services.Roleplay
             name = StringHelper.ToTitleCase(name);
             var character = new PlayerCharacter(player)
             {
-                //DiscordId = discordId,
                 Active = false,
                 Name = name,
                 Description = "",
@@ -84,32 +84,8 @@ namespace FalloutRPG.Services.Roleplay
                 Experience = 0,
                 SkillPoints = 0,
                 Money = 1000,
-                Special = new Special()
-                {
-                    Strength = 0,
-                    Perception = 0,
-                    Endurance = 0,
-                    Charisma = 0,
-                    Intelligence = 0,
-                    Agility = 0,
-                    Luck = 0
-                },
+                Special = new Special(),
                 Skills = new SkillSheet()
-                {
-                    Barter = 0,
-                    EnergyWeapons = 0,
-                    Explosives = 0,
-                    Guns = 0,
-                    Lockpick = 0,
-                    Medicine = 0,
-                    MeleeWeapons = 0,
-                    Repair = 0,
-                    Science = 0,
-                    Sneak = 0,
-                    Speech = 0,
-                    Survival = 0,
-                    Unarmed = 0
-                }
             };
 
             if (characters.Count == 0)
@@ -117,13 +93,6 @@ namespace FalloutRPG.Services.Roleplay
 
             await _charRepository.AddAsync(character);
             return character;
-        }
-
-        public async Task<PlayerCharacter> CreatePlayerCharacterAsync(ulong discordId, string name)
-        {
-            var player = await _playerService.GetPlayerAsync(discordId);
-
-            return await CreatePlayerCharacterAsync(player, name);
         }
 
         /// <summary>

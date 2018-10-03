@@ -16,16 +16,23 @@ namespace FalloutRPG.Services.Roleplay
     {
         private readonly DiscordSocketClient _client;
         private readonly PlayerService _playerService;
+        private readonly CharacterService _characterService;
 
         private readonly IRepository<Player> _playerRepository;
         private readonly IRepository<Campaign> _campaignRepository;
 
-        public CampaignService(PlayerService playerService, IRepository<Player> playerRepository, DiscordSocketClient client, IRepository<Campaign> campaignRepository)
+        public CampaignService(PlayerService playerService,
+            IRepository<Player> playerRepository,
+            DiscordSocketClient client,
+            IRepository<Campaign> campaignRepository,
+            IRepository<Character> characterRepository,
+            CharacterService characterService)
         {
             _playerService = playerService;
+            _characterService = characterService;
             _playerRepository = playerRepository;
-            _client = client;
             _campaignRepository = campaignRepository;
+            _client = client;
         }
 
         public async Task CreateCampaignAsync(string name, SocketGuild guild, Player player)
@@ -48,17 +55,33 @@ namespace FalloutRPG.Services.Roleplay
 
             var campaign = new Campaign(name, player, role.Id, channel.Id);
             campaign.Moderators.Add(player);
+            campaign.Players.Add(player);
             await SaveCampaignAsync(campaign);
         }
 
         public async Task<Campaign> GetCampaignAsync(string name) =>
-            await _campaignRepository.Query.Where(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).FirstOrDefaultAsync();
+            await _campaignRepository.Query.Where(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+            .Include(x => x.Players)
+            .Include(x => x.Moderators)
+            .FirstOrDefaultAsync();
+
+            public async Task<Campaign> GetCampaignAsync(ulong channelId) =>
+            await _campaignRepository.Query.Where(x => x.TextChannelId == channelId)
+            .Include(x => x.Players)
+            .Include(x => x.Moderators)
+            .FirstOrDefaultAsync();
 
         public async Task<Campaign> GetOwnedCampaign(Player owner) =>
-            await _campaignRepository.Query.Where(x => x.Owner.Equals(owner)).FirstOrDefaultAsync();
+            await _campaignRepository.Query.Where(x => x.Owner.Equals(owner))
+            .Include(x => x.Players)
+            .Include(x => x.Moderators)
+            .FirstOrDefaultAsync();
 
         public async Task<List<Campaign>> GetAllCampaignsAsync(Player player) =>
-            await _campaignRepository.Query.Where(x => x.Players.Contains(player)).ToListAsync();
+            await _campaignRepository.Query.Where(x => x.Players.Contains(player))
+            .Include(x => x.Players)
+            .Include(x => x.Moderators)
+            .ToListAsync();
 
         public async Task SaveCampaignAsync(Campaign campaign) =>
             await _campaignRepository.SaveAsync(campaign);
@@ -67,6 +90,9 @@ namespace FalloutRPG.Services.Roleplay
         {
             await guild.GetRole(campaign.RoleId).DeleteAsync();
             await guild.GetChannel(campaign.TextChannelId).DeleteAsync();
+
+            foreach(Character character in campaign.Characters)
+                await _characterService.DeleteCharacterAsync(character);
 
             await _campaignRepository.DeleteAsync(campaign);
         }

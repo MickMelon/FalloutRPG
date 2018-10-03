@@ -21,6 +21,7 @@ namespace FalloutRPG.Models
         public string Name { get; private set; }
 
         public ICollection<Player> Players { get; set; }
+        public ICollection<Character> Characters { get; set; }
         public ICollection<Player> Moderators { get; set; }
 
         public Player Owner { get; private set; }

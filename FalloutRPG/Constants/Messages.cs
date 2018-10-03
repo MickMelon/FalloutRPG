@@ -103,7 +103,7 @@
 
         // Campaign Messages
         public const string CAMP_CREATED_SUCCESS = SUCCESS_EMOJI + "Campaign created successfully. ({0})";
-        public const string CAMP_REMOVE_CONFIRM = QUESTION_EMOJI + "**Are you sure you want to delete `{0}` (members: {1})? This action CANNOT be undone!**" +
+        public const string CAMP_REMOVE_CONFIRM = QUESTION_EMOJI + "**Are you sure you want to delete `{0}` AND all of its' characters? (members: {1}) This action CANNOT be undone!**" +
             " To confirm this action, reply with the name of the campaign. ({2})";
         public const string CAMP_REMOVE_SUCCESS = SUCCESS_EMOJI + "The campaign was deleted successfully. ({0})";
         public const string CAMP_NOT_REMOVED = FAILURE_EMOJI + "The campaign `{0}` was **NOT** deleted. ({1})";
@@ -118,5 +118,6 @@
         public const string ERR_CAMP_NOT_MODERATOR = FAILURE_EMOJI + "This command can only be ran by a campaign moderator. ({0})";
         public const string ERR_CAMP_ALREADY_IN = FAILURE_EMOJI + "The user trying to be added is already the campaign. ({0})";
         public const string ERR_CAMP_NOT_A_MEMBER = FAILURE_EMOJI + "The specified player is not in this campaign. ({0})";
+        public const string ERR_CAMP_CHANNEL_COMMAND = FAILURE_EMOJI + "This command must be run in a campaign text channel. ({0})";
     }
 }
