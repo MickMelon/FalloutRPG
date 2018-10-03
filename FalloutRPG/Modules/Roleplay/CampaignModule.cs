@@ -59,6 +59,11 @@ namespace FalloutRPG.Modules.Roleplay
                 await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_FOUND, modInfo.Mention));
                 return;
             }
+            if (campaign.Players.Contains(playerToAdd))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_ALREADY_IN, modInfo.Mention));
+                return;
+            }
             if (!campaign.Moderators.Contains(campMod))
             {
                 await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, modInfo.Mention));
