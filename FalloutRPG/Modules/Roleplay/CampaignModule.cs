@@ -13,7 +13,7 @@ namespace FalloutRPG.Modules.Roleplay
 {
     [Group("campaign")]
     [Alias("cam", "camp")]
-    [RequireBotPermission(Discord.GuildPermission.ManageRoles | Discord.GuildPermission.ManageChannels)]
+    [RequireBotPermission(GuildPermission.ManageRoles | GuildPermission.ManageChannels)]
     public class CampaignModule : InteractiveBase<SocketCommandContext>
     {
         private readonly CampaignService _campaignService;
@@ -72,6 +72,7 @@ namespace FalloutRPG.Modules.Roleplay
             if (response != null && response.Content.Equals(campaign.Name, StringComparison.OrdinalIgnoreCase))
             {
                 campaign.Players.Add(playerToAdd);
+                await _campaignService.SaveCampaignAsync(campaign);
 
                 var role = Context.Guild.GetRole(campaign.RoleId);
                 await Context.Guild.GetUser(playerToAdd.DiscordId).AddRoleAsync(role);
@@ -118,6 +119,32 @@ namespace FalloutRPG.Modules.Roleplay
             {
                 await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_OWNER, Context.User.Mention));
             }
+        }
+
+        [Command("mod")]
+        public async Task AddModeratorAsync(IUser user)
+        {
+            // gets the player of the person sending the command
+            var senderPlayer = await _playerService.GetPlayerAsync(Context.User.Id);
+
+            var campaign = await _campaignService.GetOwnedCampaign(senderPlayer);
+            if (campaign == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_FOUND, Context.User.Mention));
+                return;
+            }
+
+            var modPlayer = await _playerService.GetPlayerAsync(user.Id);
+            
+            if (!campaign.Players.Contains(modPlayer))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_A_MEMBER, Context.User.Mention));
+                return;
+            }
+
+            campaign.Moderators.Add(modPlayer);
+            await _campaignService.SaveCampaignAsync(campaign);
+            await ReplyAsync(String.Format(Messages.CAMP_MOD_SUCCESS, user.Mention, Context.User.Mention));
         }
     }
 }

@@ -110,11 +110,13 @@
         public const string CAMP_INVITATION = QUESTION_EMOJI + "{0} invites you to join the campaign `{1}`. Reply back with the campaign name to join. ({2})";
         public const string CAMP_JOIN_SUCCESS = SUCCESS_EMOJI + "{0} has joined the campaign: {1}.";
         public const string CAMP_JOIN_FAILURE = FAILURE_EMOJI + "{0} has not joined the campaign: {1}.";
+        public const string CAMP_MOD_SUCCESS = SUCCESS_EMOJI + "{0} has been promoted to moderator. ({1})";
 
         // Campaign Error Messages
         public const string ERR_CAMP_NOT_FOUND = FAILURE_EMOJI + "Campaign not found. ({0})";
         public const string ERR_CAMP_NOT_OWNER = FAILURE_EMOJI + "This command can only be ran by the campaign owner. ({0})";
         public const string ERR_CAMP_NOT_MODERATOR = FAILURE_EMOJI + "This command can only be ran by a campaign moderator. ({0})";
         public const string ERR_CAMP_ALREADY_IN = FAILURE_EMOJI + "The user trying to be added is already in a campaign. ({0})";
+        public const string ERR_CAMP_NOT_A_MEMBER = FAILURE_EMOJI + "The specified player is not in this campaign. ({0})";
     }
 }
