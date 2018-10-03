@@ -108,8 +108,8 @@
         public const string CAMP_REMOVE_SUCCESS = SUCCESS_EMOJI + "The campaign was deleted successfully. ({0})";
         public const string CAMP_NOT_REMOVED = FAILURE_EMOJI + "The campaign `{0}` was **NOT** deleted. ({1})";
         public const string CAMP_INVITATION = QUESTION_EMOJI + "{0} invites you to join the campaign `{1}`. Reply back with the campaign name to join. ({2})";
-        public const string CAMP_JOIN_SUCCESS = SUCCESS_EMOJI + "{0} has joined the campaign: {1}.";
-        public const string CAMP_JOIN_FAILURE = FAILURE_EMOJI + "{0} has not joined the campaign: {1}.";
+        public const string CAMP_JOIN_SUCCESS = SUCCESS_EMOJI + "{0} has joined the campaign!";
+        public const string CAMP_JOIN_FAILURE = FAILURE_EMOJI + "{0} has not joined the campaign.";
         public const string CAMP_MOD_SUCCESS = SUCCESS_EMOJI + "{0} has been promoted to moderator. ({1})";
 
         // Campaign Error Messages

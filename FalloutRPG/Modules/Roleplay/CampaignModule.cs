@@ -77,11 +77,13 @@ namespace FalloutRPG.Modules.Roleplay
                 var role = Context.Guild.GetRole(campaign.RoleId);
                 await Context.Guild.GetUser(playerToAdd.DiscordId).AddRoleAsync(role);
 
-                await ReplyAsync(String.Format(Messages.CAMP_JOIN_SUCCESS, userToAdd.Mention, campaign.Name));
+                var channel = Context.Guild.GetTextChannel(campaign.TextChannelId);
+                await channel.SendMessageAsync(String.Format(Messages.CAMP_JOIN_SUCCESS, userToAdd.Mention));
             }
             else
             {
-                await ReplyAsync(String.Format(Messages.CAMP_JOIN_FAILURE, userToAdd.Mention, campaign.Name));
+                var channel = Context.Guild.GetTextChannel(campaign.TextChannelId);
+                await channel.SendMessageAsync(String.Format(Messages.CAMP_JOIN_FAILURE, userToAdd.Mention));
             }
         }
 
