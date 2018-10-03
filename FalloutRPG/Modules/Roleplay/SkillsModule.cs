@@ -85,7 +85,7 @@ namespace FalloutRPG.Modules.Roleplay
 
             [Command("set")]
             [Alias("tag")]
-            public async Task SetSkillsAsync(string tag1, string tag2, string tag3)
+            public async Task SetSkillsAsync(Globals.SkillType tag1, Globals.SkillType tag2, Globals.SkillType tag3)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetPlayerCharacterAsync(userInfo.Id);
@@ -115,7 +115,7 @@ namespace FalloutRPG.Modules.Roleplay
 
             [Command("spend")]
             [Alias("put")]
-            public async Task SpendSkillPointsAsync(string skill, int points)
+            public async Task SpendSkillPointsAsync(Globals.SkillType skill, int points)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetPlayerCharacterAsync(userInfo.Id);
