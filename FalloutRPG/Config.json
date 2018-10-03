@@ -3,14 +3,7 @@
   "tokens": {
     "discord": ""
   },
-  "gambling": {
-    "enabled-channels": [ "" ],
-    "minimum-bet": 30,
-    "maximum-bet": 1000
-  },
   "roleplay": {
-    "exp-channels": [ "" ],
-    "luck-influenced-rolls": true,
-    "luck-influence-percentage": 5
+    "exp-channels": [ "" ]
   }
 }
