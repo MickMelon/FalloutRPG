@@ -115,7 +115,7 @@
             "Converting a character to a campaign forbids use of it outside of it. This means you will be *unable to roll* in public channels! " +
             "This action CANNOT be undone!** To confirm this action, reply with the name of the character. ({2})";
         public const string CAMP_CHAR_CONVERT_SUCCESS = SUCCESS_EMOJI + "{0} joins the campaign!";
-        public const string CAMP_CHAR_CONVERT_FAILURE = SUCCESS_EMOJI + "{0} has not joined the campaign.";
+        public const string CAMP_CHAR_CONVERT_FAILURE = FAILURE_EMOJI + "{0} has not joined the campaign.";
 
         // Campaign Error Messages
         public const string ERR_CAMP_NOT_FOUND = FAILURE_EMOJI + "Campaign not found. ({0})";
@@ -124,5 +124,6 @@
         public const string ERR_CAMP_ALREADY_IN = FAILURE_EMOJI + "The user trying to be added is already the campaign. ({0})";
         public const string ERR_CAMP_NOT_A_MEMBER = FAILURE_EMOJI + "The specified player is not in this campaign. ({0})";
         public const string ERR_CAMP_CHANNEL_COMMAND = FAILURE_EMOJI + "This command must be run in a campaign text channel. ({0})";
+        public const string ERR_CAMP_NAME_LENGTH = FAILURE_EMOJI + "Campaign name must be between 2-24 letters each. ({0})";
     }
 }

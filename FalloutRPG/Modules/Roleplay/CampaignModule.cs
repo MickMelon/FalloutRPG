@@ -70,8 +70,14 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("create")]
         [Alias("new")]
-        public async Task CreateCampaignAsync(string name)
+        public async Task CreateCampaignAsync([Remainder]string name)
         {
+            if (name.Length > 24 || name.Length < 2)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NAME_LENGTH, Context.User.Mention));
+                return;
+            }
+
             var userInfo = Context.User;
             var player = await _playerService.GetPlayerAsync(userInfo.Id);
 
@@ -88,18 +94,23 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("add")]
-        public async Task AddMemberAsync(IUser userToAdd, string campName)
+        public async Task AddMemberAsync(IUser userToAdd, [Remainder] string campaignName)
         {
+            if (campaignName.Length > 24 || campaignName.Length < 2)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NAME_LENGTH, Context.User.Mention));
+                return;
+            }
+
             var modInfo = Context.User;
             var campMod = await _playerService.GetPlayerAsync(modInfo.Id);
 
-            var campaign = await _campaignService.GetCampaignAsync(campName);
-
             var playerToAdd = await _playerService.GetPlayerAsync(userToAdd.Id);
 
+            var campaign = await _campaignService.GetCampaignAsync(campaignName);
             if (campaign == null)
             {
-                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_FOUND, modInfo.Mention));
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_FOUND, Context.User.Mention));
                 return;
             }
             if (campaign.Players.Contains(playerToAdd))
@@ -165,10 +176,15 @@ namespace FalloutRPG.Modules.Roleplay
             // gets the player of the person sending the command
             var senderPlayer = await _playerService.GetPlayerAsync(Context.User.Id);
 
-            var campaign = await _campaignService.GetOwnedCampaign(senderPlayer);
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
             if (campaign == null)
             {
-                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_FOUND, Context.User.Mention));
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_CHANNEL_COMMAND, Context.User.Mention));
+                return;
+            }
+            if (!campaign.Owner.Equals(senderPlayer))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_OWNER, Context.User.Mention));
                 return;
             }
 
