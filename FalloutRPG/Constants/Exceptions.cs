@@ -25,9 +25,21 @@ namespace FalloutRPG.Constants
         public const string CHAR_NOT_ENOUGH_SPECIAL_POINTS = "Not enough SPECIAL points.";
         public const string CHAR_SPECIAL_POINTS_GOES_OVER_MAX = "Unable to add SPECIAL points because it will take skill above the max level.";
         public const string CHAR_TOO_MANY = "You have reached the limit of characters per account.";
+        public const string CHAR_NOT_FOUND = "Unable to find character.";
 
         // Campaign Exceptions
         public const string CAMP_TOO_MANY = "You have reached the limit of campaigns per account.";
         public const string CAMP_NAME_NOT_UNIQUE = "Campaign name was not unique for your server.";
+        public const string CAMP_CHANNEL_COMMAND = "This command must be run in a campaign text channel.";
+        public const string CAMP_NOT_FOUND = "Campaign not found.";
+        public const string CAMP_NOT_OWNER = "This command can only be ran by the campaign owner.";
+        public const string CAMP_NOT_MODERATOR = "This command can only be ran by a campaign moderator.";
+        public const string CAMP_ALREADY_IN = "The user trying to be added is already the campaign.";
+        public const string CAMP_NOT_A_MEMBER = "The specified player is not in this campaign.";
+        public const string CAMP_NAME_LENGTH = "Campaign name must be between 2-24 letters each.";
+        public const string CAMP_CHAR_NOT_JOINED = "The specified character is not part of this campaign.";
+
+        // Campaign Cheat Exceptions/Other
+        public const string CHAR_LEVEL_TOO_LOW = "The specified level was too low.";
     }
 }

@@ -59,48 +59,6 @@
         public const string ERR_SKILLS_NONE_TO_CLAIM = FAILURE_EMOJI + "You don't have any skill points that you can claim. ({0})";
         public const string ERR_SKILLS_POINTS_BELOW_ONE = FAILURE_EMOJI + "You cannot put less than one point in a skill. ({0})";
 
-        // Gambling Messages
-        public const string BET_PLACED = SUCCESS_EMOJI + "{0}, bet placed!";
-
-        // Gambling Error Messages
-        public const string ERR_BALANCE_ADD_FAIL = FAILURE_EMOJI + "{0}, I failed to add your balance to the directory! (Do you have a character?)";
-        public const string ERR_BET_TOO_HIGH = FAILURE_EMOJI + "{0}, that bet is too high! (Do you have enough money?)";
-        public const string ERR_BET_TOO_LOW = FAILURE_EMOJI + "{0}, that bet is too low!";
-
-        // Craps Messages
-        public const string CRAPS_CRAPOUT = "{0} crapped out!";
-        public const string CRAPS_CRAPOUT_POS = "{0} crapped out, but they were counting on it!";
-        public const string CRAPS_CRAPOUT_PUSH = "{0} crapped out, but the House always gets the best odds!";
-        public const string CRAPS_NATURAL = "{0} rolled a Natural!";
-        public const string CRAPS_NATURAL_NEG = "{0} rolled a Natural but they wish they hadn't!";
-        public const string CRAPS_POINT_ROUND = "{0} advanced the round into the Point!";
-        public const string CRAPS_POINT_SET = "{0}'s point is {1}";
-        public const string CRAPS_POINT_ROLL = "{0} rolled their point!";
-        public const string CRAPS_POINT_ROLL_NEG = "{0} rolled their point, but they betted against it!";
-        public const string CRAPS_SEVEN_OUT = "{0} sevened out!";
-        public const string CRAPS_SEVEN_OUT_POS = "{0} sevened out, but they were counting on it!";
-        public const string CRAPS_NEW_SHOOTER = "{0} is the new shooter.";
-        public const string CRAPS_NEW_SHOOTER_ONE_PLAYER = "{0} is the \"new\" shooter since no one else is playing!";
-        public const string CRAPS_NEW_MATCH = "A new match of Craps is starting, with {0} as the first shooter!";
-        public const string CRAPS_JOIN_MATCH = "{0} joins the match!";
-        public const string CRAPS_ALREADY_IN_MATCH = "{0}, you're already in this match!";
-        public const string CRAPS_LEAVE_MATCH = "{0} left the match.";
-        public const string CRAPS_EMPTY_MATCH = "{0}, to roll you must join the match first.";
-        public const string CRAPS_INACTIVITY_ROLL = "Rolling for {0} due to inactivity.";
-        public const string CRAPS_INACTIVITY_KICK = "{0} has been removed from the match due to inactivity.";
-        public const string CRAPS_INACTIVITY_PASS_DICE = "Gave the dice to {0} since {1} was inactive.";
-
-        // Craps Error Messages
-        public const string ERR_CRAPS_NOT_SHOOTER = FAILURE_EMOJI + "{0}, {1} is the current shooter. (Join the match and wait your turn.)";
-        public const string ERR_CRAPS_BET_NOT_SET = FAILURE_EMOJI + "{0}, you do not have a bet placed!";
-        public const string ERR_CRAPS_BET_ALREADY_SET = FAILURE_EMOJI + "{0}, you already have a bet!";
-        public const string ERR_CRAPS_BET_PARSE_FAIL = FAILURE_EMOJI + "{0}, valid bet types are: 'pass', 'dontpass', 'come', or 'dontcome' (without single quotes.)";
-        public const string ERR_CRAPS_POINT_NOT_SET = FAILURE_EMOJI + "{0}, you can't place a Come bet when the Point isn't set!";
-        public const string ERR_CRAPS_POINT_ALREADY_SET = FAILURE_EMOJI + "{0}, you can't place a Pass bet after the Point has been set!";
-        public const string ERR_CRAPS_JOIN_FAIL = FAILURE_EMOJI + "Failed to join {0} into the match!";
-        public const string ERR_CRAPS_LEAVE_FAIL = FAILURE_EMOJI + "Failed to remove {0} match, are they the shooter?";
-        public const string ERR_CRAPS_PASS_FAIL = FAILURE_EMOJI + "Couldn't pass the dice for {0}. (Do you have a bet placed, or the only one playing?)";
-
         // Campaign Messages
         public const string CAMP_CREATED_SUCCESS = SUCCESS_EMOJI + "Campaign created successfully. ({0})";
         public const string CAMP_REMOVE_CONFIRM = QUESTION_EMOJI + "**Are you sure you want to delete `{0}` AND all of its' characters? (members: {1}) This action CANNOT be undone!**" +
@@ -116,6 +74,9 @@
             "This action CANNOT be undone!** To confirm this action, reply with the name of the character. ({2})";
         public const string CAMP_CHAR_CONVERT_SUCCESS = SUCCESS_EMOJI + "{0} joins the campaign!";
         public const string CAMP_CHAR_CONVERT_FAILURE = FAILURE_EMOJI + "{0} has not joined the campaign.";
+        
+        // Campaign Cheat Messages
+        public const string CHEAT_LEVEL_CHANGE_SUCCESS = SUCCESS_EMOJI + "Level change successful. ({0})";
 
         // Campaign Error Messages
         public const string ERR_CAMP_NOT_FOUND = FAILURE_EMOJI + "Campaign not found. ({0})";

@@ -49,7 +49,11 @@ namespace FalloutRPG.Services.Roleplay
         /// <param name="discordId"></param>
         /// <returns></returns>
         public async Task<List<PlayerCharacter>> GetAllPlayerCharactersAsync(ulong discordId) =>
-            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId).Include(c => c.Special).Include(c => c.Skills).ToListAsync();
+            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId)
+            .Include(c => c.Special)
+            .Include(c => c.Skills)
+            .Include(c => c.Campaign)
+            .ToListAsync();
 
         /// <summary>
         /// Creates a new character.

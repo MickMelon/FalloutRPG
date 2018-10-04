@@ -108,6 +108,7 @@ namespace FalloutRPG.Modules.Roleplay
             var playerToAdd = await _playerService.GetPlayerAsync(userToAdd.Id);
 
             var campaign = await _campaignService.GetCampaignAsync(campaignName);
+            
             if (campaign == null)
             {
                 await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_FOUND, Context.User.Mention));
