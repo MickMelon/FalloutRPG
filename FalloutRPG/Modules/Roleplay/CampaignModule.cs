@@ -27,8 +27,8 @@ namespace FalloutRPG.Modules.Roleplay
             _characterService = characterService;
         }
 
-        [Command("join")]
-        public async Task JoinCharacterToCampaign()
+        [Command("convert")]
+        public async Task ConvertCharacterToCampaign()
         {
             var character = await _characterService.GetPlayerCharacterAsync(Context.User.Id);
             if (character == null)
@@ -36,17 +36,36 @@ namespace FalloutRPG.Modules.Roleplay
                 await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
                 return;
             }
-
             var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
             if (campaign == null)
             {
                 await ReplyAsync(String.Format(Messages.ERR_CAMP_CHANNEL_COMMAND, Context.User.Mention));
                 return;
             }
-            // ask for confirmation?
-            character.Campaign = campaign;
-            await _characterService.SaveCharacterAsync(character);
-            
+            var player = await _playerService.GetPlayerAsync(Context.User.Id);
+            if (!campaign.Players.Contains(player))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_A_MEMBER, Context.User.Mention));
+                return;
+            }
+
+            await Context.User.SendMessageAsync(String.Format(Messages.CAMP_CHAR_CONVERT_CONFIRMATION, character.Name, character.Level, Context.User.Mention));
+
+            var response = await NextMessageAsync(new EnsureFromUserCriterion(Context.User.Id));
+
+            if (response != null && response.Content.Equals(character.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                character.Campaign = campaign;
+                await _characterService.SaveCharacterAsync(character);
+
+                var channel = Context.Guild.GetTextChannel(campaign.TextChannelId);
+                await channel.SendMessageAsync(String.Format(Messages.CAMP_CHAR_CONVERT_SUCCESS, character.Name));
+            }
+            else
+            {
+                var channel = Context.Guild.GetTextChannel(campaign.TextChannelId);
+                await channel.SendMessageAsync(String.Format(Messages.CAMP_CHAR_CONVERT_FAILURE, character.Name));
+            }
         }
 
         [Command("create")]
@@ -94,26 +113,14 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            await userToAdd.SendMessageAsync(String.Format(Messages.CAMP_INVITATION, modInfo.Username, campaign.Name, userToAdd.Mention));
+            campaign.Players.Add(playerToAdd);
+            await _campaignService.SaveCampaignAsync(campaign);
 
-            var response = await NextMessageAsync(new EnsureFromUserCriterion(userToAdd.Id));
+            var role = Context.Guild.GetRole(campaign.RoleId);
+            await Context.Guild.GetUser(playerToAdd.DiscordId).AddRoleAsync(role);
 
-            if (response != null && response.Content.Equals(campaign.Name, StringComparison.OrdinalIgnoreCase))
-            {
-                campaign.Players.Add(playerToAdd);
-                await _campaignService.SaveCampaignAsync(campaign);
-
-                var role = Context.Guild.GetRole(campaign.RoleId);
-                await Context.Guild.GetUser(playerToAdd.DiscordId).AddRoleAsync(role);
-
-                var channel = Context.Guild.GetTextChannel(campaign.TextChannelId);
-                await channel.SendMessageAsync(String.Format(Messages.CAMP_JOIN_SUCCESS, userToAdd.Mention));
-            }
-            else
-            {
-                var channel = Context.Guild.GetTextChannel(campaign.TextChannelId);
-                await channel.SendMessageAsync(String.Format(Messages.CAMP_JOIN_FAILURE, userToAdd.Mention));
-            }
+            var channel = Context.Guild.GetTextChannel(campaign.TextChannelId);
+            await channel.SendMessageAsync(String.Format(Messages.CAMP_JOIN_SUCCESS, userToAdd.Mention));
         }
 
         [Command("delete")]

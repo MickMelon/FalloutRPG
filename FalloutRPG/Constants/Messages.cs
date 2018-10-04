@@ -111,6 +111,11 @@
         public const string CAMP_JOIN_SUCCESS = SUCCESS_EMOJI + "{0} has joined the campaign!";
         public const string CAMP_JOIN_FAILURE = FAILURE_EMOJI + "{0} has not joined the campaign.";
         public const string CAMP_MOD_SUCCESS = SUCCESS_EMOJI + "{0} has been promoted to moderator. ({1})";
+        public const string CAMP_CHAR_CONVERT_CONFIRMATION = QUESTION_EMOJI + "**Are you sure you want to convert `{0}` (level {1}) to a campaign character? " +
+            "Converting a character to a campaign forbids use of it outside of it. This means you will be *unable to roll* in public channels! " +
+            "This action CANNOT be undone!** To confirm this action, reply with the name of the character. ({2})";
+        public const string CAMP_CHAR_CONVERT_SUCCESS = SUCCESS_EMOJI + "{0} joins the campaign!";
+        public const string CAMP_CHAR_CONVERT_FAILURE = SUCCESS_EMOJI + "{0} has not joined the campaign.";
 
         // Campaign Error Messages
         public const string ERR_CAMP_NOT_FOUND = FAILURE_EMOJI + "Campaign not found. ({0})";
