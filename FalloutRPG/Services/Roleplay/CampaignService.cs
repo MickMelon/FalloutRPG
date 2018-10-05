@@ -15,22 +15,19 @@ namespace FalloutRPG.Services.Roleplay
     public class CampaignService
     {
         private readonly DiscordSocketClient _client;
-        private readonly PlayerService _playerService;
-        private readonly CharacterService _characterService;
 
-        private readonly IRepository<Player> _playerRepository;
+        private readonly CharacterService _characterService;
+        private readonly PlayerService _playerService;
+        
         private readonly IRepository<Campaign> _campaignRepository;
 
-        public CampaignService(PlayerService playerService,
-            IRepository<Player> playerRepository,
-            DiscordSocketClient client,
-            IRepository<Campaign> campaignRepository,
-            IRepository<Character> characterRepository,
-            CharacterService characterService)
+        public CampaignService(DiscordSocketClient client,
+            CharacterService characterService,
+            PlayerService playerService,
+            IRepository<Campaign> campaignRepository)
         {
             _playerService = playerService;
             _characterService = characterService;
-            _playerRepository = playerRepository;
             _campaignRepository = campaignRepository;
             _client = client;
         }
