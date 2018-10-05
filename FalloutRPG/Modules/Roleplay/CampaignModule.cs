@@ -84,7 +84,7 @@ namespace FalloutRPG.Modules.Roleplay
             try
             {
                 await _campaignService.CreateCampaignAsync(name, Context.Guild, player);
-                await ReplyAsync(string.Format(Messages.CAMP_CREATED_SUCCESS, userInfo.Mention));
+                await ReplyAsync(String.Format(Messages.CAMP_CREATED_SUCCESS, userInfo.Mention));
             }
             catch (Exception e)
             {
@@ -94,6 +94,7 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("add")]
+        [Alias("invite")]
         public async Task AddMemberAsync(IUser userToAdd, [Remainder] string campaignName)
         {
             if (campaignName.Length > 24 || campaignName.Length < 2)
