@@ -76,6 +76,7 @@ namespace FalloutRPG
             .AddSingleton<ExperienceService>()
             .AddSingleton<CampaignService>()
             .AddSingleton<CampaignCheatService>()
+            .AddSingleton<EffectsService>()
 
             // Addons
             .AddSingleton<InteractiveService>()
@@ -88,6 +89,7 @@ namespace FalloutRPG
             .AddTransient<IRepository<SkillSheet>, EfRepository<SkillSheet>>()
             .AddTransient<IRepository<Special>, EfRepository<Special>>()
             .AddTransient<IRepository<Campaign>, EfRepository<Campaign>>()
+            .AddTransient<IRepository<Effect>, EfRepository<Effect>>()
             .BuildServiceProvider();
 
         /// <summary>
