@@ -21,8 +21,8 @@ namespace FalloutRPG.Modules.Roleplay
         {
             try
             {
-                await _cheatService.SetCharacterAttributeAsync(Context.Channel.Id, Context.User.Id, receiver.Id, skill, newValue);
-                await ReplyAsync("Character edited successfully!");
+                await _cheatService.SetCharacterStatAsync(Context.Channel.Id, Context.User.Id, receiver.Id, skill, newValue);
+                await ReplyAsync(String.Format(Messages.CHEAT_CHAR_EDIT, Context.User.Mention));
             }
             catch (Exception e)
             {
@@ -35,8 +35,8 @@ namespace FalloutRPG.Modules.Roleplay
         {
             try
             {
-                await _cheatService.SetCharacterAttributeAsync(Context.Channel.Id, Context.User.Id, receiver.Id, special, newValue);
-                await ReplyAsync("Character edited successfully!");
+                await _cheatService.SetCharacterStatAsync(Context.Channel.Id, Context.User.Id, receiver.Id, special, newValue);
+                await ReplyAsync(String.Format(Messages.CHEAT_CHAR_EDIT, Context.User.Mention));
             }
             catch (Exception e)
             {
@@ -66,7 +66,7 @@ namespace FalloutRPG.Modules.Roleplay
             try
             {
                 await _cheatService.SetCharacterLevelAsync(Context.User.Id, user.Id, level, Context.Channel.Id);
-                await ReplyAsync(String.Format(Messages.CHEAT_LEVEL_CHANGE_SUCCESS, Context.User.Mention));
+                await ReplyAsync(String.Format(Messages.CHEAT_LEVEL_CHANGE, Context.User.Mention));
             }
             catch (Exception e)
             {

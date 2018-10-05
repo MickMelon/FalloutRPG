@@ -76,8 +76,9 @@
         public const string CAMP_CHAR_CONVERT_FAILURE = FAILURE_EMOJI + "{0} has not joined the campaign.";
         
         // Campaign Cheat Messages
-        public const string CHEAT_LEVEL_CHANGE_SUCCESS = SUCCESS_EMOJI + "Level change successful. ({0})";
+        public const string CHEAT_LEVEL_CHANGE = SUCCESS_EMOJI + "Level change successful. ({0})";
         public const string CHEAT_SKILL_POINTS_GIVEN = SUCCESS_EMOJI + "Skill points successfully set. ({0})";
+        public const string CHEAT_CHAR_EDIT = SUCCESS_EMOJI + "Character edited successfully. ({0})";
 
         // Campaign Error Messages
         public const string ERR_CAMP_NOT_FOUND = FAILURE_EMOJI + "Campaign not found. ({0})";

@@ -38,7 +38,7 @@ public class CampaignCheatService
         return (true, character);
     }
 
-    public async Task SetCharacterAttributeAsync(ulong channelId, ulong senderId, ulong receiverId, Globals.SkillType skill, int newValue)
+    public async Task SetCharacterStatAsync(ulong channelId, ulong senderId, ulong receiverId, Globals.SkillType skill, int newValue)
     {
         if (newValue < 0)
             throw new ArgumentOutOfRangeException("newValue", Exceptions.LEVEL_TOO_LOW);
@@ -49,14 +49,14 @@ public class CampaignCheatService
         await _characterService.SaveCharacterAsync(character);
     }
 
-    public async Task SetCharacterAttributeAsync(ulong channelId, ulong senderId, ulong receiverId, Globals.SpecialType skill, int newValue)
+    public async Task SetCharacterStatAsync(ulong channelId, ulong senderId, ulong receiverId, Globals.SpecialType special, int newValue)
     {
         if (newValue < 0)
             throw new ArgumentOutOfRangeException("newValue", Exceptions.LEVEL_TOO_LOW);
 
         var (isValid, character) = await CheckValidityAsync(channelId, senderId, receiverId);
 
-        _specialService.SetSpecial(character, skill, newValue);
+        _specialService.SetSpecial(character, special, newValue);
         await _characterService.SaveCharacterAsync(character);
     }
 
