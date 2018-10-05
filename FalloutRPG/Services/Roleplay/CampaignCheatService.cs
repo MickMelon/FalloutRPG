@@ -15,6 +15,22 @@ public class CampaignCheatService
     private readonly SpecialService _specialService;
     private readonly PlayerService _playerService;
 
+    public CampaignCheatService(
+        CampaignService campaignService,
+        CharacterService characterService,
+        ExperienceService experienceService,
+        SkillsService skillsService,
+        SpecialService specialService,
+        PlayerService playerService)
+    {
+        _campaignService = campaignService;
+        _characterService = characterService;
+        _experienceService = experienceService;
+        _skillsService = skillsService;
+        _specialService = specialService;
+        _playerService = playerService;
+    }
+
     private async Task<(bool isValid, Character character)> CheckValidityAsync(ulong channelId, ulong senderId, ulong receiverId)
     {
         var receiver = await _playerService.GetPlayerAsync(senderId);
