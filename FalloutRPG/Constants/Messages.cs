@@ -77,6 +77,7 @@
         
         // Campaign Cheat Messages
         public const string CHEAT_LEVEL_CHANGE_SUCCESS = SUCCESS_EMOJI + "Level change successful. ({0})";
+        public const string CHEAT_SKILL_POINTS_GIVEN = SUCCESS_EMOJI + "Skill points successfully set. ({0})";
 
         // Campaign Error Messages
         public const string ERR_CAMP_NOT_FOUND = FAILURE_EMOJI + "Campaign not found. ({0})";

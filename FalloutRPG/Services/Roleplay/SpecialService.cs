@@ -62,6 +62,19 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
+        /// Returns the value of the specified character's given skill.
+        /// </summary>
+        /// <returns>Returns false if character or skills are null.</returns>
+        public bool SetSpecial(Character character, Globals.SpecialType special, int newValue)
+        {
+            if (character == null || !IsSpecialSet(character))
+                return false;
+
+            typeof(Special).GetProperty(special.ToString()).SetValue(character.Special, newValue);
+            return true;
+        }
+
+        /// <summary>
         /// Checks if each number in SPECIAL is between 1 and 10
         /// and ensures there are 7 elements in the input array.
         /// </summary>

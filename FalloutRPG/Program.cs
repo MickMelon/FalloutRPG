@@ -75,6 +75,7 @@ namespace FalloutRPG
             .AddSingleton<CharacterService>()
             .AddSingleton<ExperienceService>()
             .AddSingleton<CampaignService>()
+            .AddSingleton<CampaignCheatService>()
 
             // Addons
             .AddSingleton<InteractiveService>()

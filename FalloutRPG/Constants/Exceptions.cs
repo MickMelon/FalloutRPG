@@ -26,6 +26,7 @@ namespace FalloutRPG.Constants
         public const string CHAR_SPECIAL_POINTS_GOES_OVER_MAX = "Unable to add SPECIAL points because it will take skill above the max level.";
         public const string CHAR_TOO_MANY = "You have reached the limit of characters per account.";
         public const string CHAR_NOT_FOUND = "Unable to find character.";
+        public const string CHAR_NOT_PLAYER = "The given character was not a player character.";
 
         // Campaign Exceptions
         public const string CAMP_TOO_MANY = "You have reached the limit of campaigns per account.";
@@ -40,6 +41,6 @@ namespace FalloutRPG.Constants
         public const string CAMP_CHAR_NOT_JOINED = "The specified character is not part of this campaign.";
 
         // Campaign Cheat Exceptions/Other
-        public const string CHAR_LEVEL_TOO_LOW = "The specified level was too low.";
+        public const string LEVEL_TOO_LOW = "The specified level was too low.";
     }
 }

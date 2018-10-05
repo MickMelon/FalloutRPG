@@ -1,11 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using FalloutRPG.Constants;
-using FalloutRPG.Services;
-using FalloutRPG.Services.Roleplay;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
@@ -18,6 +14,50 @@ namespace FalloutRPG.Modules.Roleplay
         public CampaignCheatModule(CampaignCheatService cheatService)
         {
             _cheatService = cheatService;
+        }
+
+        [Command("edit")]
+        public async Task EditCharacterAsync(IUser receiver, Globals.SkillType skill, int newValue)
+        {
+            try
+            {
+                await _cheatService.SetCharacterAttributeAsync(Context.Channel.Id, Context.User.Id, receiver.Id, skill, newValue);
+                await ReplyAsync("Character edited successfully!");
+            }
+            catch (Exception e)
+            {
+                await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({Context.User.Mention}");
+                return;
+            }
+        }
+        [Command("edit")]
+        public async Task EditCharacterAsync(IUser receiver, Globals.SpecialType special, int newValue)
+        {
+            try
+            {
+                await _cheatService.SetCharacterAttributeAsync(Context.Channel.Id, Context.User.Id, receiver.Id, special, newValue);
+                await ReplyAsync("Character edited successfully!");
+            }
+            catch (Exception e)
+            {
+                await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({Context.User.Mention}");
+                return;
+            }
+        }
+
+        [Command("setskillpoints")]
+        public async Task SetCharacterSkillPointsAsync(IUser receiver, int newValue)
+        {
+            try
+            {
+                await _cheatService.SetCharacterSkillPointsAsync(Context.Channel.Id, Context.User.Id, receiver.Id, newValue);
+                await ReplyAsync(String.Format(Messages.CHEAT_SKILL_POINTS_GIVEN, Context.User.Mention));
+            }
+            catch (Exception e)
+            {
+                await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({Context.User.Mention}");
+                return;
+            }
         }
 
         [Command("setlevel")]
@@ -33,46 +73,6 @@ namespace FalloutRPG.Modules.Roleplay
                 await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message}");
                 return;
             }
-        }
-
-        [Command("giveitem")]
-        public async Task GiveItemAsync(IUser user, string itemName)
-        {
-            await ReplyAsync();
-            throw new NotImplementedException("bro hold on until items are at least present before trying to cheat");
-
-            // var receiver = await _playerService.GetPlayerAsync(user.Id);
-            // var giver = await _playerService.GetPlayerAsync(Context.User.Id);
-
-            // var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
-            // if (campaign == null)
-            // {
-            //     await ReplyAsync(String.Format(Messages.ERR_CAMP_CHANNEL_COMMAND, Context.User.Mention));
-            //     return;
-            // }
-            // if (!campaign.Moderators.Contains(giver))
-            // {
-            //     await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
-            //     return;
-            // }
-            // if (!campaign.Players.Contains(receiver))
-            // {
-            //     await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_A_MEMBER, Context.User.Mention));
-            //     return;
-            // }
-            // var character = await _characterService.GetPlayerCharacterAsync(receiver.DiscordId);
-            // if (character == null)
-            // {
-            //     await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, user.Mention));
-            //     return;
-            // }
-            // i swear this might actually work in the future
-            // var item = await _itemService.GetItemAsync(itemName);
-            // await _itemService.AddItemAsync(item, character)
-            // OR
-            // character.Inventory.Add(item);
-            // await _characterService.SaveCharacterAsync(character);
-            // await ReplyAsync("Item added successfully!");
         }
     }
 }
