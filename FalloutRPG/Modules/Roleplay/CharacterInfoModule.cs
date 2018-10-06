@@ -184,31 +184,34 @@ namespace FalloutRPG.Modules.Roleplay
             StringBuilder sb = new StringBuilder("**Weapons:**\n");
 
             foreach (var item in inv.OfType<ItemWeapon>())
-                sb.Append($"*{item.Name}*:\n" +
+                sb.Append($"__*{item.Name}*__:\n" +
                     $"Damage: {item.Damage}\n" +
-                    $"Skill: {item.SkillMinimum}\n" +
+                    $"{item.Skill.ToString()} Skill: {item.SkillMinimum}\n" +
                     $"Ammo Type: {item.Ammo.Name}\n" +
                     $"Ammo Capacity: {item.AmmoCapacity}\n" +
-                    $"Ammo usage on attack: {item.AmmoOnAttack}\n");
+                    $"Ammo Usage: {item.AmmoOnAttack}/Attack\n\n");
 
             sb.Append("**Apparel:**\n");
             foreach (var item in inv.OfType<ItemApparel>())
-                sb.Append($"{item.Name}:\n" +
-                    $"DT {item.DamageThreshold}\n");
+                sb.Append($"__*{item.Name}*__: DT {item.DamageThreshold}\n");
 
             sb.Append("**Consumables:**\n");
             foreach (var item in inv.OfType<ItemConsumable>().ToHashSet())
-                sb.Append($"{item.Name} x{inv.Count(x => x.Equals(item))}\n");
+                sb.Append($"__*{item.Name}*__ x{inv.Count(x => x.Equals(item))}\n");
 
             sb.Append("**Miscellaneous:**\n");
             foreach (var item in inv.OfType<ItemMisc>())
-                sb.Append($"{item.Name}\n");
+                sb.Append($"__*{item.Name}*__\n");
 
             sb.Append("**Ammunition:**\n");
             foreach (var item in inv.OfType<ItemAmmo>().ToHashSet())
-                sb.Append($"{item.Name}: x{inv.Count(x => x.Equals(item))}\n" +
-                    $"DT Multiplier: {item.DTMultiplier}\n" +
-                    $"DT Reduction: {item.DTReduction}\n");
+            {
+                sb.Append($"__*{item.Name}:*__ x{inv.Count(x => x.Equals(item))}\n");
+                if (item.DTMultiplier != 1)
+                    sb.Append($"DT Multiplier: {item.DTMultiplier}\n");
+                if (item.DTReduction != 0)
+                    sb.Append($"DT Reduction: {item.DTReduction}\n");
+            }
             
             await ReplyAsync(userInfo.Mention, embed: EmbedHelper.BuildBasicEmbed($"{character.Name}'s Inventory:", sb.ToString()));
         }

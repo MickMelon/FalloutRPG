@@ -22,7 +22,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command]
         [Alias("info")]
-        public async Task ViewItemInfoAsync(string itemName)
+        public async Task ViewItemInfoAsync([Remainder]string itemName)
         {
             var item = await _itemService.GetItemAsync(itemName);
 
@@ -33,32 +33,31 @@ namespace FalloutRPG.Modules.Roleplay
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.Append($"*{item.Name}*\n" +
-                $"**Description:** {item.Description}\n" +
+            sb.Append($"**Description:** {item.Description}\n" +
                 $"**Value:** {item.Value}\n" +
                 $"**Weight:** {item.Weight} lbs\n");
 
-            if (item is ItemWeapon)
+            if (item is ItemWeapon wep)
             {
-                sb.Append($"**Damage:** {((ItemWeapon)item).Damage}");
-                sb.Append($"**Ammo Type:** {((ItemWeapon)item).Ammo.Name}");
-                sb.Append($"**Capacity:** {((ItemWeapon)item).AmmoCapacity}");
-                sb.Append($"**Ammo usage on Attack:** {((ItemWeapon)item).AmmoOnAttack}");
+                sb.Append($"**Damage:** {wep.Damage}\n");
+                sb.Append($"**Ammo Type:** {wep.Ammo.Name}\n");
+                sb.Append($"**Capacity:** {wep.AmmoCapacity}\n");
+                sb.Append($"**Ammo Usage:** {wep.AmmoOnAttack}/Attack\n");
             }
-            else if (item is ItemAmmo)
+            else if (item is ItemAmmo ammo)
             {
-                if (((ItemAmmo)item).DTMultiplier != 1)
-                    sb.Append($"**DT Multiplier:** {((ItemAmmo)item).DTMultiplier}");
-                if (((ItemAmmo)item).DTReduction != 0)
-                    sb.Append($"**DT Reduction:** {((ItemAmmo)item).DTReduction}");
+                if (ammo.DTMultiplier != 1)
+                    sb.Append($"**DT Multiplier:** {ammo.DTMultiplier}\n");
+                if (ammo.DTReduction != 0)
+                    sb.Append($"**DT Reduction:** {ammo.DTReduction}\n");
             }
-            else if (item is ItemApparel)
+            else if (item is ItemApparel apparel)
             {
-                sb.Append($"**Damage Threshold:**{((ItemApparel)item).DamageThreshold}");
-                sb.Append($"**Apparel Slot:** {((ItemApparel)item).ApparelSlot}");
+                sb.Append($"**Damage Threshold:** {apparel.DamageThreshold}\n");
+                sb.Append($"**Apparel Slot:** {apparel.ApparelSlot}\n");
             }
 
-            await ReplyAsync($"{sb.ToString()} ({Context.User.Mention})");
+            await ReplyAsync(embed: Helpers.EmbedHelper.BuildBasicEmbed(item.Name, sb.ToString()), message: Context.User.Mention);
         }
     }
 }
