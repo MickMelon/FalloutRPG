@@ -33,6 +33,15 @@ namespace FalloutRPG.Constants
             Luck
         }
 
+        public enum ItemType
+        {
+            Ammo,
+            Apparel,
+            Consumable,
+            Misc,
+            Weapon
+        }
+
         public static readonly Dictionary<string, SkillType> SKILL_ALIASES = new Dictionary<string, SkillType>(StringComparer.OrdinalIgnoreCase)
         {
             { "Barter", SkillType.Barter },

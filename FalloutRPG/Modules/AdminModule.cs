@@ -4,6 +4,7 @@ using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
+using System;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules
@@ -18,16 +19,19 @@ namespace FalloutRPG.Modules
         private readonly SkillsService _skillsService;
         private readonly SpecialService _specialService;
         private readonly HelpService _helpService;
+        private readonly ItemService _itemService;
 
         public AdminModule(CharacterService charService,
             SkillsService skillsService,
             SpecialService specialService,
-            HelpService helpService)
+            HelpService helpService,
+            ItemService itemService)
         {
             _charService = charService;
             _skillsService = skillsService;
             _specialService = specialService;
             _helpService = helpService;
+            _itemService = itemService;
         }
 
         [Command]
@@ -59,6 +63,29 @@ namespace FalloutRPG.Modules
 
             await _charService.SaveCharacterAsync(character);
             await ReplyAsync(string.Format(Messages.ADM_GAVE_SKILL_POINTS, Context.User.Mention));
+        }
+
+        [Command("giveitem")]
+        public async Task AddItem(IUser user, string itemName)
+        {
+            var item = await _itemService.GetItemAsync(itemName);
+            var character = await _charService.GetCharacterAsync(user.Id);
+
+            if (item == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_ITEM_NOT_FOUND, Context.User.Mention));
+                return;
+            }
+            if (character == null)
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, user.Mention));
+                return;
+            }
+
+            character.Inventory.Add(item);
+            await _charService.SaveCharacterAsync(character);
+
+            await ReplyAsync(String.Format(Messages.ITEM_GIVE_SUCCESS, item.Name, character.Name, Context.User.Mention));
         }
 
         [Command("changename")]

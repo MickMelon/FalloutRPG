@@ -40,6 +40,8 @@ namespace FalloutRPG.Services.Roleplay
             await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId && c.Active == true)
             .Include(c => c.Special)
             .Include(c => c.Skills)
+            .Include(c => c.Inventory)
+                .ThenInclude(weapons => ((ItemWeapon)weapons).Ammo)
             .Include(c => c.Campaign)
             .FirstOrDefaultAsync();
 
@@ -52,6 +54,8 @@ namespace FalloutRPG.Services.Roleplay
             await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId)
             .Include(c => c.Special)
             .Include(c => c.Skills)
+            .Include(c => c.Inventory)
+                .ThenInclude(weapons => ((ItemWeapon)weapons).Ammo)
             .Include(c => c.Campaign)
             .ToListAsync();
 

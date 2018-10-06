@@ -60,6 +60,7 @@ namespace FalloutRPG.Modules.Roleplay
                 $"**Campaign:** {campaignString}\n" +
                 $"**Description:** {description}\n" +
                 $"**Story:** ($char story)\n" +
+                $"**Inventory:** ($char inventory)\n" +
                 $"**Level:** {level}\n" +
                 $"**Experience:** {character.Experience}\n" +
                 $"**To Next Level:** {expToNextLevel}\n" +

@@ -88,5 +88,14 @@
         public const string ERR_CAMP_NOT_A_MEMBER = FAILURE_EMOJI + "The specified player is not in this campaign. ({0})";
         public const string ERR_CAMP_CHANNEL_COMMAND = FAILURE_EMOJI + "This command must be run in a campaign text channel. ({0})";
         public const string ERR_CAMP_NAME_LENGTH = FAILURE_EMOJI + "Campaign name must be between 2-24 letters each. ({0})";
+
+        // Item Messages
+        public const string ITEM_GIVE_SUCCESS = SUCCESS_EMOJI + "Gave item {0} to {1}. ({2})";
+        public const string ITEM_CREATE_SUCCESS = SUCCESS_EMOJI + "Created new item with name {0} and type {1}. ({2})";
+
+        // Item Error Messages
+        public const string ERR_ITEM_NOT_FOUND = FAILURE_EMOJI + "That item was unable to be found. ({0})";
+        public const string ERR_ITEM_INVALID_SLOT = FAILURE_EMOJI + "The given apparel slot was invalid. ({0})";
+        public const string ERR_ITEM_INVALID_AMMO = FAILURE_EMOJI + "The given ammo was unable to be found; does it exist yet? ({0})";
     }
 }
