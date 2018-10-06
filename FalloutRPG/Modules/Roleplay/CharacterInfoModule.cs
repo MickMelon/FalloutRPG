@@ -171,7 +171,7 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task ShowCharacterInventoryAsync()
         {
             var userInfo = Context.User;
-            var character = await _charService.GetCharacterAsync(userInfo.Id);
+            var character = await _charService.GetPlayerCharacterAsync(userInfo.Id);
 
             if (character == null)
             {
