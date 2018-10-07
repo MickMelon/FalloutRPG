@@ -57,28 +57,16 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         public async Task<Campaign> GetCampaignAsync(string name) =>
-            await _campaignRepository.Query.Where(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-            .Include(x => x.Players)
-            .Include(x => x.Moderators)
-            .FirstOrDefaultAsync();
+            await _campaignRepository.Query.Where(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).FirstOrDefaultAsync();
 
             public async Task<Campaign> GetCampaignAsync(ulong channelId) =>
-            await _campaignRepository.Query.Where(x => x.TextChannelId == channelId)
-            .Include(x => x.Players)
-            .Include(x => x.Moderators)
-            .FirstOrDefaultAsync();
+            await _campaignRepository.Query.Where(x => x.TextChannelId == channelId).FirstOrDefaultAsync();
 
         public async Task<Campaign> GetOwnedCampaign(Player owner) =>
-            await _campaignRepository.Query.Where(x => x.Owner.Equals(owner))
-            .Include(x => x.Players)
-            .Include(x => x.Moderators)
-            .FirstOrDefaultAsync();
+            await _campaignRepository.Query.Where(x => x.Owner.Equals(owner)).FirstOrDefaultAsync();
 
         public async Task<List<Campaign>> GetAllCampaignsAsync(Player player) =>
-            await _campaignRepository.Query.Where(x => x.Players.Contains(player))
-            .Include(x => x.Players)
-            .Include(x => x.Moderators)
-            .ToListAsync();
+            await _campaignRepository.Query.Where(x => x.Players.Contains(player)).ToListAsync();
 
         public async Task SaveCampaignAsync(Campaign campaign) =>
             await _campaignRepository.SaveAsync(campaign);
