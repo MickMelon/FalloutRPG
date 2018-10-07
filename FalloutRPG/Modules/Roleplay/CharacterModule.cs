@@ -51,13 +51,10 @@ namespace FalloutRPG.Modules.Roleplay
 
             var description = string.IsNullOrEmpty(character.Description) ? "No description." : character.Description;
             var story = string.IsNullOrEmpty(character.Story) ? "No story." : character.Story;
+            var campaign = string.IsNullOrEmpty(character?.Campaign?.Name) ? "No campaign." : character.Campaign.Name;
 
-            string campaignString = "None";
-            if (character.Campaign != null)
-                campaignString = character.Campaign.Name;
-            
             var embed = EmbedHelper.BuildBasicEmbed($"{character.Name}",
-                $"**Campaign:** {campaignString}\n" +
+                $"**Campaign:** {campaign}\n" +
                 $"**Description:** {description}\n" +
                 $"**Story:** ($char story)\n" +
                 $"**Inventory:** ($char inventory)\n" +
