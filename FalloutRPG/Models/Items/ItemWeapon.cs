@@ -9,7 +9,7 @@ namespace FalloutRPG.Models
         public Globals.SkillType Skill { get; set; }
         public int SkillMinimum { get; set; }
 
-        public ItemAmmo Ammo { get; set; }
+        public virtual ItemAmmo Ammo { get; set; }
         [NotMapped]
         public int AmmoRemaining { get; set; }
         public int AmmoCapacity { get; set; }

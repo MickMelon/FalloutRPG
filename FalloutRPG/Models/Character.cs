@@ -8,7 +8,7 @@ namespace FalloutRPG.Models
     {
         public string Name { get; set; }
 
-        public Campaign Campaign { get; set; }
+        public virtual Campaign Campaign { get; set; }
 
         public int Experience { get; set; }
         [NotMapped]
@@ -21,11 +21,40 @@ namespace FalloutRPG.Models
             }
         }
 
-        public Special Special { get; set; }
-        public SkillSheet Skills { get; set; }
+        public virtual Special Special { get; set; }
+        public virtual SkillSheet Skills { get; set; }
+
+        [NotMapped]
+        public Special EffectiveSpecial
+        {
+            get { return null; }
+        }
+        [NotMapped]
+        public SkillSheet EffectiveSkills
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public int HitPoints { get; set; }
+        [NotMapped]
+        public int HitPointsLimit
+        {
+            get
+            {
+                if (Special == null || Special.Endurance < 1)
+                    return -1;
+
+                return 95 + (Special.Endurance * 20) + (Level * 5);
+            }
+        }
 
         public long Money { get; set; }
 
-        public List<Item> Inventory { get; set; }
+        public virtual List<Effect> Effects { get; set; }
+
+        public virtual List<Item> Inventory { get; set; }
     }
 }

@@ -37,13 +37,7 @@ namespace FalloutRPG.Services.Roleplay
         /// Gets the active character from the repository by Discord ID.
         /// </summary>
         public async Task<PlayerCharacter> GetPlayerCharacterAsync(ulong discordId) =>
-            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId && c.Active == true)
-            .Include(c => c.Special)
-            .Include(c => c.Skills)
-            .Include(c => c.Inventory)
-                .ThenInclude(weapons => ((ItemWeapon)weapons).Ammo)
-            .Include(c => c.Campaign)
-            .FirstOrDefaultAsync();
+            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId && c.Active == true).FirstOrDefaultAsync();
 
         /// <summary>
         /// Gets all characters from the repository by Discord ID.
@@ -51,13 +45,7 @@ namespace FalloutRPG.Services.Roleplay
         /// <param name="discordId"></param>
         /// <returns></returns>
         public async Task<List<PlayerCharacter>> GetAllPlayerCharactersAsync(ulong discordId) =>
-            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId)
-            .Include(c => c.Special)
-            .Include(c => c.Skills)
-            .Include(c => c.Inventory)
-                .ThenInclude(weapons => ((ItemWeapon)weapons).Ammo)
-            .Include(c => c.Campaign)
-            .ToListAsync();
+            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId).ToListAsync();
 
         /// <summary>
         /// Creates a new character.

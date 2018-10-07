@@ -20,11 +20,11 @@ namespace FalloutRPG.Models
 
         public string Name { get; private set; }
 
-        public ICollection<Player> Players { get; set; }
-        public ICollection<Character> Characters { get; set; }
-        public ICollection<Player> Moderators { get; set; }
+        public virtual ICollection<Player> Players { get; set; }
+        public virtual ICollection<Character> Characters { get; set; }
+        public virtual ICollection<Player> Moderators { get; set; }
 
-        public Player Owner { get; private set; }
+        public virtual Player Owner { get; private set; }
         public ulong RoleId { get; private set; }
         public ulong TextChannelId { get; private set; }
     }

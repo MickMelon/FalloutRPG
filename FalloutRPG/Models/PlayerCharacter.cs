@@ -13,7 +13,7 @@ namespace FalloutRPG.Models
             Player = player;
         }
 
-        public Player Player { get; set; }
+        public virtual Player Player { get; set; }
 
         public bool Active { get; set; }
 

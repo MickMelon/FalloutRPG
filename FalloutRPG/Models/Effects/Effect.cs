@@ -7,7 +7,10 @@ namespace FalloutRPG.Models
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public IList<EffectSpecial> SpecialEffects { get; set; }
-        public IList<EffectSkill> SkillEffects { get; set; }
+        public virtual Special SpecialLocks { get; set; }
+        public virtual SkillSheet SkillLocks { get; set; }
+
+        public virtual IList<EffectSpecial> SpecialAdditions { get; set; }
+        public virtual IList<EffectSkill> SkillAdditions { get; set; }
     }
 }
