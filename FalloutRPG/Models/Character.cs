@@ -24,20 +24,6 @@ namespace FalloutRPG.Models
         public virtual Special Special { get; set; }
         public virtual SkillSheet Skills { get; set; }
 
-        [NotMapped]
-        public Special EffectiveSpecial
-        {
-            get { return null; }
-        }
-        [NotMapped]
-        public SkillSheet EffectiveSkills
-        {
-            get
-            {
-                return null;
-            }
-        }
-
         public int HitPoints { get; set; }
         [NotMapped]
         public int HitPointsLimit
