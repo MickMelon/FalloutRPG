@@ -11,9 +11,9 @@ namespace FalloutRPG.Modules.Roleplay
     [Group("roll")]
     public class RollModule : ModuleBase<SocketCommandContext>
     {
-        private readonly RollService _rollService;
+        private readonly RollDiceService _rollService;
 
-        public RollModule(RollService rollService)
+        public RollModule(RollDiceService rollService)
         {
             _rollService = rollService;
         }

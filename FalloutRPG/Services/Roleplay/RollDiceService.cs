@@ -5,11 +5,11 @@ using System.Text;
 
 namespace FalloutRPG.Services.Roleplay
 {
-    public class RollService
+    public class RollDiceService
     {
         private readonly Random _random;
 
-        public RollService(Random random)
+        public RollDiceService(Random random)
         {
             _random = random;
         }
