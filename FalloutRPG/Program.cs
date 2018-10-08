@@ -74,6 +74,7 @@ namespace FalloutRPG
             .AddSingleton<SpecialService>()
             .AddSingleton<StartupService>()
             .AddSingleton<CharacterService>()
+            .AddSingleton<RollService>()
             .AddSingleton<RollDiceService>()
             .AddSingleton<ExperienceService>()
             .AddSingleton<NpcService>()
