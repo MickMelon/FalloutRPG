@@ -8,6 +8,7 @@
         public const string ADM_EMOJI = "👮 ";
         public const string NPC_SUFFIX = "(\uD83D\uDCBBNPC) ";
         public const string QUESTION_EMOJI = "❓ ";
+        public const string DICE_EMOJI = "\uD83C\uDFB2";
 
         // Character Messages
         public const string CHAR_CREATED_SUCCESS = SUCCESS_EMOJI + "Character created successfully. ({0})";
@@ -79,14 +80,7 @@
         public const string ERR_NPC_PRESET_ENABLE = FAILURE_EMOJI + "Failed to enable NPC preset: {0}. (Check for typos) ({1})";
         public const string ERR_NPC_PRESET_DISABLE = FAILURE_EMOJI + "Failed to disable NPC preset: {0}. (Check for typos) ({1})";
         public const string ERR_NPC_PRESET_EDIT = FAILURE_EMOJI + "Failed to modify NPC preset attribute. ({0})";
-
-        // Gambling Messages
-        public const string BET_PLACED = SUCCESS_EMOJI + "{0}, bet placed!";
-
-        // Gambling Error Messages
-        public const string ERR_BALANCE_ADD_FAIL = FAILURE_EMOJI + "{0}, I failed to add your balance to the directory! (Do you have a character?)";
-        public const string ERR_BET_TOO_HIGH = FAILURE_EMOJI + "{0}, that bet is too high! (Do you have enough money?)";
-        public const string ERR_BET_TOO_LOW = FAILURE_EMOJI + "{0}, that bet is too low!";
+        
         // Campaign Messages
         public const string CAMP_CREATED_SUCCESS = SUCCESS_EMOJI + "Campaign created successfully. ({0})";
         public const string CAMP_REMOVE_CONFIRM = QUESTION_EMOJI + "**Are you sure you want to delete `{0}` AND all of its' characters? (members: {1}) This action CANNOT be undone!**" +
@@ -125,5 +119,13 @@
         public const string ERR_ITEM_NOT_FOUND = FAILURE_EMOJI + "That item was unable to be found. ({0})";
         public const string ERR_ITEM_INVALID_SLOT = FAILURE_EMOJI + "The given apparel slot was invalid. ({0})";
         public const string ERR_ITEM_INVALID_AMMO = FAILURE_EMOJI + "The given ammo was unable to be found; does it exist yet? ({0})";
+
+        // Roll Messages
+        public const string ROLL_DICE = DICE_EMOJI + "Rolled: {0}. ({1})";
+
+        // Roll Error Messages
+        public const string ERR_ROLL_DICE_INVALID_STRING = FAILURE_EMOJI + "The given dice string was invalid. Example: 2d20+5 ({0})";
+        public const string ERR_ROLL_DICE_TOO_MANY = FAILURE_EMOJI + "There were too many die to be rolled; max is twenty. ({0})";
+        public const string ERR_ROLL_DICE_TOO_MANY_SIDES = FAILURE_EMOJI + "There were too many sides on that die to be rolled; max is one hundred. ({0})";
     }
 }
