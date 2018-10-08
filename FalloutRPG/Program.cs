@@ -67,6 +67,7 @@ namespace FalloutRPG
             .AddSingleton<StartupService>()
             .AddSingleton<HelpService>()
             .AddSingleton<PlayerService>()
+            .AddSingleton<Random>()
 
             // Roleplay
             .AddSingleton<SkillsService>()

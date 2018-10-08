@@ -16,7 +16,7 @@ namespace FalloutRPG.Services.Roleplay
     {
         private Dictionary<ulong, Timer> cooldownTimers;
         private List<ulong> experienceEnabledChannels;
-        private Random random;
+        private readonly Random _random;
 
         private const int DEFAULT_EXP_GAIN = 100;
         private const int DEFAULT_EXP_RANGE_FROM = 10;
@@ -32,7 +32,8 @@ namespace FalloutRPG.Services.Roleplay
             CharacterService charService,
             SkillsService skillsService,
             DiscordSocketClient client,
-            IConfiguration config)
+            IConfiguration config,
+            Random random)
         {
             _charService = charService;
             _skillsService = skillsService;
@@ -41,7 +42,7 @@ namespace FalloutRPG.Services.Roleplay
 
             cooldownTimers = new Dictionary<ulong, Timer>();
             LoadExperienceEnabledChannels();
-            random = new Random();
+            _random = random;
         }
 
         /// <summary>
@@ -102,7 +103,7 @@ namespace FalloutRPG.Services.Roleplay
             int rangeFrom = DEFAULT_EXP_RANGE_FROM,
             int rangeTo = DEFAULT_EXP_RANGE_TO)
         {
-            return random.Next(rangeFrom, rangeTo);
+            return _random.Next(rangeFrom, rangeTo);
         }
 
         /// <summary>
