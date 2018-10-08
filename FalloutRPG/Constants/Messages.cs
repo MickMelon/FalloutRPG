@@ -6,6 +6,7 @@
         public const string SUCCESS_EMOJI = "✅ ";
         public const string STAR_EMOJI = "\u2B50 ";
         public const string ADM_EMOJI = "👮 ";
+        public const string NPC_SUFFIX = "(\uD83D\uDCBBNPC) ";
         public const string QUESTION_EMOJI = "❓ ";
 
         // Character Messages
@@ -59,6 +60,33 @@
         public const string ERR_SKILLS_NONE_TO_CLAIM = FAILURE_EMOJI + "You don't have any skill points that you can claim. ({0})";
         public const string ERR_SKILLS_POINTS_BELOW_ONE = FAILURE_EMOJI + "You cannot put less than one point in a skill. ({0})";
 
+        // NPC Messages
+        public const string NPC_CREATED_SUCCESS = SUCCESS_EMOJI + "NPC created with type: {0} and name: {1}";
+        public const string NPC_CANT_USE_SKILL = FAILURE_EMOJI + "{0} can't use this skill! " + NPC_SUFFIX;
+        public const string NPC_CANT_USE_SPECIAL = FAILURE_EMOJI + "{0} can't use this S.P.E.C.I.A.L. stat! " + NPC_SUFFIX;
+        public const string NPC_CANT_USE_STAT = FAILURE_EMOJI + "{0} can't use this attribute! " + NPC_SUFFIX;
+        public const string NPC_PRESET_CREATE = SUCCESS_EMOJI + "NPC preset: {0} created successfully. ({1})";
+        public const string NPC_PRESET_ENABLE = SUCCESS_EMOJI + "NPC preset: {0} enabled successfully. ({1})";
+        public const string NPC_PRESET_DISABLE = SUCCESS_EMOJI + "NPC preset: {0} disabled successfully. ({1})";
+        public const string NPC_PRESET_EDIT = SUCCESS_EMOJI + "NPC preset: {0} {1} value changed to {2}. ({3})";
+        public const string NPC_PRESET_EDIT_SPECIAL = SUCCESS_EMOJI + "NPC preset: {0} S.P.E.C.I.A.L. values changed. ({1})";
+        public const string NPC_PRESET_SKILLS_INIT = SUCCESS_EMOJI + "NPC preset: {0} Skills initialized according to its S.P.E.C.I.A.L. ({1})";
+
+        // NPC Error Messages
+        public const string ERR_NPC_CHAR_NOT_FOUND = FAILURE_EMOJI + "An NPC with the name {0} could not be found.";
+        public const string ERR_NPC_PRESET_NOT_FOUND = FAILURE_EMOJI + "An NPC preset with the name {0} could not be found. ({1})";
+        public const string ERR_NPC_PRESET_CREATE = FAILURE_EMOJI + "NPC preset creation failed. ({0})";
+        public const string ERR_NPC_PRESET_ENABLE = FAILURE_EMOJI + "Failed to enable NPC preset: {0}. (Check for typos) ({1})";
+        public const string ERR_NPC_PRESET_DISABLE = FAILURE_EMOJI + "Failed to disable NPC preset: {0}. (Check for typos) ({1})";
+        public const string ERR_NPC_PRESET_EDIT = FAILURE_EMOJI + "Failed to modify NPC preset attribute. ({0})";
+
+        // Gambling Messages
+        public const string BET_PLACED = SUCCESS_EMOJI + "{0}, bet placed!";
+
+        // Gambling Error Messages
+        public const string ERR_BALANCE_ADD_FAIL = FAILURE_EMOJI + "{0}, I failed to add your balance to the directory! (Do you have a character?)";
+        public const string ERR_BET_TOO_HIGH = FAILURE_EMOJI + "{0}, that bet is too high! (Do you have enough money?)";
+        public const string ERR_BET_TOO_LOW = FAILURE_EMOJI + "{0}, that bet is too low!";
         // Campaign Messages
         public const string CAMP_CREATED_SUCCESS = SUCCESS_EMOJI + "Campaign created successfully. ({0})";
         public const string CAMP_REMOVE_CONFIRM = QUESTION_EMOJI + "**Are you sure you want to delete `{0}` AND all of its' characters? (members: {1}) This action CANNOT be undone!**" +
