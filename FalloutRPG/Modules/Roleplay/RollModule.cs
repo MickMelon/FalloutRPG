@@ -1,5 +1,6 @@
 ﻿using Discord.Commands;
 using FalloutRPG.Constants;
+using FalloutRPG.Services.Roleplay;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,75 +11,34 @@ namespace FalloutRPG.Modules.Roleplay
     [Group("roll")]
     public class RollModule : ModuleBase<SocketCommandContext>
     {
-        private readonly Random _random;
+        private readonly RollService _rollService;
 
-        public RollModule(Random random)
+        public RollModule(RollService rollService)
         {
-            _random = random;
+            _rollService = rollService;
         }
 
         [Command]
         public async Task RollDiceAsync(string diceString)
         {
-            if (!diceString.Contains('d') || diceString.Length < 3)
+            try
             {
-                await ReplyAsync(String.Format(Messages.ERR_ROLL_DICE_INVALID_STRING, Context.User.Mention));
-                return;
-            }
-            if (!Int32.TryParse(diceString.Substring(0, diceString.IndexOf('d')), out int dieCount))
-            {
-                await ReplyAsync(String.Format(Messages.ERR_ROLL_DICE_INVALID_STRING, Context.User.Mention));
-                return;
-            }
-            Console.WriteLine(dieCount);
-            if (dieCount > 20)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_ROLL_DICE_TOO_MANY, Context.User.Mention));
-                return;
-            }
+                var dice = _rollService.RollDice(diceString);
 
-            diceString = diceString.Substring(diceString.IndexOf('d') + 1);
+                StringBuilder sb = new StringBuilder();
+                for (int die = 0; die < dice.Length - 2; die++)
+                    sb.Append($"[{dice[die]}] + ");
 
-            int dieSides = 0, bonus = 0;
+                sb.Append($"{dice[dice.Length - 2]} ");
+                sb.Append($"// Result: {dice[dice.Length-1]}");
 
-            if (diceString.Contains('+'))
-            {
-                if (!Int32.TryParse(diceString.Substring(0, diceString.IndexOf('+')), out dieSides))
-                {
-                    await ReplyAsync(String.Format(Messages.ERR_ROLL_DICE_INVALID_STRING, Context.User.Mention));
-                    return;
-                }
-                if (!Int32.TryParse(diceString.Substring(diceString.IndexOf('+')+1), out bonus))
-                {
-                    await ReplyAsync(String.Format(Messages.ERR_ROLL_DICE_INVALID_STRING, Context.User.Mention));
-                    return;
-                }
+                await ReplyAsync(String.Format(Messages.ROLL_DICE, sb.ToString(), Context.User.Mention));
             }
-            else
+            catch (Exception e)
             {
-                if (!Int32.TryParse(diceString, out dieSides))
-                {
-                    await ReplyAsync(String.Format(Messages.ERR_ROLL_DICE_INVALID_STRING, Context.User.Mention));
-                    return;
-                }
-            }
-            Console.WriteLine(dieSides);
-            if (dieSides > 100)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_ROLL_DICE_TOO_MANY_SIDES, Context.User.Mention));
+                await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({Context.User.Mention})");
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            int sum = 0;
-            for (int die = 0; die < dieCount; die++)
-            {
-                int dieResult = _random.Next(1, dieSides + 1);
-                sum += dieResult;
-                sb.Append($"[{dieResult}] + ");
-            }
-            sum += bonus;
-            sb.Append($"{bonus} || Result: {sum}");
-            await ReplyAsync(String.Format(Messages.ROLL_DICE, sb.ToString(), Context.User.Mention));
         }
     }
 }

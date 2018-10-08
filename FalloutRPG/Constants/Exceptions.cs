@@ -50,5 +50,10 @@ namespace FalloutRPG.Constants
         public const string NPC_LEVEL_TOO_LOW = "The given level was too low for the NPC preset.";
         public const string NPC_INVALID_TYPE = "The specified NPC type was invalid.";
         public const string NPC_INVALID_TYPE_DISABLED = "The specified NPC type is not enabled yet.";
+
+        // Roll Exceptions
+        public const string ROLL_DICE_INVALID_STRING = "The given dice string was invalid. Example: 2d20+5";
+        public const string ROLL_DICE_TOO_MANY = "There were too many die to be rolled; max is twenty.";
+        public const string ROLL_DICE_TOO_MANY_SIDES = "There were too many sides on that die to be rolled; max is one hundred.";
     }
 }

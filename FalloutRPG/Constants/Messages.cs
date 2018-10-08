@@ -122,10 +122,5 @@
 
         // Roll Messages
         public const string ROLL_DICE = DICE_EMOJI + "Rolled: {0}. ({1})";
-
-        // Roll Error Messages
-        public const string ERR_ROLL_DICE_INVALID_STRING = FAILURE_EMOJI + "The given dice string was invalid. Example: 2d20+5 ({0})";
-        public const string ERR_ROLL_DICE_TOO_MANY = FAILURE_EMOJI + "There were too many die to be rolled; max is twenty. ({0})";
-        public const string ERR_ROLL_DICE_TOO_MANY_SIDES = FAILURE_EMOJI + "There were too many sides on that die to be rolled; max is one hundred. ({0})";
     }
 }
