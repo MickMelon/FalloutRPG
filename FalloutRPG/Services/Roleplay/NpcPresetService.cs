@@ -97,7 +97,7 @@ namespace FalloutRPG.Services.Roleplay
             if (preset == null)
                 throw new ArgumentNullException("preset");
 
-            Character temp = new Character { Special = preset.Special };
+            Character temp = new NonPlayerCharacter { Special = preset.Special };
             _skillsService.InitializeSkills(temp);
 
             // Loop through NpcPreset's properties and set them accordingly to the Skills we just made in temp

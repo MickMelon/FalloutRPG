@@ -10,7 +10,6 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class NpcService
     {
-        private readonly RollService _rollService;
         private readonly NpcPresetService _presetService;
 
         private readonly List<Character> Npcs;
@@ -21,9 +20,8 @@ namespace FalloutRPG.Services.Roleplay
         // Measured in seconds (not milliseconds):
         private const int NPC_ACTIVE_DURATION = 43200;
         
-        public NpcService(SkillsService skillsService, RollService rollService, NpcPresetService presetService, IRepository<NpcPreset> presetRepository)
+        public NpcService(SkillsService skillsService, NpcPresetService presetService, IRepository<NpcPreset> presetRepository)
         {
-            _rollService = rollService;
             _presetService = presetService;
 
             Npcs = new List<Character>();
@@ -44,7 +42,7 @@ namespace FalloutRPG.Services.Roleplay
             if (preset.Enabled == false)
                 throw new Exception(Exceptions.NPC_INVALID_TYPE_DISABLED);
 
-            Character newNpc = new Character
+            Character newNpc = new NonPlayerCharacter
             {
                 Name = name,
                 Special = new Special
@@ -86,48 +84,6 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         public Character FindNpc(string name) => Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-        public string RollNpcStat(string name, Globals.SpecialType stat)
-        {
-            var character = Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-            if (character == null)
-                return String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, name);
-            else if (character.Skills == null)
-                throw new Exception(Exceptions.CHAR_SKILLS_NOT_SET);
-            else if (character.Special == null)
-                throw new Exception(Exceptions.CHAR_SPECIAL_NOT_SET);
-
-            int attribAmt = (int)typeof(Special).GetProperty(stat.ToString()).GetValue(character.Special);
-
-            if (attribAmt == 0)
-                return String.Format(Messages.NPC_CANT_USE_SPECIAL, character.Name);
-
-            ResetNpcTimer(character);
-
-            return _rollService.GetRollMessage(character.Name, stat.ToString(), _rollService.GetRollResult(stat, character)) + " " + Messages.NPC_SUFFIX;
-        }
-
-        public string RollNpcStat(string name, Globals.SkillType stat)
-        {
-            var character = Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-            if (character == null)
-                return String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, name);
-            else if (character.Skills == null)
-                throw new Exception(Exceptions.CHAR_SKILLS_NOT_SET);
-            else if (character.Special == null)
-                throw new Exception(Exceptions.CHAR_SPECIAL_NOT_SET);
-
-            int attribAmt = (int)typeof(SkillSheet).GetProperty(stat.ToString()).GetValue(character.Skills);
-
-            if (attribAmt == 0)
-                return String.Format(Messages.NPC_CANT_USE_SKILL, character.Name);
-
-            ResetNpcTimer(character);
-
-            return _rollService.GetRollMessage(character.Name, stat.ToString(), _rollService.GetRollResult(stat, character)) + " " + Messages.NPC_SUFFIX;
-        }
 
         /// <summary>
         /// Adds a user's Discord ID to the cooldowns.
