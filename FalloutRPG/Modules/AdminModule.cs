@@ -60,7 +60,7 @@ namespace FalloutRPG.Modules
             await _experienceService.GiveExperienceAsync(character, points);
 
             await _charService.SaveCharacterAsync(character);
-            await ReplyAsync(string.Format(Messages.ADM_GAVE_SKILL_POINTS, Context.User.Mention));
+            await ReplyAsync(string.Format(Messages.ADM_GAVE_EXP_POINTS, Context.User.Mention));
         }
 
         [Command("giveskillpoints")]
