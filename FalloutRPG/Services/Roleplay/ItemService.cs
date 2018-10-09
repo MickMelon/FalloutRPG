@@ -21,5 +21,23 @@ namespace FalloutRPG.Services.Roleplay
 
         public async Task<Item> GetItemAsync(string name) =>
             await _itemRepo.Query.Where(x => x.Name.Equals(name)).FirstOrDefaultAsync();
+
+        public List<Item> GetEquippedItems(Character character) =>
+            character.Inventory.Where(x => x.Equipped == true).ToList();
+
+        public int GetDamageThreshold(Character character) =>
+            GetEquippedItems(character).OfType<ItemApparel>().Sum(x => x.DamageThreshold);
+
+        public double GetDamageSkillMultiplier(ItemWeapon weapon, int skillValue)
+        {
+            double skillMultiplier = skillValue / weapon.SkillMinimum;
+            
+            if (skillMultiplier < 0.5)
+                skillMultiplier = 0.5;
+            else if (skillMultiplier > 1)
+                skillMultiplier = 1;
+
+            return skillMultiplier;
+        }
     }
 }

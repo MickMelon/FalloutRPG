@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using FalloutRPG.Constants;
+using FalloutRPG.Services.Roleplay;
 using System;
 using System.Threading.Tasks;
 

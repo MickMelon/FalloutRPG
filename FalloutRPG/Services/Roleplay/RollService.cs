@@ -28,7 +28,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             int rng = _rand.Next(1, 101);
 
-            double maxSuccessRoll = Math.Round(10 * Math.Sqrt(attribute) - (0.225 * attribute) - 1);
+            double maxSuccessRoll = Math.Round(10 * Math.Sqrt(attribute) - 0.225 * attribute - 1);
 
             // compares your roll with your skills, and how much better you did than the bare minimum
             double resultPercent = (maxSuccessRoll - rng) / maxSuccessRoll;
