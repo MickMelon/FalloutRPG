@@ -1,5 +1,6 @@
 using FalloutRPG.Constants;
 using FalloutRPG.Models;
+using System;
 using System.Linq;
 
 namespace FalloutRPG.Services.Roleplay
@@ -20,10 +21,12 @@ namespace FalloutRPG.Services.Roleplay
         public bool AttackCharacter(Character sender, Character receiver)
         {
             var senderWeapon = _itemService.GetEquippedItems(sender).OfType<ItemWeapon>().Single();
-            var victimDt = _itemService.GetDamageThreshold(receiver);
+            double victimDt = _itemService.GetDamageThreshold(receiver);
             var rollResult = _rollService.GetRollResult(sender, senderWeapon.Skill);
-
+            double victimAC = _rollService.GetArmorClass(receiver);
+            
             // >= 0 is a success, less than 0 is a failure
+            // going to roll with the FO1 & 2 system with AC
             if (rollResult >= 0)
             {
                 double dam = senderWeapon.Damage * 
@@ -33,10 +36,12 @@ namespace FalloutRPG.Services.Roleplay
                     dam *= sender.Special.Strength * 0.5;
                 if (senderWeapon.Skill == Globals.SkillType.Unarmed)
                     dam *= sender.Skills.Unarmed / 20 + 0.5;
+
+                // critical!
                 if (rollResult >= 95)
-                {
-                    // critical!
-                }
+                    dam *= 2;
+                victimDt = Math.Max(0, victimDt * senderWeapon.Ammo.DTMultiplier - senderWeapon.Ammo.DTReduction);
+                dam = Math.Max(dam * 0.2, dam - victimDt);
                 /*
                 Second, Melee/Unarmed special attack multiplier, critical damage (if a critical roll succeeded) and armor reduction are added in, where:
 
@@ -60,9 +65,9 @@ namespace FalloutRPG.Services.Roleplay
                 SA = Sneak Attack multiplier: 2 if ranged, 5 if Melee/Unarmed.
                 LM = Location multiplier for ranged attacks. For example, most creatures with a head take 2x damage from headshots and ants take 0.5x damage to their legs.
                 AM = Ammo type damage multiplier (such as the x1.75 of HP ammo).
-                DM = Difficulty multiplier: 2 on very easy, 1 on normal difficulty, 0.5 on very hard.
+                
                 Perks = Damage multipliers from perks such as Lord Death, Bloody Mess, Living Anatomy, etc.
-                Chems = Damage multipliers from Chems such as Psycho, Slasher, etc.  */
+                */
             }
 
             return false;
