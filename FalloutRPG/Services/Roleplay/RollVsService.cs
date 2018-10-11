@@ -7,12 +7,14 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class RollVsService
     {
+        private readonly EffectsService _effectsService;
         private readonly ItemService _itemService;
         private readonly RollService _rollService;
         private readonly SkillsService _skillsService;
 
-        public RollVsService(ItemService itemService, RollService rollService, SkillsService skillsService)
+        public RollVsService(EffectsService effectsService, ItemService itemService, RollService rollService, SkillsService skillsService)
         {
+            _effectsService = effectsService;
             _itemService = itemService;
             _rollService = rollService;
             _skillsService = skillsService;
@@ -21,9 +23,11 @@ namespace FalloutRPG.Services.Roleplay
         public bool AttackCharacter(Character sender, Character receiver)
         {
             var senderWeapon = _itemService.GetEquippedItems(sender).OfType<ItemWeapon>().Single();
+
+            
+
             double victimDt = _itemService.GetDamageThreshold(receiver);
-            var rollResult = _rollService.GetRollResult(sender, senderWeapon.Skill);
-            double victimAC = _rollService.GetArmorClass(receiver);
+            var rollResult = _rollService.GetRollResult(sender, senderWeapon.Skill) - _effectsService.GetArmorClass(receiver);
             
             // >= 0 is a success, less than 0 is a failure
             // going to roll with the FO1 & 2 system with AC
@@ -40,34 +44,14 @@ namespace FalloutRPG.Services.Roleplay
                 // critical!
                 if (rollResult >= 95)
                     dam *= 2;
+                // find adjusted DT due to armor piercing / opposite of that ammo
                 victimDt = Math.Max(0, victimDt * senderWeapon.Ammo.DTMultiplier - senderWeapon.Ammo.DTReduction);
+
+                // armor never reduces damage completely
                 dam = Math.Max(dam * 0.2, dam - victimDt);
-                /*
-                Second, Melee/Unarmed special attack multiplier, critical damage (if a critical roll succeeded) and armor reduction are added in, where:
 
-                Damadjusted1=(Dam+isCrit×CritDmg×CritPerks)
-
-                DTadjusted=max(0,DT×AmmoDTmult−AmmoDT) 
-
-                Damadjusted2=max(Damadjusted1×0.2,Damadjusted1−DTadjusted) 
-
-                isCrit = 1 if a critical hit, otherwise 0.
-                CritDmg = Unmodified critical bonus damage, as seen on individual weapon pages.
-                CritPerks = Perks that multiply critical damage (Better Criticals, Stealth Girl, etc.)
-                DT = The Damage Threshold of the target. Note that DT cannot reduce damage (DR modified) below 20%.
-                AmmoDT_mult = Ammo DT multiplier (such as the x3 of HP ammo).
-                AmmoDT = Ammo DT reduction (such as the 15DT reduction of AP ammo). Note that it cannot reduce DT of the target below 0. 
-
-            Finally, any other multiplicative modifiers are included, such as:
-
-                Final damage=Damadjusted2×SA×LM×AM×DM×Perks×Chems 
-
-                SA = Sneak Attack multiplier: 2 if ranged, 5 if Melee/Unarmed.
-                LM = Location multiplier for ranged attacks. For example, most creatures with a head take 2x damage from headshots and ants take 0.5x damage to their legs.
-                AM = Ammo type damage multiplier (such as the x1.75 of HP ammo).
-                
-                Perks = Damage multipliers from perks such as Lord Death, Bloody Mess, Living Anatomy, etc.
-                */
+                // perks & more ammo calculations
+                dam *= senderWeapon.Ammo.DamageMultiplier /* * perks */;
             }
 
             return false;

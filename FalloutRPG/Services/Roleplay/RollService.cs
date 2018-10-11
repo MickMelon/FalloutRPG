@@ -37,11 +37,6 @@ namespace FalloutRPG.Services.Roleplay
             return resultPercent;
         }
 
-        public double GetArmorClass(Character receiver)
-        {
-            throw new NotImplementedException();
-        }
-
         public double GetRollResult(Character character, Globals.SpecialType attribute) =>
             GetRollResult(_specService.GetSpecial(character, attribute));
 

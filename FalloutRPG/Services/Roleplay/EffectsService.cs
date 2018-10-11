@@ -19,6 +19,11 @@ namespace FalloutRPG.Services.Roleplay
         // now the problem, is that there isn't a Character.Effects list or anything, so do we just apply the
         // effect in reverse to remove it? Probably should go ahead and add a NonMapped effect list...
 
+        public double GetArmorClass(Character receiver)
+        {
+            throw new NotImplementedException();
+        }
+
         //public void ApplyEffect(Character character, Effect effect)
         //{
         //    foreach (var specialEffect in effect.SpecialEffects)

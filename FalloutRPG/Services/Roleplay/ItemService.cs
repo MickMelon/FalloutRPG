@@ -17,7 +17,7 @@ namespace FalloutRPG.Services.Roleplay
         public ItemService(IRepository<Item> itemRepo)
         {
             _itemRepo = itemRepo;
-        }   
+        }
 
         public async Task<Item> GetItemAsync(string name) =>
             await _itemRepo.Query.Where(x => x.Name.Equals(name)).FirstOrDefaultAsync();
@@ -39,5 +39,8 @@ namespace FalloutRPG.Services.Roleplay
 
             return skillMultiplier;
         }
+
+        public bool HasAmmo(Character character, ItemWeapon weapon) =>
+            character.Inventory.OfType<ItemAmmo>().Where(x => x.Equals(weapon.Ammo)).Count() >= weapon.AmmoOnAttack;
     }
 }
