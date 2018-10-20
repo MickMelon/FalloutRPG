@@ -20,6 +20,7 @@ namespace FalloutRPG.Services.Roleplay
 
         private double LUCK_INFLUENCE;
         private int LUCK_INFLUENCE_SKILL_CUTOFF;
+        private int LUCK_INFLUENCE_SPECIAL_CUTOFF;
         private bool LUCK_INFLUENCE_ENABLED;
 
         public RollService(CharacterService charService, SpecialService specService, SkillsService skillsService, IConfiguration config)
@@ -48,6 +49,7 @@ namespace FalloutRPG.Services.Roleplay
                 {
                     LUCK_INFLUENCE = double.Parse(_config["roleplay:luck-influence-percentage"]);
                     LUCK_INFLUENCE_SKILL_CUTOFF = int.Parse(_config["roleplay:luck-influence-skill-cutoff"]);
+                    LUCK_INFLUENCE_SPECIAL_CUTOFF = int.Parse(_config["roleplay:luck-influence-special-cutoff"]);
 
                     if (LUCK_INFLUENCE <= 0 || LUCK_INFLUENCE > 100)
                     {
@@ -55,16 +57,20 @@ namespace FalloutRPG.Services.Roleplay
                         LUCK_INFLUENCE = 0;
                         
                     }
-                    if (LUCK_INFLUENCE_SKILL_CUTOFF <= 0 || LUCK_INFLUENCE_SKILL_CUTOFF > SkillsService.MAX_SKILL_LEVEL)
+
+                    if (LUCK_INFLUENCE_SKILL_CUTOFF <= 0 || LUCK_INFLUENCE_SKILL_CUTOFF > SkillsService.MAX_SKILL_LEVEL ||
+                        LUCK_INFLUENCE_SPECIAL_CUTOFF <=  0 || LUCK_INFLUENCE_SPECIAL_CUTOFF > 10)
                     {
-                        Console.WriteLine("Luck influence skill cutoff setting improperly configured, check Config.json");
+                        Console.WriteLine("Luck influence skill or special cutoff setting improperly configured, check Config.json");
                         LUCK_INFLUENCE_SKILL_CUTOFF = 0;
+                        LUCK_INFLUENCE_SPECIAL_CUTOFF = 0;
                     }
                 }
                 else
                 {
                     LUCK_INFLUENCE = 0;
                     LUCK_INFLUENCE_SKILL_CUTOFF = 0;
+                    LUCK_INFLUENCE_SPECIAL_CUTOFF = 0;
                 }
             }
             catch (Exception)
@@ -176,7 +182,7 @@ namespace FalloutRPG.Services.Roleplay
             double maxSuccessRoll = Math.Round(32.2 * Math.Sqrt(attributeValue) - 7);
 
             // prevents luck from guaranteeing success
-            if (LUCK_INFLUENCE_ENABLED && 95 * luckMultiplier > maxSuccessRoll)
+            if (LUCK_INFLUENCE_ENABLED && attributeValue < LUCK_INFLUENCE_SPECIAL_CUTOFF && 95 * luckMultiplier > maxSuccessRoll)
                 finalResult = rng * luckMultiplier;
             else
                 finalResult = rng;

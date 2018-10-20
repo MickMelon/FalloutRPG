@@ -13,6 +13,7 @@
     "exp-channels": [ "" ],
     "luck-influenced-rolls": true,
     "luck-influence-percentage": 3.1,
-    "luck-influence-skill-cutoff": 100
+    "luck-influence-skill-cutoff": 100,
+    "luck-influence-special-cutoff": 5
   }
 }
