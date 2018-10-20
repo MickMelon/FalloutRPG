@@ -81,7 +81,8 @@ namespace FalloutRPG.Services.Roleplay
                 SkillPoints = 0,
                 Money = 1000,
                 Special = new Special(),
-                Skills = new SkillSheet()
+                Skills = new SkillSheet(),
+                Inventory = new List<Item>()
             };
 
             if (characters.Count == 0)
