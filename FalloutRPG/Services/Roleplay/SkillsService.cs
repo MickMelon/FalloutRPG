@@ -67,6 +67,19 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
+        /// Returns the value of the specified character's given skill.
+        /// </summary>
+        /// <returns>Returns 0 if character or skills are null.</returns>
+        public int GetSkill(Character character, Globals.SkillType skill)
+        {
+            if (character == null || !AreSkillsSet(character))
+                return 0;
+
+            return (int)typeof(SkillSheet).GetProperty(skill.ToString()).GetValue(character.Skills);
+        }
+            
+
+        /// <summary>
         /// Gives character their skill points from leveling up.
         /// </summary>
         public void GiveSkillPoints(Character character)

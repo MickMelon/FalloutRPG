@@ -75,18 +75,22 @@ namespace FalloutRPG.Services.Roleplay
             if (character == null) return false;
             if (cooldownTimers.ContainsKey(character.DiscordId)) return false;
 
-            var levelUp = false;
-
-            if (WillLevelUp(character, experience))
-            {
-                await OnLevelUpAsync(character);
-                levelUp = true;
-            }
+            var initialLevel = character.Level;
 
             character.Experience += experience;
             await _charService.SaveCharacterAsync(character);
 
+            var levelUp = false;
+            var difference = character.Level - initialLevel;
+
+            if (difference >= 1)
+            {
+                await OnLevelUpAsync(character, difference);
+                levelUp = true;
+            }
+
             AddToCooldown(character.DiscordId);
+            
             return levelUp;
         }
 
@@ -186,11 +190,14 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Called when a character levels up.
         /// </summary>
-        private async Task OnLevelUpAsync(Character character)
+        private async Task OnLevelUpAsync(Character character, int times = 1)
         {
             if (character == null) throw new ArgumentNullException("character");
             var user = _client.GetUser(character.DiscordId);
-            _skillsService.GiveSkillPoints(character);
+
+            for (int i = 0; i < times; i++)
+                _skillsService.GiveSkillPoints(character);
+
             await user.SendMessageAsync(string.Format(Messages.SKILLS_LEVEL_UP, user.Mention, character.SkillPoints));
         }
 
