@@ -173,7 +173,7 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                int pointsPerLevel = _skillsService.CalculateSkillPoints(character.Special.Intelligence);
+                int pointsPerLevel = _skillsService.CalculateSkillPoints(character);
                 int totalPoints = pointsPerLevel * (character.Level - 1);
 
                 if (totalPoints < 1)
