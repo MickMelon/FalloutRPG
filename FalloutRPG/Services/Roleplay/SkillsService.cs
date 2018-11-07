@@ -9,6 +9,7 @@ namespace FalloutRPG.Services.Roleplay
     {
         private const int DEFAULT_SKILL_POINTS = 10;
         public const int MAX_SKILL_LEVEL = 200;
+        public const int TAG_SKILL_ADDITION = 15;
 
         private readonly CharacterService _charService;
         private readonly SpecialService _specService;
@@ -171,9 +172,9 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Sets a character's tag skill.
         /// </summary>
-        private void SetTagSkill(Character character, Globals.SkillType tag)
+        public void SetTagSkill(Character character, Globals.SkillType tag)
         {
-            SetSkill(character, tag, GetSkill(character, tag) + 15);
+            SetSkill(character, tag, GetSkill(character, tag) + TAG_SKILL_ADDITION);
         }
 
         /// <summary>
