@@ -22,12 +22,11 @@ namespace FalloutRPG.Services.Roleplay
 
         public bool AttackCharacter(Character sender, Character receiver)
         {
-            var senderWeapon = _itemService.GetEquippedItems(sender).OfType<ItemWeapon>().Single();
-
-            
-
+            var senderEquipped = _itemService.GetEquippedItems(sender);
+            var senderWeapon = senderEquipped.OfType<ItemWeapon>().Single();
+            var senderAmmo = senderEquipped.OfType<ItemAmmo>().Single();
             double victimDt = _itemService.GetDamageThreshold(receiver);
-            var rollResult = _rollService.GetRollResult(sender, senderWeapon.Skill) - _effectsService.GetArmorClass(receiver);
+            var rollResult = _rollService.GetRollResult(sender, senderWeapon.Skill) - receiver.ArmorClass;
             
             // >= 0 is a success, less than 0 is a failure
             // going to roll with the FO1 & 2 system with AC
@@ -45,13 +44,13 @@ namespace FalloutRPG.Services.Roleplay
                 if (rollResult >= 95)
                     dam *= 2;
                 // find adjusted DT due to armor piercing / opposite of that ammo
-                victimDt = Math.Max(0, victimDt * senderWeapon.Ammo.DTMultiplier - senderWeapon.Ammo.DTReduction);
+                victimDt = Math.Max(0, victimDt * senderAmmo.DTMultiplier - senderAmmo.DTReduction);
 
                 // armor never reduces damage completely
                 dam = Math.Max(dam * 0.2, dam - victimDt);
 
                 // perks & more ammo calculations
-                dam *= senderWeapon.Ammo.DamageMultiplier /* * perks */;
+                dam *= senderAmmo.DamageMultiplier /* times perks */;
             }
 
             return false;
