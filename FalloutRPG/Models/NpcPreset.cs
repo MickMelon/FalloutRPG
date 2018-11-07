@@ -12,6 +12,8 @@ namespace FalloutRPG.Models
             InitialInventory = new List<Item>();
         }
 
+        public virtual Campaign Campaign { get; set; }
+
         public string Name { get; set; }
 
         public bool Enabled { get; set; }

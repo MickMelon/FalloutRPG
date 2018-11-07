@@ -19,6 +19,9 @@ namespace FalloutRPG.Services.Roleplay
             _itemRepo = itemRepo;
         }
 
+        public async Task AddItemAsync(Item item) =>
+            await _itemRepo.AddAsync(item);
+
         public async Task<Item> GetItemAsync(string name) =>
             await _itemRepo.Query.Where(x => x.Name.Equals(name)).FirstOrDefaultAsync();
 

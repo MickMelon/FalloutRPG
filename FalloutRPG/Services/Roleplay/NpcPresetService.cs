@@ -23,21 +23,22 @@ namespace FalloutRPG.Services.Roleplay
             _skillsService = skillsService;
         }
 
-        public async Task<bool> CreateNpcPresetAsync(string name)
+        public async Task<bool> CreateNpcPresetAsync(string name, Campaign campaign)
         {
-            return await CreateNpcPresetAsync(name, 0, 0, 0, 0, 0, 0, 0);
+            return await CreateNpcPresetAsync(name, 0, 0, 0, 0, 0, 0, 0, campaign);
         }
 
-        public async Task<bool> CreateNpcPresetAsync(string name, int str, int per, int end, int cha, int @int, int agi, int luc)
+        public async Task<bool> CreateNpcPresetAsync(string name, int str, int per, int end, int cha, int @int, int agi, int luc, Campaign campaign)
         {
             // NPC preset with name exists
             if (await GetNpcPreset(name) != null)
-                return false;
+                throw new Exception(Exceptions.NPC_PRESET_EXISTS);
 
             NpcPreset preset = new NpcPreset
             {
                 Name = name,
-                Special = new Special { Strength = str, Perception = per, Endurance = end, Charisma = cha, Intelligence = @int, Agility = agi, Luck = luc }
+                Special = new Special { Strength = str, Perception = per, Endurance = end, Charisma = cha, Intelligence = @int, Agility = agi, Luck = luc },
+                Campaign = campaign
             };
 
             await _presetRepository.AddAsync(preset);

@@ -81,5 +81,17 @@ namespace FalloutRPG.Services.Roleplay
 
             await _campaignRepository.DeleteAsync(campaign);
         }
+
+        public bool IsModerator(Campaign campaign, Player player)
+        {
+            if (campaign == null || player == null) return false;
+            return campaign.Moderators.Contains(player);
+        }
+
+        public async Task<bool> IsModeratorAsync(Campaign campaign, ulong playerId) =>
+            IsModerator(campaign, await _playerService.GetPlayerAsync(playerId));
+
+        public async Task<bool> IsModeratorAsync(ulong campaignId, ulong playerId) =>
+            await IsModeratorAsync(await GetCampaignAsync(campaignId), playerId);
     }
 }

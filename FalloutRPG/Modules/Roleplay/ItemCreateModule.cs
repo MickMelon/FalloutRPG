@@ -11,16 +11,15 @@ using System.Threading.Tasks;
 namespace FalloutRPG.Modules.Roleplay
 {
     [Group("item create"), Alias("items create")]
-    [RequireUserPermission(GuildPermission.Administrator)]
     public class ItemCreateModule : ModuleBase<SocketCommandContext>
     {
+        private readonly CampaignService _campaignService;
         private readonly ItemService _itemService;
-        private readonly IRepository<Item> _itemRepo;
 
-        public ItemCreateModule(ItemService itemService, IRepository<Item> itemRepository)
+        public ItemCreateModule(CampaignService campaignService, ItemService itemService)
         {
+            _campaignService = campaignService;
             _itemService = itemService;
-            _itemRepo = itemRepository;
         }
 
         [Command("ammo")]
@@ -30,9 +29,18 @@ namespace FalloutRPG.Modules.Roleplay
         [Command("ammo")]
         public async Task CreateItemAmmoAsync(string name, string desc, int value, double weight, double dtMult, int dtReduction)
         {
-            await _itemRepo.AddAsync(
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
+            await _itemService.AddItemAsync(
                 new ItemAmmo
                 {
+                    Campaign = campaign,
                     Name = name,
                     Description = desc,
                     Value = value,
@@ -47,11 +55,20 @@ namespace FalloutRPG.Modules.Roleplay
         [Command("apparel")]
         public async Task CreateItemApparelAsync(string name, string desc, int value, double weight, string slot, int dt)
         {
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
             if (Enum.TryParse(slot, true, out ApparelSlot appSlot))
             {
-                await _itemRepo.AddAsync(
+                await _itemService.AddItemAsync(
                     new ItemApparel
                     {
+                        Campaign = campaign,
                         Name = name,
                         Description = desc,
                         Value = value,
@@ -69,9 +86,18 @@ namespace FalloutRPG.Modules.Roleplay
         [Command("consumable")]
         public async Task CreateItemConsumableAsync(string name, string desc, int value, double weight)
         {
-            await _itemRepo.AddAsync(
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
+            await _itemService.AddItemAsync(
                 new ItemConsumable
                 {
+                    Campaign = campaign,
                     Name = name,
                     Description = desc,
                     Value = value,
@@ -84,9 +110,18 @@ namespace FalloutRPG.Modules.Roleplay
         [Command("misc")]
         public async Task CreateItemMiscAsync(string name, string desc, int value, double weight)
         {
-            await _itemRepo.AddAsync(
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
+            await _itemService.AddItemAsync(
                 new ItemMisc
                 {
+                    Campaign = campaign,
                     Name = name,
                     Description = desc,
                     Value = value,
@@ -100,12 +135,21 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task CreateItemWeaponAsync(string name, string desc, int value, double weight, int damage,
             Globals.SkillType skill, int skillMin, string ammo, int ammoCapacity, int ammoOnAttack)
         {
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
             Item item = await _itemService.GetItemAsync(ammo);
 
             if (item is ItemAmmo ammoItem)
             {
                 var weapon = new ItemWeapon
                 {
+                    Campaign = campaign,
                     Name = name,
                     Description = desc,
                     Value = value,
@@ -118,7 +162,7 @@ namespace FalloutRPG.Modules.Roleplay
                     AmmoRemaining = ammoCapacity
                 };
                 weapon.Ammo.Add(ammoItem);
-                await _itemRepo.AddAsync(weapon);
+                await _itemService.AddItemAsync(weapon);
 
                 await ReplyAsync(String.Format(Messages.ITEM_CREATE_SUCCESS, name, "Weapon", Context.User.Mention));
             }

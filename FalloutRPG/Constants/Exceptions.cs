@@ -50,6 +50,7 @@ namespace FalloutRPG.Constants
         public const string NPC_LEVEL_TOO_LOW = "The given level was too low for the NPC preset.";
         public const string NPC_INVALID_PRESET = "The specified NPC preset was invalid.";
         public const string NPC_INVALID_PRESET_DISABLED = "The specified NPC preset is not enabled yet.";
+        public const string NPC_PRESET_EXISTS = "The specified name matched an existing NPC preset";
 
         // Roll Exceptions
         public const string ROLL_DICE_INVALID_STRING = "The given dice string was invalid. Example: 2d20+5";

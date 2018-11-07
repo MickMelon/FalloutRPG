@@ -15,16 +15,19 @@ namespace FalloutRPG.Modules.Roleplay
 {
     [Group("npc preset")]
     [Alias("npc pre")]
-    [RequireUserPermission(GuildPermission.Administrator, Group = "Permission")]
-    [RequireOwner(Group = "Permission")]
     public class NpcPresetModule : ModuleBase<SocketCommandContext>
     {
+        private readonly CampaignService _campaignService;
         private readonly ItemService _itemService;
         private readonly HelpService _helpService;
         private readonly NpcPresetService _presetService;
 
-        public NpcPresetModule(ItemService itemService, HelpService helpService, NpcPresetService presetService)
+        public NpcPresetModule(CampaignService campaignService,
+            ItemService itemService,
+            HelpService helpService,
+            NpcPresetService presetService)
         {
+            _campaignService = campaignService;
             _itemService = itemService;
             _helpService = helpService;
             _presetService = presetService;
@@ -55,6 +58,14 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
             preset.InitialInventory.Add(item);
             await _presetService.SaveNpcPreset(preset);
 
@@ -64,9 +75,17 @@ namespace FalloutRPG.Modules.Roleplay
         [Command("create")]
         public async Task CreatePresetAsync(string name)
         {
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+            
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
             try
             {
-                await _presetService.CreateNpcPresetAsync(name);
+                await _presetService.CreateNpcPresetAsync(name, campaign);
                 await ReplyAsync(String.Format(Messages.NPC_PRESET_CREATE, name, Context.User.Mention));
             }
             catch (Exception e)
@@ -87,6 +106,14 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
             preset.Special = new Special { Strength = str, Perception = per, Endurance = end, Intelligence = @int, Agility = agi, Luck = luc };
             await _presetService.SaveNpcPreset(preset);
 
@@ -101,6 +128,14 @@ namespace FalloutRPG.Modules.Roleplay
             if (preset == null)
             {
                 await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
+                return;
+            }
+
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
                 return;
             }
 
@@ -123,6 +158,14 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
             preset.Enabled = !preset.Enabled;
             await _presetService.SaveNpcPreset(preset);
 
@@ -138,6 +181,14 @@ namespace FalloutRPG.Modules.Roleplay
 
             if (preset == null)
                 await dmChannel.SendMessageAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, name, Context.User.Mention));
+
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await dmChannel.SendMessageAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
 
             StringBuilder sb = new StringBuilder();
 
