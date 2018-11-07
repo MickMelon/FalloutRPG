@@ -1,5 +1,7 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using FalloutRPG.Constants;
+using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
 using FalloutRPG.Services.Roleplay;
 using System;
@@ -14,14 +16,15 @@ namespace FalloutRPG.Modules.Roleplay
     public class ItemModule : ModuleBase<SocketCommandContext>
     {
         private readonly ItemService _itemService;
+        private readonly IRepository<Item> _itemRepo;
 
-        public ItemModule(ItemService itemService)
+        public ItemModule(ItemService itemService, IRepository<Item> itemRepo)
         {
             _itemService = itemService;
+            _itemRepo = itemRepo;
         }
 
-        [Command]
-        [Alias("info")]
+        [Command("info")]
         public async Task ViewItemInfoAsync([Remainder]string itemName)
         {
             var item = await _itemService.GetItemAsync(itemName);
@@ -35,12 +38,13 @@ namespace FalloutRPG.Modules.Roleplay
             StringBuilder sb = new StringBuilder();
             sb.Append($"**Description:** {item.Description}\n" +
                 $"**Value:** {item.Value}\n" +
-                $"**Weight:** {item.Weight} lbs\n");
+                $"**Weight:** {item.Weight} lbs\n" +
+                $"**Effects:** {String.Join(", ", item.Effects)}\n");
 
             if (item is ItemWeapon wep)
             {
                 sb.Append($"**Damage:** {wep.Damage}\n");
-                sb.Append($"**Ammo Type:** {wep.Ammo.Name}\n");
+                sb.Append($"**Ammo Type:** {String.Join(", ", wep.Ammo)}\n");
                 sb.Append($"**Capacity:** {wep.AmmoCapacity}\n");
                 sb.Append($"**Ammo Usage:** {wep.AmmoOnAttack}/Attack\n");
             }
@@ -58,6 +62,26 @@ namespace FalloutRPG.Modules.Roleplay
             }
 
             await ReplyAsync(embed: Helpers.EmbedHelper.BuildBasicEmbed(item.Name, sb.ToString()), message: Context.User.Mention);
+        }
+
+        [Command("addammo")]
+        [Alias("ammoadd", "add ammo", "ammo add")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task AddAmmoAsync(string weaponName, string ammoName)
+        {
+            Item weaponItem = await _itemService.GetItemAsync(weaponName);
+            Item ammoItem = await _itemService.GetItemAsync(ammoName);
+
+            if (weaponItem is ItemWeapon weapon && ammoItem is ItemAmmo ammo)
+            {
+                weapon.Ammo.Add(ammo);
+                await _itemRepo.SaveAsync(ammo);
+                await ReplyAsync(Messages.SUCCESS_EMOJI + " done successfully baby");
+            }
+            else
+            {
+                await ReplyAsync("invalid weapon or ammo");
+            }
         }
     }
 }

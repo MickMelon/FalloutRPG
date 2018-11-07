@@ -5,6 +5,7 @@ using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
 using FalloutRPG.Services.Roleplay;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
@@ -99,25 +100,25 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task CreateItemWeaponAsync(string name, string desc, int value, double weight, int damage,
             Globals.SkillType skill, int skillMin, string ammo, int ammoCapacity, int ammoOnAttack)
         {
-            Item ammoItem = await _itemService.GetItemAsync(ammo);
+            Item item = await _itemService.GetItemAsync(ammo);
 
-            if (ammoItem is ItemAmmo)
+            if (item is ItemAmmo ammoItem)
             {
-                await _itemRepo.AddAsync(
-                    new ItemWeapon
-                    {
-                        Name = name,
-                        Description = desc,
-                        Value = value,
-                        Weight = weight,
-                        Damage = damage,
-                        Skill = skill,
-                        SkillMinimum = skillMin,
-                        Ammo = (ItemAmmo)ammoItem,
-                        AmmoCapacity = ammoCapacity,
-                        AmmoOnAttack = ammoOnAttack,
-                        AmmoRemaining = ammoCapacity
-                    });
+                var weapon = new ItemWeapon
+                {
+                    Name = name,
+                    Description = desc,
+                    Value = value,
+                    Weight = weight,
+                    Damage = damage,
+                    Skill = skill,
+                    SkillMinimum = skillMin,
+                    AmmoCapacity = ammoCapacity,
+                    AmmoOnAttack = ammoOnAttack,
+                    AmmoRemaining = ammoCapacity
+                };
+                weapon.Ammo.Add(ammoItem);
+                await _itemRepo.AddAsync(weapon);
 
                 await ReplyAsync(String.Format(Messages.ITEM_CREATE_SUCCESS, name, "Weapon", Context.User.Mention));
             }

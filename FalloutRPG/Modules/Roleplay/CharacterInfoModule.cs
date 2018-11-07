@@ -187,7 +187,7 @@ namespace FalloutRPG.Modules.Roleplay
                 sb.Append($"__*{item.Name}*__:\n" +
                     $"Damage: {item.Damage}\n" +
                     $"{item.Skill.ToString()} Skill: {item.SkillMinimum}\n" +
-                    $"Ammo Type: {item.Ammo.Name}\n" +
+                    $"**Ammo Type:** {String.Join(", ", item.Ammo)}\n" +
                     $"Ammo Capacity: {item.AmmoCapacity}\n" +
                     $"Ammo Usage: {item.AmmoOnAttack}/Attack\n\n");
 
