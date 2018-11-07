@@ -90,12 +90,13 @@ namespace FalloutRPG.Services.Roleplay
 
         /// <summary>
         /// Gives character their skill points from leveling up.
+        /// This method should be called after the character already has had their experience added.
         /// </summary>
         public void GiveSkillPoints(PlayerCharacter character)
         {
             if (character == null) throw new ArgumentNullException("character");
 
-            var points = CalculateSkillPoints(character.Special.Intelligence);
+            var points = CalculateSkillPoints(character);
 
             character.SkillPoints += points;
         }
@@ -105,10 +106,15 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         /// <remarks>
         /// Uses the Fallout New Vegas formula. (10 + (INT / 2))
+        /// (For odd intelligence scores, the "extra" skill point is given on even levels,
+        /// so a character with 1 intelligence will gain 11 skill points at level 2, then 10 at level 3, etc.) 
         /// </remarks>
-        public int CalculateSkillPoints(int intelligence)
+        public int CalculateSkillPoints(Character character)
         {
-            return DEFAULT_SKILL_POINTS + (intelligence / 2);
+            if (character.Special.Intelligence % 2 != 0 && character.Level % 2 == 0)
+                return DEFAULT_SKILL_POINTS + (character.Special.Intelligence / 2) + 1;
+
+            return DEFAULT_SKILL_POINTS + (character.Special.Intelligence / 2);
         }
 
         /// <summary>
