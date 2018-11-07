@@ -3,6 +3,7 @@ using FalloutRPG.Constants;
 using FalloutRPG.Services.Roleplay;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,18 +20,17 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command]
-        public async Task RollDiceAsync(string diceString)
+        public async Task RollDiceAsync(int dieCount, int sides, int bonus = 0)
         {
             try
             {
-                var dice = _rollService.RollDice(diceString);
+                var dice = _rollService.RollDice(dieCount, sides);
 
                 StringBuilder sb = new StringBuilder();
-                for (int die = 0; die < dice.Length - 2; die++)
+                for (int die = 0; die < dice.Length; die++)
                     sb.Append($"[{dice[die]}] + ");
 
-                sb.Append($"{dice[dice.Length - 2]} ");
-                sb.Append($"// Result: {dice[dice.Length-1]}");
+                sb.Append($"{bonus} = {dice.Sum() + bonus}");
 
                 await ReplyAsync(String.Format(Messages.ROLL_DICE, sb.ToString(), Context.User.Mention));
             }
