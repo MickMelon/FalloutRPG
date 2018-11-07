@@ -37,6 +37,8 @@ namespace FalloutRPG.Models
             }
         }
 
+        public int ArmorClass { get; set; }
+
         public long Money { get; set; }
 
         public virtual List<Effect> Effects { get; set; }
