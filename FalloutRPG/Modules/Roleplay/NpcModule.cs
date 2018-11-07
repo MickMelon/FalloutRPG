@@ -29,19 +29,23 @@ namespace FalloutRPG.Modules.Roleplay
         [Alias("new")]
         public async Task CreateNewNpc(string type, string name)
         {
+            await CreateNewNpc(type, name, 1);
+        }
+
+        [Command("create")]
+        [Alias("new")]
+        public async Task CreateNewNpc(string name, string type, int level)
+        {
             try
             {
-                await _npcService.CreateNpc(type, name);
+                await _npcService.CreateNpc(name, type, level);
+                await ReplyAsync(String.Format(Messages.NPC_CREATED_SUCCESS, type, name));
             }
             catch (Exception e)
             {
                 await ReplyAsync(Messages.FAILURE_EMOJI + e.Message);
                 return;
             }
-            // used to show "Raider created" vs "raIDeR created" or whatever the user put in
-            NpcPreset preset = await _presetService.GetNpcPreset(type);
-
-            await ReplyAsync(String.Format(Messages.NPC_CREATED_SUCCESS, preset.Name, name));
         }
 
         [Command]

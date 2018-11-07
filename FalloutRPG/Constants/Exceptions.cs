@@ -44,12 +44,12 @@ namespace FalloutRPG.Constants
         // Campaign Cheat Exceptions/Other
         public const string LEVEL_TOO_LOW = "The specified level was too low.";
 
-        // NPC Exception Message
+        // NPC Exceptions
         public const string NPC_CHAR_EXISTS = "A character with that name already exists!";
         public const string NPC_LEVEL_TOO_HIGH = "The given level was too high for the NPC preset.";
         public const string NPC_LEVEL_TOO_LOW = "The given level was too low for the NPC preset.";
-        public const string NPC_INVALID_TYPE = "The specified NPC type was invalid.";
-        public const string NPC_INVALID_TYPE_DISABLED = "The specified NPC type is not enabled yet.";
+        public const string NPC_INVALID_PRESET = "The specified NPC preset was invalid.";
+        public const string NPC_INVALID_PRESET_DISABLED = "The specified NPC preset is not enabled yet.";
 
         // Roll Exceptions
         public const string ROLL_DICE_INVALID_STRING = "The given dice string was invalid. Example: 2d20+5";
