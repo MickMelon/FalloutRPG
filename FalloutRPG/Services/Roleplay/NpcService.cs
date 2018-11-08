@@ -34,19 +34,19 @@ namespace FalloutRPG.Services.Roleplay
             _rand = random;
         }
 
-        public async Task CreateNpc(string name, string npcType, int level)
+        public async Task CreateNpc(string name, string npcType, int level, Campaign campaign)
         {
             if (Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) != null)
                 throw new Exception(Exceptions.NPC_CHAR_EXISTS);
 
-            NpcPreset preset = await _presetService.GetNpcPreset(npcType);
+            NpcPreset preset = await _presetService.GetNpcPreset(npcType, campaign);
 
             if (preset == null)
                 throw new Exception(Exceptions.NPC_INVALID_PRESET);
             if (preset.Enabled == false)
                 throw new Exception(Exceptions.NPC_INVALID_PRESET_DISABLED);
 
-            Character newNpc = new NonPlayerCharacter { Name = name, Special = preset.Special };
+            Character newNpc = new NonPlayerCharacter { Name = name, Campaign = campaign, Special = preset.Special };
 
             _skillsService.InitializeSkills(newNpc);
 

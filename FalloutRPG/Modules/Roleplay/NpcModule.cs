@@ -14,15 +14,17 @@ namespace FalloutRPG.Modules.Roleplay
     [Group("npc")]
     public class NpcModule : ModuleBase<SocketCommandContext>
     {
+        private readonly CampaignService _campaignService;
         private readonly NpcService _npcService;
         private readonly NpcPresetService _presetService;
         private readonly HelpService _helpService;
 
-        public NpcModule(NpcService npcService, NpcPresetService presetService, HelpService helpService)
+        public NpcModule(CampaignService campaignService, NpcService npcService, NpcPresetService presetService, HelpService helpService)
         {
-            _npcService = npcService;
-            _presetService = presetService;
+            _campaignService = campaignService;
             _helpService = helpService;
+            _presetService = presetService;
+            _npcService = npcService;
         }
 
         [Command("create")]
@@ -36,9 +38,17 @@ namespace FalloutRPG.Modules.Roleplay
         [Alias("new")]
         public async Task CreateNewNpc(string name, string type, int level)
         {
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
             try
             {
-                await _npcService.CreateNpc(name, type, level);
+                await _npcService.CreateNpc(name, type, level, campaign);
                 await ReplyAsync(String.Format(Messages.NPC_CREATED_SUCCESS, type, name));
             }
             catch (Exception e)
