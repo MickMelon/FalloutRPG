@@ -31,7 +31,7 @@ namespace FalloutRPG.Services.Roleplay
         public async Task<bool> CreateNpcPresetAsync(string name, int str, int per, int end, int cha, int @int, int agi, int luc, Campaign campaign)
         {
             // NPC preset with name exists
-            if (await GetNpcPreset(name) != null)
+            if (await GetNpcPreset(name, campaign) != null)
                 throw new Exception(Exceptions.NPC_PRESET_EXISTS);
 
             NpcPreset preset = new NpcPreset
@@ -46,12 +46,12 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
-        /// Returns an NpcPreset of the given name if it exists in the database, case-insensitively.
+        /// Returns an NpcPreset of the given name if it exists in the database AND matches the given campaign, case-insensitively.
         /// </summary>
         /// <param name="typeString">The name of the NPC preset to find.</param>
-        /// <returns>An NpcPreset with the given name in the database if it exists.</returns>
-        public async Task<NpcPreset> GetNpcPreset(string typeString) =>
-            await _presetRepository.Query.Where(x => x.Name.Equals(typeString, StringComparison.OrdinalIgnoreCase)).FirstOrDefaultAsync();
+        /// <returns>An NpcPreset with the given name and campaign in the database if it exists.</returns>
+        public async Task<NpcPreset> GetNpcPreset(string typeString, Campaign campaign) =>
+            await _presetRepository.Query.Where(x => x.Name.Equals(typeString, StringComparison.OrdinalIgnoreCase) && x.Campaign.Equals(campaign)).FirstOrDefaultAsync();
 
         public async Task SaveNpcPreset(NpcPreset npcPreset)
         {
