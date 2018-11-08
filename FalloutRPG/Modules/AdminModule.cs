@@ -68,7 +68,7 @@ namespace FalloutRPG.Modules
         [Command("giveitem")]
         public async Task AddItem(IUser user, string itemName)
         {
-            var item = await _itemService.GetItemAsync(itemName);
+            var item = await _itemService.GetItemAsync(itemName, null);
             var character = await _charService.GetPlayerCharacterAsync(user.Id);
 
             if (item == null)

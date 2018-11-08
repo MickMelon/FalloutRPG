@@ -22,8 +22,8 @@ namespace FalloutRPG.Services.Roleplay
         public async Task AddItemAsync(Item item) =>
             await _itemRepo.AddAsync(item);
 
-        public async Task<Item> GetItemAsync(string name) =>
-            await _itemRepo.Query.Where(x => x.Name.Equals(name)).FirstOrDefaultAsync();
+        public async Task<Item> GetItemAsync(string name, Campaign campaign) =>
+            await _itemRepo.Query.Where(x => x.Name.Equals(name) && x.Campaign.Equals(campaign)).FirstOrDefaultAsync();
 
         public List<Item> GetEquippedItems(Character character) =>
             character.Inventory.Where(x => x.Equipped == true).ToList();

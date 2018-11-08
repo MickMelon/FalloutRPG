@@ -15,11 +15,13 @@ namespace FalloutRPG.Modules.Roleplay
     [Alias("items")]
     public class ItemModule : ModuleBase<SocketCommandContext>
     {
+        private readonly CampaignService _campaignService;
         private readonly ItemService _itemService;
         private readonly IRepository<Item> _itemRepo;
 
-        public ItemModule(ItemService itemService, IRepository<Item> itemRepo)
+        public ItemModule(CampaignService campaignService, ItemService itemService, IRepository<Item> itemRepo)
         {
+            _campaignService = campaignService;
             _itemService = itemService;
             _itemRepo = itemRepo;
         }
@@ -27,7 +29,15 @@ namespace FalloutRPG.Modules.Roleplay
         [Command("info")]
         public async Task ViewItemInfoAsync([Remainder]string itemName)
         {
-            var item = await _itemService.GetItemAsync(itemName);
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
+            var item = await _itemService.GetItemAsync(itemName, campaign);
 
             if (item == null)
             {
@@ -66,11 +76,18 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("addammo")]
         [Alias("ammoadd", "add ammo", "ammo add")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AddAmmoAsync(string weaponName, string ammoName)
         {
-            Item weaponItem = await _itemService.GetItemAsync(weaponName);
-            Item ammoItem = await _itemService.GetItemAsync(ammoName);
+            var campaign = await _campaignService.GetCampaignAsync(Context.Channel.Id);
+
+            if (!await _campaignService.IsModeratorAsync(campaign, Context.User.Id))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_CAMP_NOT_MODERATOR, Context.User.Mention));
+                return;
+            }
+
+            Item weaponItem = await _itemService.GetItemAsync(weaponName, campaign);
+            Item ammoItem = await _itemService.GetItemAsync(ammoName, campaign);
 
             if (weaponItem is ItemWeapon weapon && ammoItem is ItemAmmo ammo)
             {

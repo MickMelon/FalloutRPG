@@ -143,7 +143,7 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            Item item = await _itemService.GetItemAsync(ammo);
+            Item item = await _itemService.GetItemAsync(ammo, campaign);
 
             if (item is ItemAmmo ammoItem)
             {

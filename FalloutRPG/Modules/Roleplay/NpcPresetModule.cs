@@ -59,7 +59,7 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            var item = await _itemService.GetItemAsync(itemName);
+            var item = await _itemService.GetItemAsync(itemName, campaign);
             if (item == null)
             {
                 await ReplyAsync(String.Format(Messages.ERR_ITEM_NOT_FOUND, Context.User.Mention));
