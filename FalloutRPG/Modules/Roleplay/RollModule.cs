@@ -9,35 +9,59 @@ using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
 {
-    [Group("roll")]
     public class RollModule : ModuleBase<SocketCommandContext>
     {
-        private readonly RollDiceService _rollService;
-
-        public RollModule(RollDiceService rollService)
+        [Group("roll")]
+        public class RollDiceModule : ModuleBase<SocketCommandContext>
         {
-            _rollService = rollService;
+            private readonly RollDiceService _diceService;
+
+            public RollDiceModule(RollDiceService rollService)
+            {
+                _diceService = rollService;
+            }
+
+            [Command]
+            public async Task RollDiceAsync(int dieCount, int sides, int bonus = 0)
+            {
+                try
+                {
+                    var dice = _diceService.RollDice(dieCount, sides);
+
+                    StringBuilder sb = new StringBuilder();
+                    for (int die = 0; die < dice.Length; die++)
+                        sb.Append($"[{dice[die]}] + ");
+
+                    sb.Append($"{bonus} = {dice.Sum() + bonus}");
+
+                    await ReplyAsync(String.Format(Messages.ROLL_DICE, sb.ToString(), Context.User.Mention));
+                }
+                catch (Exception e)
+                {
+                    await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({Context.User.Mention})");
+                    return;
+                }
+            }
         }
 
-        [Command]
-        public async Task RollDiceAsync(int dieCount, int sides, int bonus = 0)
+        [Group("rollvs")]
+        public class RollVsModule : ModuleBase<SocketCommandContext>
         {
-            try
+            private readonly CharacterService _characterService;
+            private readonly RollVsService _rollVsService;
+            private readonly NpcService _npcService;
+
+            public RollVsModule(CharacterService characterService, RollVsService rollVsService, NpcService npcService)
             {
-                var dice = _rollService.RollDice(dieCount, sides);
-
-                StringBuilder sb = new StringBuilder();
-                for (int die = 0; die < dice.Length; die++)
-                    sb.Append($"[{dice[die]}] + ");
-
-                sb.Append($"{bonus} = {dice.Sum() + bonus}");
-
-                await ReplyAsync(String.Format(Messages.ROLL_DICE, sb.ToString(), Context.User.Mention));
+                _characterService = characterService;
+                _rollVsService = rollVsService;
+                _npcService = npcService;
             }
-            catch (Exception e)
+
+            [Command]
+            public async Task RollVsAsync(string charName, Globals.SkillType skill)
             {
-                await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({Context.User.Mention})");
-                return;
+                await Task.Delay(0);
             }
         }
     }
