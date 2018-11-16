@@ -48,8 +48,8 @@ namespace FalloutRPG.Modules
                         .WithName("F.R.A.G.S.")
                         .WithIconUrl(Context.Client.CurrentUser.GetAvatarUrl().ToString());
                 })
-                .AddField("Developed By", $"{app.Owner.Mention} and {mrredUser.Mention}")
-                .AddField("Name and Artwork By", $"{dukeUser.Mention}")
+                .AddField("Developed By", $"{app?.Owner?.Mention ?? "Mick"} and {mrredUser?.Mention ?? "mrred"}")
+                .AddField("Name and Artwork By", $"{dukeUser?.Mention ?? "Duke"}")
                 .AddField("Library", $"Discord.Net ({DiscordConfig.Version})")
                 .AddField("Runtime", $"{RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} " +
                     $"({RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture})")
