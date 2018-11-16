@@ -55,7 +55,7 @@ namespace FalloutRPG.Services.Roleplay
 
             var characters = await GetAllCharactersAsync(discordId);
 
-            if (characters != null)
+            if (characters.Count > 0)
             {
                 if (CheckDuplicateNames(characters, name))
                     throw new Exception(Exceptions.CHAR_NAMES_NOT_UNIQUE);
@@ -103,7 +103,7 @@ namespace FalloutRPG.Services.Roleplay
                 }
             };
 
-            if (characters == null)
+            if (characters.Count == 0)
                 character.Active = true;
 
             await _charRepository.AddAsync(character);

@@ -15,16 +15,19 @@ namespace FalloutRPG.Modules
     public class AdminModule : ModuleBase<SocketCommandContext>
     {
         private readonly CharacterService _charService;
+        private readonly ExperienceService _experienceService;
         private readonly SkillsService _skillsService;
         private readonly SpecialService _specialService;
         private readonly HelpService _helpService;
 
         public AdminModule(CharacterService charService,
+            ExperienceService experienceService,
             SkillsService skillsService,
             SpecialService specialService,
             HelpService helpService)
         {
             _charService = charService;
+            _experienceService = experienceService;
             _skillsService = skillsService;
             _specialService = specialService;
             _helpService = helpService;
@@ -48,8 +51,19 @@ namespace FalloutRPG.Modules
             await ReplyAsync(string.Format(Messages.ADM_GAVE_MONEY, Context.User.Mention));
         }
 
+        [Command("giveexp")]
+        public async Task GiveExperienceAsync(IUser user, int points)
+        {
+            var character = await _charService.GetCharacterAsync(user.Id);
+            if (character == null) return;
+
+            await _experienceService.GiveExperienceAsync(character, points);
+
+            await _charService.SaveCharacterAsync(character);
+            await ReplyAsync(string.Format(Messages.ADM_GAVE_EXP_POINTS, Context.User.Mention));
+        }
+
         [Command("giveskillpoints")]
-        [RequireOwner]
         public async Task GiveSkillPointsAsync(IUser user, int points)
         {
             var character = await _charService.GetCharacterAsync(user.Id);

@@ -34,6 +34,7 @@
         // Admin Messages
         public const string ADM_GAVE_MONEY = ADM_EMOJI + "Money given successfully. ({0})";
         public const string ADM_GAVE_SKILL_POINTS = ADM_EMOJI + "Skill points given successfully. ({0})";
+        public const string ADM_GAVE_EXP_POINTS = ADM_EMOJI + "Experience points given successfully. ({0})";
         public const string ADM_GAVE_SPEC_POINTS = ADM_EMOJI + "SPECIAL points given successfully. ({0})";
         public const string ADM_RESET = ADM_EMOJI + "Reset character skills and SPECIAL successfully. ({0})";
         public const string ADM_DELETE = ADM_EMOJI + "Deleted character successfully. ({0})";
