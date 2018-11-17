@@ -153,8 +153,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public async Task<int> GetTotalCharactersAsync()
         {
-            var characters = await _charRepository.FetchAllAsync();
-            return characters.Count;
+            return await _charRepository.Query.CountAsync();
         }
 
         public async Task<bool> CheckDuplicateNames(ulong discordId, string name) =>
