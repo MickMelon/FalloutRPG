@@ -68,6 +68,7 @@ namespace FalloutRPG
             .AddSingleton<LogService>()
             .AddSingleton<StartupService>()
             .AddSingleton<HelpService>()
+            .AddSingleton<ReliabilityService>()
 
             // Roleplay
             .AddSingleton<RollService>()

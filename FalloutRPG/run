@@ -1,0 +1,6 @@
+﻿#!/bin/bash
+
+until dotnet FalloutRPG.dll; do
+        echo "Server 'frags' crashed with exit code $?.  Respawning.." >&2
+        sleep 1
+done
