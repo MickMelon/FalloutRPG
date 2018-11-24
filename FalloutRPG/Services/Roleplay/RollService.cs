@@ -201,7 +201,7 @@ namespace FalloutRPG.Services.Roleplay
 
             if (percent >= 0)
             {
-                if (percent >= 125)
+                if (percent >= 95)
                     result.Append($"**CRITICAL {roll.ToUpper()} SUCCESS!!!**");
                 else if (percent >= 80)
                     result.Append($"__GREAT {roll.ToUpper()} SUCCESS__");
