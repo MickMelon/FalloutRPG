@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using FalloutRPG.Data;
 using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Effects;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Casino;
 using FalloutRPG.Services.Roleplay;
@@ -70,12 +71,14 @@ namespace FalloutRPG
             .AddSingleton<ReliabilityService>()
 
             // Roleplay
+            .AddSingleton<Random>()
             .AddSingleton<RollService>()
             .AddSingleton<SkillsService>()
             .AddSingleton<SpecialService>()
             .AddSingleton<StartupService>()
             .AddSingleton<CharacterService>()
             .AddSingleton<ExperienceService>()
+            .AddSingleton<EffectsService>()
 
             // Casino
             .AddSingleton<GamblingService>()
@@ -89,6 +92,7 @@ namespace FalloutRPG
             .AddTransient<IRepository<Character>, EfRepository<Character>>()
             .AddTransient<IRepository<SkillSheet>, EfRepository<SkillSheet>>()
             .AddTransient<IRepository<Special>, EfRepository<Special>>()
+            .AddTransient<IRepository<Effect>, EfRepository<Effect>>()
             .BuildServiceProvider();
 
         /// <summary>

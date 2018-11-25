@@ -28,7 +28,7 @@ namespace FalloutRPG.Services.Casino
 
         private Timer _rollTimer;
 
-        public CrapsService(GamblingService gamblingService)
+        public CrapsService(GamblingService gamblingService, Random rand)
         {
             _players = new List<IUser>();
             _bets = new List<Bet>();
@@ -40,7 +40,7 @@ namespace FalloutRPG.Services.Casino
 
             _gamblingService = gamblingService;
 
-            _rand = new Random();
+            _rand = rand;
 
             _rollTimer = new Timer(SHOOTER_TIMEOUT_SECONDS * 1000);
             _rollTimer.Elapsed += ShooterTimeout;

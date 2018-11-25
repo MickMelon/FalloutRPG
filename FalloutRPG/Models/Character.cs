@@ -1,4 +1,7 @@
-﻿using System;
+﻿using FalloutRPG.Models.Effects;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FalloutRPG.Models
 {
@@ -29,6 +32,8 @@ namespace FalloutRPG.Models
 
         public Special Special { get; set; }
         public SkillSheet Skills { get; set; }
+
+        public virtual IList<Effect> Effects { get; set; }
 
         public long Money { get; set; }
     }

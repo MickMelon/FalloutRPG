@@ -19,17 +19,27 @@ namespace FalloutRPG.Modules.Roleplay
         public class CharacterSpecialModule : ModuleBase<SocketCommandContext>
         {
             private readonly CharacterService _charService;
+            private readonly EffectsService _effectsService;
             private readonly SpecialService _specService;
 
-            public CharacterSpecialModule(CharacterService charService, SpecialService specService)
+            public CharacterSpecialModule(CharacterService charService, EffectsService effectsService, SpecialService specService)
             {
                 _charService = charService;
+                _effectsService = effectsService;
                 _specService = specService;
             }
 
             [Command]
             [Alias("show", "view")]
-            public async Task ShowSpecialAsync(IUser targetUser = null)
+            public async Task ShowSpecialAsync(IUser targetUser = null) =>
+                await ShowSpecialAsync(targetUser);
+
+            [Command("buffed")]
+            [Alias("bshow", "bview")]
+            public async Task ShowSpecialBuffedAsync(IUser targetUser = null) =>
+                await ShowSpecialAsync(targetUser, true);
+
+            private async Task ShowSpecialAsync(IUser targetUser = null, bool useEffects = false)
             {
                 var userInfo = Context.User;
                 var character = targetUser == null
@@ -50,15 +60,19 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                var embed = EmbedHelper.BuildBasicEmbed("Command: $character special",
+                var special = character.Special;
+                if (useEffects)
+                    special = _effectsService.GetEffectiveSpecial(character);
+
+                var embed = EmbedHelper.BuildBasicEmbed("Command: $special",
                     $"**Name:** {character.Name}\n" +
-                    $"**STR:** {character.Special.Strength}\n" +
-                    $"**PER:** {character.Special.Perception}\n" +
-                    $"**END:** {character.Special.Endurance}\n" +
-                    $"**CHA:** {character.Special.Charisma}\n" +
-                    $"**INT:** {character.Special.Intelligence}\n" +
-                    $"**AGI:** {character.Special.Agility}\n" +
-                    $"**LUC:** {character.Special.Luck}");
+                    $"**STR:** {special.Strength}\n" +
+                    $"**PER:** {special.Perception}\n" +
+                    $"**END:** {special.Endurance}\n" +
+                    $"**CHA:** {special.Charisma}\n" +
+                    $"**INT:** {special.Intelligence}\n" +
+                    $"**AGI:** {special.Agility}\n" +
+                    $"**LUC:** {special.Luck}");
 
                 await ReplyAsync(userInfo.Mention, embed: embed);
             }
