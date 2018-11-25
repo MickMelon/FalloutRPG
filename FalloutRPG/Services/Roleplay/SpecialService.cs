@@ -9,7 +9,7 @@ namespace FalloutRPG.Services.Roleplay
     public class SpecialService
     {
         private const int DEFAULT_SPECIAL_POINTS = 40;
-        private const int MAX_SPECIAL = 10;
+        public const int MAX_SPECIAL = 10;
 
         private readonly CharacterService _charService;
 
