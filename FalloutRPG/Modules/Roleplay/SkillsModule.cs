@@ -20,22 +20,33 @@ namespace FalloutRPG.Modules.Roleplay
         public class CharacterSkillsModule : ModuleBase<SocketCommandContext>
         {
             private readonly CharacterService _charService;
+            private readonly EffectsService _effectsService;
             private readonly SkillsService _skillsService;
             private readonly HelpService _helpService;
 
             public CharacterSkillsModule(
                 CharacterService charService,
+                EffectsService effectsService,
                 SkillsService skillsService,
                 HelpService helpService)
             {
                 _charService = charService;
+                _effectsService = effectsService;
                 _skillsService = skillsService;
                 _helpService = helpService;
             }
 
             [Command]
             [Alias("show", "view")]
-            public async Task ShowSkillsAsync(IUser targetUser = null)
+            public async Task ShowSkillsAsync(IUser targetUser = null) =>
+                await ShowSkillsAsync(targetUser, false);
+
+            [Command("buffed")]
+            [Alias("buff", "showb", "viewb")]
+            public async Task ShowSkillsBuffedAsync(IUser targetUser = null) =>
+                await ShowSkillsAsync(targetUser, true);
+
+            private async Task ShowSkillsAsync(IUser targetUser = null, bool useEffects = false)
             {
                 var userInfo = Context.User;
                 var character = targetUser == null
@@ -56,21 +67,25 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                var embed = EmbedHelper.BuildBasicEmbed("Command: $character skills",
+                var skills = character.Skills;
+                if (useEffects)
+                    skills = _effectsService.GetEffectiveSkills(character);
+
+                var embed = EmbedHelper.BuildBasicEmbed("Command: $skills",
                     $"**Name:** {character.Name}\n" +
-                    $"**Barter:** {character.Skills.Barter}\n" +
-                    $"**Energy Weapons:** {character.Skills.EnergyWeapons}\n" +
-                    $"**Explosives:** {character.Skills.Explosives}\n" +
-                    $"**Guns:** {character.Skills.Guns}\n" +
-                    $"**Lockpick:** {character.Skills.Lockpick}\n" +
-                    $"**Medicine:** {character.Skills.Medicine}\n" +
-                    $"**MeleeWeapons:** {character.Skills.MeleeWeapons}\n" +
-                    $"**Repair:** {character.Skills.Repair}\n" +
-                    $"**Science:** {character.Skills.Science}\n" +
-                    $"**Sneak:** {character.Skills.Sneak}\n" +
-                    $"**Speech:** {character.Skills.Speech}\n" +
-                    $"**Survival:** {character.Skills.Survival}\n" +
-                    $"**Unarmed:** {character.Skills.Unarmed}\n" +
+                    $"**Barter:** {skills.Barter}\n" +
+                    $"**Energy Weapons:** {skills.EnergyWeapons}\n" +
+                    $"**Explosives:** {skills.Explosives}\n" +
+                    $"**Guns:** {skills.Guns}\n" +
+                    $"**Lockpick:** {skills.Lockpick}\n" +
+                    $"**Medicine:** {skills.Medicine}\n" +
+                    $"**Melee Weapons:** {skills.MeleeWeapons}\n" +
+                    $"**Repair:** {skills.Repair}\n" +
+                    $"**Science:** {skills.Science}\n" +
+                    $"**Sneak:** {skills.Sneak}\n" +
+                    $"**Speech:** {skills.Speech}\n" +
+                    $"**Survival:** {skills.Survival}\n" +
+                    $"**Unarmed:** {skills.Unarmed}\n" +
                     $"*You have {character.SkillPoints} left to spend! ($char skills spend)*");
 
                 await ReplyAsync(userInfo.Mention, embed: embed);

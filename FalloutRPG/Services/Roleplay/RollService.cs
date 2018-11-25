@@ -22,15 +22,14 @@ namespace FalloutRPG.Services.Roleplay
         private int LUCK_INFLUENCE_SPECIAL_CUTOFF;
         private bool LUCK_INFLUENCE_ENABLED;
 
-        public RollService(SpecialService specService, SkillsService skillsService, IConfiguration config)
+        public RollService(SpecialService specService, SkillsService skillsService, IConfiguration config, Random rand)
         {
             _specService = specService;
             _skillsService = skillsService;
             _config = config;
+            _rand = rand;
 
             LoadLuckInfluenceConfig();
-
-            _rand = new Random();
         }
 
         /// <summary>
@@ -78,7 +77,7 @@ namespace FalloutRPG.Services.Roleplay
             }
         }
 
-        private double GetRollResult(int attribute, int luck, bool isSpecial)
+        public double GetRollResult(int attribute, int luck, bool isSpecial)
         {
             double rng = _rand.Next(1, 101);
 
@@ -101,12 +100,6 @@ namespace FalloutRPG.Services.Roleplay
 
             return resultPercent;
         }
-
-        public double GetRollResult(Character character, Globals.SkillType skill) =>
-            GetRollResult(_skillsService.GetSkill(character, skill), character.Special.Luck, false);
-
-        public double GetRollResult(Character character, Globals.SpecialType attribute) =>
-            GetRollResult(_specService.GetSpecial(character, attribute), character.Special.Luck, true);
 
         public string GetRollMessage(string charName, string roll, double percent)
         {

@@ -2,6 +2,7 @@
 using FalloutRPG.Data.Repositories;
 using FalloutRPG.Helpers;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Effects;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,14 @@ namespace FalloutRPG.Services.Roleplay
         /// Gets the active character from the repository by Discord ID.
         /// </summary>
         public async Task<Character> GetCharacterAsync(ulong discordId) =>
-            await _charRepository.Query.Where(c => c.DiscordId == discordId && c.Active == true).Include(c => c.Special).Include(c => c.Skills).FirstOrDefaultAsync();
+            await _charRepository.Query.Where(c => c.DiscordId == discordId && c.Active == true)
+            .Include(c => c.Special)
+            .Include(c => c.Skills)
+            .Include(c => c.Effects)
+                .ThenInclude(x => x.SkillAdditions)
+            .Include(c => c.Effects)
+                .ThenInclude(x => x.SpecialAdditions)
+            .FirstOrDefaultAsync();
 
         /// <summary>
         /// Gets all characters from the repository by Discord ID.
@@ -40,7 +48,14 @@ namespace FalloutRPG.Services.Roleplay
         /// <param name="discordId"></param>
         /// <returns></returns>
         public async Task<List<Character>> GetAllCharactersAsync(ulong discordId) =>
-            await _charRepository.Query.Where(c => c.DiscordId == discordId).Include(c => c.Special).Include(c => c.Skills).ToListAsync();
+            await _charRepository.Query.Where(c => c.DiscordId == discordId)
+            .Include(c => c.Special)
+            .Include(c => c.Skills)
+            .Include(c => c.Effects)
+                .ThenInclude(x => x.SkillAdditions)
+            .Include(c => c.Effects)
+                .ThenInclude(x => x.SpecialAdditions)
+            .ToListAsync();
 
         /// <summary>
         /// Creates a new character.
@@ -100,7 +115,8 @@ namespace FalloutRPG.Services.Roleplay
                     Speech = 0,
                     Survival = 0,
                     Unarmed = 0
-                }
+                },
+                Effects = new List<Effect>()
             };
 
             if (characters.Count == 0)
