@@ -2,6 +2,7 @@
 {
     public class Special : BaseModel
     {
+        public int CharacterId { get; set; }
         public int Strength { get; set; }
         public int Perception { get; set; }
         public int Endurance { get; set; }
