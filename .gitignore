@@ -259,3 +259,4 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/FalloutRPG/Properties/PublishProfiles/F.R.A.G.S. Release.pubxml
