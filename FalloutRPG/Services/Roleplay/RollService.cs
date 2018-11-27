@@ -17,6 +17,8 @@ namespace FalloutRPG.Services.Roleplay
 
         private readonly Random _rand;
 
+        public const int MAX_SUCCESS_ROLL_CAP = 95;
+
         private double LUCK_INFLUENCE;
         private int LUCK_INFLUENCE_SKILL_CUTOFF;
         private int LUCK_INFLUENCE_SPECIAL_CUTOFF;
@@ -91,8 +93,11 @@ namespace FalloutRPG.Services.Roleplay
             double luckMultiplier = 1.0 - (luck - 5 * (LUCK_INFLUENCE / 100.0));
 
             // Ensures that Luck influence never guarantees success
-            if (LUCK_INFLUENCE_ENABLED && attribute < LUCK_INFLUENCE_SKILL_CUTOFF && 95 * luckMultiplier > maxSuccessRoll)
+            if (LUCK_INFLUENCE_ENABLED && attribute < LUCK_INFLUENCE_SKILL_CUTOFF && MAX_SUCCESS_ROLL_CAP * luckMultiplier > maxSuccessRoll)
                 rng *= luckMultiplier;
+
+            // Ensure success is never guaranteed
+            if (maxSuccessRoll > MAX_SUCCESS_ROLL_CAP) maxSuccessRoll = MAX_SUCCESS_ROLL_CAP;
 
             // compares your roll with your skills, and how much better you did than the bare minimum
             double resultPercent = (maxSuccessRoll - rng) / maxSuccessRoll;
