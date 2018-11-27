@@ -10,5 +10,7 @@ namespace FalloutRPG.Models.Effects
 
         public virtual IList<EffectSpecial> SpecialAdditions { get; set; }
         public virtual IList<EffectSkill> SkillAdditions { get; set; }
+
+        public virtual IList<EffectCharacter> EffectCharacters { get; set; }
     }
 }

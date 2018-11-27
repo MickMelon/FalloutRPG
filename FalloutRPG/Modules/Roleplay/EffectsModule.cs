@@ -218,9 +218,14 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            if (character.Effects == null) character.Effects = new List<Effect>();
+            // product.Categories
+            //var categories = product.Categorizations.Select(c => c.Category);
 
-            character.Effects.Add(effect);
+            //if (character.Effects == null) character.Effects = new List<Effect>();
+            if (character.EffectCharacters == null) character.EffectCharacters = new List<EffectCharacter>();
+
+            // character.Effects.Add(effect);
+            character.EffectCharacters.Add(new EffectCharacter { Character = character, Effect = effect });
             await _charService.SaveCharacterAsync(character);
 
             await ReplyAsync(String.Format(Messages.EFFECT_APPLY_SUCCESS, effect.Name, character.Name, Context.User.Mention));
@@ -245,9 +250,10 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            if (character.Effects == null) character.Effects = new List<Effect>();
+            //if (character.Effects == null) character.Effects = new List<Effect>();
+            if (character.EffectCharacters == null) character.EffectCharacters = new List<EffectCharacter>();
 
-            character.Effects.Remove(effect);
+            character.EffectCharacters.Remove(character.EffectCharacters.Where(x => x.Effect.Equals(effect)).FirstOrDefault());
             await _charService.SaveCharacterAsync(character);
 
             await ReplyAsync(String.Format(Messages.EFFECT_REMOVE_SUCCESS, effect.Name, character.Name, Context.User.Mention));

@@ -33,7 +33,7 @@ namespace FalloutRPG.Models
         public Special Special { get; set; }
         public SkillSheet Skills { get; set; }
 
-        public virtual IList<Effect> Effects { get; set; }
+        public virtual IList<EffectCharacter> EffectCharacters { get; set; }
 
         public long Money { get; set; }
     }

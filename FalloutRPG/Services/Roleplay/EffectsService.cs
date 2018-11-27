@@ -60,7 +60,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             var newSkills = _skillsService.CloneSkills(character.Skills);
 
-            foreach (var effect in character.Effects)
+            foreach (var effect in character.EffectCharacters.Select(x => x.Effect))
             {
                 foreach (var skillEffect in effect.SkillAdditions)
                 {
@@ -77,7 +77,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             var newSpecial = _specialService.CloneSpecial(character.Special);
 
-            foreach (var effect in character.Effects)
+            foreach (var effect in character.EffectCharacters.Select(x => x.Effect))
                 foreach (var specialEffect in effect.SpecialAdditions)
                 {
                     var newValue = _specialService.GetSpecial(newSpecial, specialEffect.SpecialAttribute) + specialEffect.EffectValue;
@@ -125,7 +125,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach (var effect in character.Effects)
+            foreach (var effect in character.EffectCharacters.Select(x => x.Effect))
                 sb.Append($"{GetEffectInfo(effect)}\n**------**\n");
 
             return sb.ToString();
