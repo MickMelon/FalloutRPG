@@ -13,5 +13,21 @@ namespace FalloutRPG.Data
         public RpgContext(DbContextOptions<RpgContext> options) : base(options)
         {
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EffectCharacter>()
+                .HasKey(ec => new { ec.EffectId, ec.CharacterId });
+
+            modelBuilder.Entity<EffectCharacter>()
+                .HasOne(ec => ec.Effect)
+                .WithMany(e => e.EffectCharacters)
+                .HasForeignKey(ec => ec.EffectId);
+
+            modelBuilder.Entity<EffectCharacter>()
+                .HasOne(ec => ec.Character)
+                .WithMany(c => c.EffectCharacters)
+                .HasForeignKey(ec => ec.CharacterId);
+        }
     }
 }

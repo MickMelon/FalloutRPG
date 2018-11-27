@@ -36,10 +36,12 @@ namespace FalloutRPG.Services.Roleplay
             await _charRepository.Query.Where(c => c.DiscordId == discordId && c.Active == true)
             .Include(c => c.Special)
             .Include(c => c.Skills)
-            .Include(c => c.Effects)
-                .ThenInclude(x => x.SkillAdditions)
-            .Include(c => c.Effects)
-                .ThenInclude(x => x.SpecialAdditions)
+            .Include(c => c.EffectCharacters)
+                .ThenInclude(x => x.Effect)
+                    .ThenInclude(x => x.SkillAdditions)
+            .Include(c => c.EffectCharacters)
+                .ThenInclude(x => x.Effect)
+                    .ThenInclude(x => x.SpecialAdditions)
             .FirstOrDefaultAsync();
 
         /// <summary>
@@ -51,10 +53,12 @@ namespace FalloutRPG.Services.Roleplay
             await _charRepository.Query.Where(c => c.DiscordId == discordId)
             .Include(c => c.Special)
             .Include(c => c.Skills)
-            .Include(c => c.Effects)
-                .ThenInclude(x => x.SkillAdditions)
-            .Include(c => c.Effects)
-                .ThenInclude(x => x.SpecialAdditions)
+            .Include(c => c.EffectCharacters)
+                .ThenInclude(x => x.Effect)
+                    .ThenInclude(x => x.SkillAdditions)
+            .Include(c => c.EffectCharacters)
+                .ThenInclude(x => x.Effect)
+                    .ThenInclude(x => x.SpecialAdditions)
             .ToListAsync();
 
         /// <summary>
@@ -116,7 +120,7 @@ namespace FalloutRPG.Services.Roleplay
                     Survival = 0,
                     Unarmed = 0
                 },
-                Effects = new List<Effect>()
+                EffectCharacters = new List<EffectCharacter>()
             };
 
             if (characters.Count == 0)
