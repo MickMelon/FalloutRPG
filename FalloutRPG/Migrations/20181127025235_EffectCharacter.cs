@@ -8,7 +8,51 @@ namespace FalloutRPG.Migrations
         {
             migrationBuilder.Sql("PRAGMA foreign_keys = OFF;");
 
+            migrationBuilder.DropTable("EffectSpecial");
+            migrationBuilder.DropTable("EffectSkill");
             migrationBuilder.DropTable("Effects");
+
+            migrationBuilder.CreateTable(
+                name: "EffectSkill",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Skill = table.Column<int>(nullable: false),
+                    EffectValue = table.Column<int>(nullable: false),
+                    EffectId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EffectSkill", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EffectSkill_Effects_EffectId",
+                        column: x => x.EffectId,
+                        principalTable: "Effects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EffectSpecial",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SpecialAttribute = table.Column<int>(nullable: false),
+                    EffectValue = table.Column<int>(nullable: false),
+                    EffectId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EffectSpecial", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EffectSpecial_Effects_EffectId",
+                        column: x => x.EffectId,
+                        principalTable: "Effects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Effects",
