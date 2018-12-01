@@ -8,8 +8,6 @@ namespace FalloutRPG.Models
     {
         public string Name { get; set; }
 
-        public virtual Campaign Campaign { get; set; }
-
         public int Experience { get; set; }
         [NotMapped]
         public int Level
