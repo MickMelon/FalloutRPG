@@ -39,7 +39,7 @@ namespace FalloutRPG.Modules.Roleplay
             sb.Append($"**Description:** {item.Description}\n" +
                 $"**Value:** {item.Value}\n" +
                 $"**Weight:** {item.Weight} lbs\n" +
-                $"**Effects:** {String.Join(", ", item.Effects)}\n");
+                $"**Effects:** \"None for now.\"\n");
 
             if (item is ItemWeapon wep)
             {

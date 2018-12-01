@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20181201171248_Initial.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Discord.Addons.PassiveInteractive" Version="2.0.3" />
     <PackageReference Include="Discord.Net" Version="2.0.0-beta2-00975" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.2" />
@@ -16,9 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="CharacterDB.db">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
