@@ -58,7 +58,7 @@ namespace FalloutRPG.Modules
         [Command("giveexp")]
         public async Task GiveExperienceAsync(IUser user, int points)
         {
-            var character = await _charService.GetCharacterAsync(user.Id);
+            var character = await _charService.GetPlayerCharacterAsync(user.Id);
             if (character == null) return;
 
             await _experienceService.GiveExperienceAsync(character, points);

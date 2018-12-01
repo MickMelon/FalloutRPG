@@ -70,19 +70,18 @@ namespace FalloutRPG
             .AddSingleton<ReliabilityService>()
 
             // Roleplay
-            .AddSingleton<Random>()
-            .AddSingleton<RollService>()
-            .AddSingleton<SkillsService>()
-            .AddSingleton<SpecialService>()
-            .AddSingleton<StartupService>()
             .AddSingleton<CharacterService>()
+            .AddSingleton<EffectsService>()
+            .AddSingleton<ExperienceService>()
+            .AddSingleton<ItemService>()
             .AddSingleton<RollService>()
             .AddSingleton<RollDiceService>()
-            .AddSingleton<ExperienceService>()
             .AddSingleton<NpcService>()
             .AddSingleton<NpcPresetService>()
-            .AddSingleton<EffectsService>()
-            .AddSingleton<ItemService>()
+            .AddSingleton<PlayerService>()
+            .AddSingleton<SkillsService>()
+            .AddSingleton<SpecialService>()
+            .AddSingleton<Random>()
 
             // Addons
             .AddSingleton<InteractiveService>()

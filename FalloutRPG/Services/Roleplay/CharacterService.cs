@@ -37,8 +37,8 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Gets the active character from the repository by Discord ID.
         /// </summary>
-        public async Task<Character> GetCharacterAsync(ulong discordId) =>
-            await _charRepository.Query.Where(c => c.DiscordId == discordId && c.Active == true)
+        public async Task<PlayerCharacter> GetPlayerCharacterAsync(ulong discordId) =>
+            await _charRepository.Query.OfType<PlayerCharacter>().Where(x => x.Player.DiscordId == discordId)
             .Include(c => c.Special)
             .Include(c => c.Skills)
             .Include(c => c.EffectCharacters)
@@ -54,8 +54,8 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         /// <param name="discordId"></param>
         /// <returns></returns>
-        public async Task<List<Character>> GetAllCharactersAsync(ulong discordId) =>
-            await _charRepository.Query.Where(c => c.DiscordId == discordId)
+        public async Task<List<PlayerCharacter>> GetAllPlayerCharactersAsync(ulong discordId) =>
+            await _charRepository.Query.OfType<PlayerCharacter>().Where(x => x.Player.DiscordId == discordId)
             .Include(c => c.Special)
             .Include(c => c.Skills)
             .Include(c => c.EffectCharacters)

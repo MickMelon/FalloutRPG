@@ -186,7 +186,7 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task ShowCharacterEffectsAsync()
         {
             var userInfo = Context.User;
-            var character = await _charService.GetCharacterAsync(userInfo.Id);
+            var character = await _charService.GetPlayerCharacterAsync(userInfo.Id);
 
             if (character == null)
             {
@@ -202,7 +202,7 @@ namespace FalloutRPG.Modules.Roleplay
         [Command("apply")]
         public async Task ApplyEffectAsync([Remainder]string name)
         {
-            var character = await _charService.GetCharacterAsync(Context.User.Id);
+            var character = await _charService.GetPlayerCharacterAsync(Context.User.Id);
 
             if (character == null)
             {
@@ -234,7 +234,7 @@ namespace FalloutRPG.Modules.Roleplay
         [Command("unapply")]
         public async Task RemoveEffectAsync([Remainder]string name)
         {
-            var character = await _charService.GetCharacterAsync(Context.User.Id);
+            var character = await _charService.GetPlayerCharacterAsync(Context.User.Id);
 
             if (character == null)
             {
