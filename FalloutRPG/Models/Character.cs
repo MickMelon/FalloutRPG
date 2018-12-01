@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FalloutRPG.Models.Effects;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -39,7 +40,7 @@ namespace FalloutRPG.Models
 
         public long Money { get; set; }
 
-        public virtual List<Effect> Effects { get; set; }
+        public virtual IList<EffectCharacter> EffectCharacters { get; set; }
 
         public virtual List<Item> Inventory { get; set; }
     }

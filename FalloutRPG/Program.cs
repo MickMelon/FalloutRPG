@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using FalloutRPG.Data;
 using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Effects;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using Microsoft.EntityFrameworkCore;
@@ -66,10 +67,11 @@ namespace FalloutRPG
             .AddSingleton<LogService>()
             .AddSingleton<StartupService>()
             .AddSingleton<HelpService>()
-            .AddSingleton<PlayerService>()
-            .AddSingleton<Random>()
+            .AddSingleton<ReliabilityService>()
 
             // Roleplay
+            .AddSingleton<Random>()
+            .AddSingleton<RollService>()
             .AddSingleton<SkillsService>()
             .AddSingleton<SpecialService>()
             .AddSingleton<StartupService>()
@@ -86,10 +88,7 @@ namespace FalloutRPG
             .AddSingleton<InteractiveService>()
 
             // Database
-            .AddEntityFrameworkSqlite()
-                .AddDbContext<RpgContext>(optionsAction: options => options
-                .UseLazyLoadingProxies()
-                .UseSqlite("Filename=CharacterDB.db"))
+            .AddEntityFrameworkSqlite().AddDbContext<RpgContext>(optionsAction: options => options.UseSqlite("Filename=CharacterDB.db"))
             .AddTransient<IRepository<Player>, EfRepository<Player>>()
             .AddTransient<IRepository<Character>, EfRepository<Character>>()
             .AddTransient<IRepository<SkillSheet>, EfRepository<SkillSheet>>()

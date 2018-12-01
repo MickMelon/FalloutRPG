@@ -9,6 +9,7 @@
         public const string NPC_SUFFIX = "(\uD83D\uDCBBNPC) ";
         public const string QUESTION_EMOJI = "❓ ";
         public const string DICE_EMOJI = "\uD83C\uDFB2";
+        public const string MUSCLE_EMOJI = "\uD83D\uDCAA";
 
         // Character Messages
         public const string CHAR_CREATED_SUCCESS = SUCCESS_EMOJI + "Character created successfully. ({0})";
@@ -36,6 +37,7 @@
         // Admin Messages
         public const string ADM_GAVE_MONEY = ADM_EMOJI + "Money given successfully. ({0})";
         public const string ADM_GAVE_SKILL_POINTS = ADM_EMOJI + "Skill points given successfully. ({0})";
+        public const string ADM_GAVE_EXP_POINTS = ADM_EMOJI + "Experience points given successfully. ({0})";
         public const string ADM_GAVE_SPEC_POINTS = ADM_EMOJI + "SPECIAL points given successfully. ({0})";
         public const string ADM_RESET = ADM_EMOJI + "Reset character skills and SPECIAL successfully. ({0})";
         public const string ADM_DELETE = ADM_EMOJI + "Deleted character successfully. ({0})";
@@ -80,35 +82,6 @@
         public const string ERR_NPC_PRESET_DISABLE = FAILURE_EMOJI + "Failed to disable NPC preset: {0}. (Check for typos) ({1})";
         public const string ERR_NPC_PRESET_EDIT = FAILURE_EMOJI + "Failed to modify NPC preset attribute. ({0})";
 
-        // Campaign Messages
-        public const string CAMP_CREATED_SUCCESS = SUCCESS_EMOJI + "Campaign created successfully. ({0})";
-        public const string CAMP_REMOVE_CONFIRM = QUESTION_EMOJI + "**Are you sure you want to delete `{0}` AND all of its' characters? (members: {1}) This action CANNOT be undone!**" +
-            " To confirm this action, reply with the name of the campaign. ({2})";
-        public const string CAMP_REMOVE_SUCCESS = SUCCESS_EMOJI + "The campaign was deleted successfully. ({0})";
-        public const string CAMP_NOT_REMOVED = FAILURE_EMOJI + "The campaign `{0}` was **NOT** deleted. ({1})";
-        public const string CAMP_INVITATION = QUESTION_EMOJI + "{0} invites you to join the campaign `{1}`. Reply back with the campaign name to join. ({2})";
-        public const string CAMP_JOIN_SUCCESS = SUCCESS_EMOJI + "{0} has joined the campaign!";
-        public const string CAMP_JOIN_FAILURE = FAILURE_EMOJI + "{0} has not joined the campaign.";
-        public const string CAMP_MOD_SUCCESS = SUCCESS_EMOJI + "{0} has been promoted to moderator. ({1})";
-        public const string CAMP_CHAR_CONVERT_CONFIRMATION = QUESTION_EMOJI + "**Are you sure you want to convert `{0}` (level {1}) to a campaign character? " +
-            "Converting a character to a campaign forbids use of it outside of it. This means you will be *unable to roll* in public channels! " +
-            "This action CANNOT be undone!** To confirm this action, reply with the name of the character. ({2})";
-        public const string CAMP_CHAR_CONVERT_SUCCESS = SUCCESS_EMOJI + "{0} joins the campaign!";
-        public const string CAMP_CHAR_CONVERT_FAILURE = FAILURE_EMOJI + "{0} has not joined the campaign.";
-        
-        // Campaign Cheat Messages
-        public const string CHEAT_LEVEL_CHANGE = SUCCESS_EMOJI + "Level change successful. ({0})";
-        public const string CHEAT_SKILL_POINTS_GIVEN = SUCCESS_EMOJI + "Skill points successfully set. ({0})";
-        public const string CHEAT_CHAR_EDIT = SUCCESS_EMOJI + "Character edited successfully. ({0})";
-
-        // Campaign Error Messages
-        public const string ERR_CAMP_NOT_FOUND = FAILURE_EMOJI + "Campaign not found. ({0})";
-        public const string ERR_CAMP_NOT_OWNER = FAILURE_EMOJI + "This command can only be ran by the campaign owner. ({0})";
-        public const string ERR_CAMP_NOT_MODERATOR = FAILURE_EMOJI + "This command can only be ran by a campaign moderator. ({0})";
-        public const string ERR_CAMP_ALREADY_IN = FAILURE_EMOJI + "The user trying to be added is already the campaign. ({0})";
-        public const string ERR_CAMP_NOT_A_MEMBER = FAILURE_EMOJI + "The specified player is not in this campaign. ({0})";
-        public const string ERR_CAMP_CHANNEL_COMMAND = FAILURE_EMOJI + "This command must be run in a campaign text channel. ({0})";
-        public const string ERR_CAMP_NAME_LENGTH = FAILURE_EMOJI + "Campaign name must be between 2-24 letters each. ({0})";
 
         // Item Messages
         public const string ITEM_GIVE_SUCCESS = SUCCESS_EMOJI + "Gave item {0} to {1}. ({2})";
@@ -118,6 +91,20 @@
         public const string ERR_ITEM_NOT_FOUND = FAILURE_EMOJI + "That item was unable to be found. ({0})";
         public const string ERR_ITEM_INVALID_SLOT = FAILURE_EMOJI + "The given apparel slot was invalid. ({0})";
         public const string ERR_ITEM_INVALID_AMMO = FAILURE_EMOJI + "The given ammo was unable to be found; does it exist yet? ({0})";
+
+        // Effects Messages
+        public const string EFFECT_CREATE_SUCCESS = SUCCESS_EMOJI + "Effect created successfully. ({0})";
+        public const string EFFECT_EDIT_SUCCESS = SUCCESS_EMOJI + "Effect edited successfully. ({0})";
+        public const string EFFECT_DELETE_SUCCESS = SUCCESS_EMOJI + "Effect deleted successfully. ({0})";
+        public const string EFFECT_APPLY_SUCCESS = SUCCESS_EMOJI + "`{0}` applied successfully to `{1}`. ({2})";
+        public const string EFFECT_REMOVE_SUCCESS = SUCCESS_EMOJI + "`{0}` successfully removed from `{1}`. ({2})";
+
+        // Effects Error Messages
+        public const string ERR_EFFECT_NOT_FOUND = FAILURE_EMOJI + "Unable to find effect. ({0})";
+        public const string ERR_EFFECT_TOO_MANY = FAILURE_EMOJI + "You have reached the limit of effects per account. ({0})";
+        public const string ERR_EFFECT_NAME_DUPLICATE = FAILURE_EMOJI + "An effect already exists with the given name. ({0})";
+        public const string ERR_EFFECT_NAME_TOO_LONG = FAILURE_EMOJI + "The given effect name was too long. ({0})";
+        public const string ERR_EFFECT_NOT_ALPHABETICAL = FAILURE_EMOJI + "The effect name must contain only letters. ({0})";
 
         // Roll Messages
         public const string ROLL_DICE = DICE_EMOJI + "Rolled: {0}. ({1})";

@@ -9,7 +9,7 @@ namespace FalloutRPG.Services.Roleplay
     public class SpecialService
     {
         private const int DEFAULT_SPECIAL_POINTS = 40;
-        private const int MAX_SPECIAL = 10;
+        public const int MAX_SPECIAL = 10;
 
         private readonly CharacterService _charService;
 
@@ -49,30 +49,56 @@ namespace FalloutRPG.Services.Roleplay
             return false;
         }
 
+        public Special CloneSpecial(Special special)
+        {
+            var newSpecial = new Special();
+
+            foreach (var item in typeof(Special).GetProperties())
+                item.SetValue(newSpecial, item.GetValue(special));
+
+            newSpecial.Id = -1;
+
+            return newSpecial;
+        }
+
+        /// <summary>
+        /// Returns the value of the specified special.
+        /// </summary>
+        /// <returns>Returns 0 if special values are null.</returns>
+        public int GetSpecial(Special specialSheet, Globals.SpecialType special)
+        {
+            if (specialSheet == null)
+                return 0;
+
+            return (int)typeof(Special).GetProperty(special.ToString()).GetValue(specialSheet);
+        }
+
         /// <summary>
         /// Returns the value of the specified character's given special.
         /// </summary>
         /// <returns>Returns 0 if character or special values are null.</returns>
-        public int GetSpecial(Character character, Globals.SpecialType special)
-        {
-            if (character == null || !IsSpecialSet(character))
-                return 0;
+        public int GetSpecial(Character character, Globals.SpecialType special) =>
+            GetSpecial(character?.Special, special);
 
-            return (int)typeof(Special).GetProperty(special.ToString()).GetValue(character.Special);
+        /// <summary>
+        /// Sets the value of the specified character's given special.
+        /// </summary>
+        /// <returns>Returns false if special is null.</returns>
+        public bool SetSpecial(Special specialSheet, Globals.SpecialType special, int newValue)
+        {
+            if (specialSheet == null)
+                return false;
+
+            typeof(Special).GetProperty(special.ToString()).SetValue(specialSheet, newValue);
+            return true;
         }
 
         /// <summary>
-        /// Returns the value of the specified character's given skill.
+        /// Sets the value of the specified character's given special.
         /// </summary>
-        /// <returns>Returns false if character or skills are null.</returns>
-        public bool SetSpecial(Character character, Globals.SpecialType special, int newValue)
-        {
-            if (character == null || !IsSpecialSet(character))
-                return false;
-
-            typeof(Special).GetProperty(special.ToString()).SetValue(character.Special, newValue);
-            return true;
-        }
+        /// <returns>Returns false if character or special are null.</returns>
+        public bool SetSpecial(Character character, Globals.SpecialType special, int newValue) =>
+            SetSpecial(character?.Special, special, newValue);
 
         /// <summary>
         /// Checks if each number in SPECIAL is between 1 and 10

@@ -1,4 +1,5 @@
 ﻿using FalloutRPG.Models;
+using FalloutRPG.Models.Effects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -19,16 +20,29 @@ namespace FalloutRPG.Data
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            builder.Entity<PlayerCharacter>();
-            builder.Entity<ItemAmmo>();
-            builder.Entity<ItemApparel>();
-            builder.Entity<ItemConsumable>();
-            builder.Entity<ItemMisc>();
-            builder.Entity<ItemWeapon>();
+            modelBuilder.Entity<EffectCharacter>()
+                .HasKey(ec => new { ec.EffectId, ec.CharacterId });
 
-            base.OnModelCreating(builder);
+            modelBuilder.Entity<EffectCharacter>()
+                .HasOne(ec => ec.Effect)
+                .WithMany(e => e.EffectCharacters)
+                .HasForeignKey(ec => ec.EffectId);
+
+            modelBuilder.Entity<EffectCharacter>()
+                .HasOne(ec => ec.Character)
+                .WithMany(c => c.EffectCharacters)
+                .HasForeignKey(ec => ec.CharacterId);
+
+            modelBuilder.Entity<PlayerCharacter>();
+            modelBuilder.Entity<ItemAmmo>();
+            modelBuilder.Entity<ItemApparel>();
+            modelBuilder.Entity<ItemConsumable>();
+            modelBuilder.Entity<ItemMisc>();
+            modelBuilder.Entity<ItemWeapon>();
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

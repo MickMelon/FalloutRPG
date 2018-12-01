@@ -101,7 +101,8 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            var charMatch = chars.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            //var charMatch = chars.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            var charMatch = chars.Find(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
 
             if (charMatch == null)
             {

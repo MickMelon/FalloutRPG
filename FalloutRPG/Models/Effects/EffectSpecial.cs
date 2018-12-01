@@ -1,6 +1,6 @@
 ﻿using FalloutRPG.Constants;
 
-namespace FalloutRPG.Models
+namespace FalloutRPG.Models.Effects
 {
     public class EffectSpecial : BaseModel
     {

@@ -2,6 +2,7 @@
 using FalloutRPG.Data.Repositories;
 using FalloutRPG.Helpers;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Effects;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -36,16 +37,34 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Gets the active character from the repository by Discord ID.
         /// </summary>
-        public async Task<PlayerCharacter> GetPlayerCharacterAsync(ulong discordId) =>
-            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId && c.Active == true).FirstOrDefaultAsync();
+        public async Task<Character> GetCharacterAsync(ulong discordId) =>
+            await _charRepository.Query.Where(c => c.DiscordId == discordId && c.Active == true)
+            .Include(c => c.Special)
+            .Include(c => c.Skills)
+            .Include(c => c.EffectCharacters)
+                .ThenInclude(x => x.Effect)
+                    .ThenInclude(x => x.SkillAdditions)
+            .Include(c => c.EffectCharacters)
+                .ThenInclude(x => x.Effect)
+                    .ThenInclude(x => x.SpecialAdditions)
+            .FirstOrDefaultAsync();
 
         /// <summary>
         /// Gets all characters from the repository by Discord ID.
         /// </summary>
         /// <param name="discordId"></param>
         /// <returns></returns>
-        public async Task<List<PlayerCharacter>> GetAllPlayerCharactersAsync(ulong discordId) =>
-            await _charRepository.Query.OfType<PlayerCharacter>().Where(c => c.Player.DiscordId == discordId).ToListAsync();
+        public async Task<List<Character>> GetAllCharactersAsync(ulong discordId) =>
+            await _charRepository.Query.Where(c => c.DiscordId == discordId)
+            .Include(c => c.Special)
+            .Include(c => c.Skills)
+            .Include(c => c.EffectCharacters)
+                .ThenInclude(x => x.Effect)
+                    .ThenInclude(x => x.SkillAdditions)
+            .Include(c => c.EffectCharacters)
+                .ThenInclude(x => x.Effect)
+                    .ThenInclude(x => x.SpecialAdditions)
+            .ToListAsync();
 
         /// <summary>
         /// Creates a new character.
@@ -82,7 +101,8 @@ namespace FalloutRPG.Services.Roleplay
                 Money = 1000,
                 Special = new Special(),
                 Skills = new SkillSheet(),
-                Inventory = new List<Item>()
+                Inventory = new List<Item>(),
+                EffectCharacters = new List<EffectCharacter>()
             };
 
             if (characters.Count == 0)
