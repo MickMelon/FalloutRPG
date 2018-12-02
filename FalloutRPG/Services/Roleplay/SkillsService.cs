@@ -1,4 +1,4 @@
-﻿using FalloutRPG.Constants;
+using FalloutRPG.Constants;
 using FalloutRPG.Models;
 using System;
 using System.Threading.Tasks;
@@ -8,7 +8,7 @@ namespace FalloutRPG.Services.Roleplay
     public class SkillsService
     {
         private const int DEFAULT_SKILL_POINTS = 10;
-        private const int MAX_SKILL_LEVEL = 100;
+        public const int MAX_SKILL_LEVEL = 200;
 
         private readonly CharacterService _charService;
         private readonly SpecialService _specService;
@@ -63,30 +63,53 @@ namespace FalloutRPG.Services.Roleplay
             return true;
         }
 
+        public SkillSheet CloneSkills(SkillSheet skillSheet)
+        {
+            var skills = new SkillSheet();
+
+            foreach (var item in typeof(SkillSheet).GetProperties())
+                item.SetValue(skills, item.GetValue(skillSheet));
+
+            skills.Id = -1;
+
+            return skills;
+        }
+
         /// <summary>
         /// Returns the value of the specified character's given skill.
         /// </summary>
         /// <returns>Returns 0 if character or skills are null.</returns>
-        public int GetSkill(Character character, Globals.SkillType skill)
+        public int GetSkill(SkillSheet skillSheet, Globals.SkillType skill)
         {
-            if (character == null || !AreSkillsSet(character))
+            if (skillSheet == null)
                 return 0;
 
-            return (int)typeof(SkillSheet).GetProperty(skill.ToString()).GetValue(character.Skills);
+            return (int)typeof(SkillSheet).GetProperty(skill.ToString()).GetValue(skillSheet);
+        }
+
+        /// <returns>Returns 0 if character or skills are null.</returns>
+        public int GetSkill(Character character, Globals.SkillType skill) =>
+            GetSkill(character?.Skills, skill);
+
+        /// <summary>
+        /// Sets the value of the specified character's given skill.
+        /// </summary>
+        /// <returns>Returns false if skills are null.</returns>
+        public bool SetSkill(SkillSheet skillSheet, Globals.SkillType skill, int newValue)
+        {
+            if (skillSheet == null)
+                return false;
+
+            typeof(SkillSheet).GetProperty(skill.ToString()).SetValue(skillSheet, newValue);
+            return true;
         }
 
         /// <summary>
-        /// Returns the value of the specified character's given skill.
+        /// Sets the value of the specified character's given skill.
         /// </summary>
         /// <returns>Returns false if character or skills are null.</returns>
-        public bool SetSkill(Character character, Globals.SkillType skill, int newValue)
-        {
-            if (character == null || !AreSkillsSet(character))
-                return false;
-
-            typeof(SkillSheet).GetProperty(skill.ToString()).SetValue(character.Skills, newValue);
-            return true;
-        }
+        public bool SetSkill(Character character, Globals.SkillType skill, int newValue) =>
+            SetSkill(character?.Skills, skill, newValue);
 
         /// <summary>
         /// Gives character their skill points from leveling up.

@@ -89,7 +89,7 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("activate")]
-        [Alias("active")]
+        [Alias("active", "act")]
         public async Task ActivateCharacterAsync([Remainder]string name)
         {
             var chars = await _charService.GetAllCharactersAsync(Context.User.Id);
@@ -100,7 +100,8 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            var charMatch = chars.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            //var charMatch = chars.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            var charMatch = chars.Find(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
 
             if (charMatch == null)
             {

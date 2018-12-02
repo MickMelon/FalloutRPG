@@ -7,6 +7,7 @@
         public const string STAR_EMOJI = "\u2B50 ";
         public const string ADM_EMOJI = "👮 ";
         public const string QUESTION_EMOJI = "❓ ";
+        public const string MUSCLE_EMOJI = "\uD83D\uDCAA";
 
         // Character Messages
         public const string CHAR_CREATED_SUCCESS = SUCCESS_EMOJI + "Character created successfully. ({0})";
@@ -34,6 +35,7 @@
         // Admin Messages
         public const string ADM_GAVE_MONEY = ADM_EMOJI + "Money given successfully. ({0})";
         public const string ADM_GAVE_SKILL_POINTS = ADM_EMOJI + "Skill points given successfully. ({0})";
+        public const string ADM_GAVE_EXP_POINTS = ADM_EMOJI + "Experience points given successfully. ({0})";
         public const string ADM_GAVE_SPEC_POINTS = ADM_EMOJI + "SPECIAL points given successfully. ({0})";
         public const string ADM_RESET = ADM_EMOJI + "Reset character skills and SPECIAL successfully. ({0})";
         public const string ADM_DELETE = ADM_EMOJI + "Deleted character successfully. ({0})";
@@ -100,5 +102,19 @@
         public const string ERR_CRAPS_JOIN_FAIL = FAILURE_EMOJI + "Failed to join {0} into the match!";
         public const string ERR_CRAPS_LEAVE_FAIL = FAILURE_EMOJI + "Failed to remove {0} match, are they the shooter?";
         public const string ERR_CRAPS_PASS_FAIL = FAILURE_EMOJI + "Couldn't pass the dice for {0}. (Do you have a bet placed, or the only one playing?)";
+
+        // Effects Messages
+        public const string EFFECT_CREATE_SUCCESS = SUCCESS_EMOJI + "Effect created successfully. ({0})";
+        public const string EFFECT_EDIT_SUCCESS = SUCCESS_EMOJI + "Effect edited successfully. ({0})";
+        public const string EFFECT_DELETE_SUCCESS = SUCCESS_EMOJI + "Effect deleted successfully. ({0})";
+        public const string EFFECT_APPLY_SUCCESS = SUCCESS_EMOJI + "`{0}` applied successfully to `{1}`. ({2})";
+        public const string EFFECT_REMOVE_SUCCESS = SUCCESS_EMOJI + "`{0}` successfully removed from `{1}`. ({2})";
+
+        // Effects Error Messages
+        public const string ERR_EFFECT_NOT_FOUND = FAILURE_EMOJI + "Unable to find effect. ({0})";
+        public const string ERR_EFFECT_TOO_MANY = FAILURE_EMOJI + "You have reached the limit of effects per account. ({0})";
+        public const string ERR_EFFECT_NAME_DUPLICATE = FAILURE_EMOJI + "An effect already exists with the given name. ({0})";
+        public const string ERR_EFFECT_NAME_TOO_LONG = FAILURE_EMOJI + "The given effect name was too long. ({0})";
+        public const string ERR_EFFECT_NOT_ALPHABETICAL = FAILURE_EMOJI + "The effect name must contain only letters. ({0})";
     }
 }
