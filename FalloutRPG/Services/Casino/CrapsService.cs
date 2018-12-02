@@ -113,27 +113,7 @@ namespace FalloutRPG.Services.Casino
             if (betAmount < _gamblingService.MINIMUM_BET)
                 return String.Format(Messages.ERR_BET_TOO_LOW, user.Mention);
 
-            betToPlace = betToPlace.ToLower();
-
-            BetType betType = BetType.Error;
-
-            switch (betToPlace)
-            {
-                case "pass":
-                    betType = BetType.Pass;
-                    break;
-                case "dontpass":
-                    betType = BetType.DontPass;
-                    break;
-                case "come":
-                    betType = BetType.Come;
-                    break;
-                case "dontcome":
-                    betType = BetType.DontCome;
-                    break;
-            }
-
-            if (betType != BetType.Error)
+            if (Enum.TryParse(betToPlace, true, out BetType betType))
             {
                 if (_round == Round.ComeOut)
                 {
@@ -149,11 +129,13 @@ namespace FalloutRPG.Services.Casino
                 }
 
                 _bets.Add(new Bet(user, betAmount, betType));
+
                 if (user == Shooter)
                 {
                     _rollTimer.Stop();
                     _rollTimer.Start();
                 }
+
                 return String.Format(Messages.BET_PLACED, user.Mention);
             }
             else
@@ -195,9 +177,13 @@ namespace FalloutRPG.Services.Casino
                 return JoinMatchResult.Success;
             }
             else if (result == GamblingService.AddUserBalanceResult.NullCharacter)
+            {
                 return JoinMatchResult.NullCharacter;
+            }
             else
+            {
                 return JoinMatchResult.UnknownError;
+            }
         }
 
         public enum JoinMatchResult
@@ -328,6 +314,7 @@ namespace FalloutRPG.Services.Casino
                     result += String.Format(Messages.CRAPS_POINT_ROLL, Shooter.Mention) + "\n";
                 }
             }
+
             BetType losingBet = BetType.Error;
 
             if (winningBet == BetType.Pass)
@@ -338,15 +325,21 @@ namespace FalloutRPG.Services.Casino
             foreach (var bet in _bets.ToList())
             {
                 if (bet.BetType == winningBet)
+                {
                     await AwardBet(bet);
+                }
                 else if (bet.BetType == losingBet)
+                {
                     await AwardBet(bet, false);
+                }
             }
 
             if (sevenOut)
             {
                 NextShooter();
+
                 if (_players.Count == 1)
+                    // Will display a message along the lines of "X is the new shooter, but they're the only one playing!"
                     result += String.Format(Messages.CRAPS_NEW_SHOOTER_ONE_PLAYER, Shooter.Mention, roll) + "\n";
                 else
                     result += String.Format(Messages.CRAPS_NEW_SHOOTER, Shooter.Mention, roll) + "\n";

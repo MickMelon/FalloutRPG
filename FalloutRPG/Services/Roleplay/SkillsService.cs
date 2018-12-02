@@ -1,4 +1,4 @@
-﻿using FalloutRPG.Constants;
+using FalloutRPG.Constants;
 using FalloutRPG.Models;
 using System;
 using System.Threading.Tasks;
@@ -22,15 +22,12 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Set character's tag skills.
         /// </summary>
-        public async Task SetTagSkills(Character character, string tag1, string tag2, string tag3)
+        public async Task SetTagSkills(Character character, Globals.SkillType tag1, Globals.SkillType tag2, Globals.SkillType tag3)
         {
             if (character == null) throw new ArgumentNullException("character");
 
             if (!_specService.IsSpecialSet(character))
                 throw new Exception(Exceptions.CHAR_SPECIAL_NOT_FOUND);
-
-            if (!IsValidSkillName(tag1) || !IsValidSkillName(tag2) || !IsValidSkillName(tag3))
-                throw new ArgumentException(Exceptions.CHAR_INVALID_TAG_NAMES);
 
             if (!AreUniqueTags(tag1, tag2, tag3))
                 throw new ArgumentException(Exceptions.CHAR_TAGS_NOT_UNIQUE);
@@ -90,9 +87,6 @@ namespace FalloutRPG.Services.Roleplay
             return (int)typeof(SkillSheet).GetProperty(skill.ToString()).GetValue(skillSheet);
         }
 
-        /// <summary>
-        /// Returns the value of the specified character's given skill.
-        /// </summary>
         /// <returns>Returns 0 if character or skills are null.</returns>
         public int GetSkill(Character character, Globals.SkillType skill) =>
             GetSkill(character?.Skills, skill);
@@ -143,37 +137,25 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Puts an amount of points in a specified skill.
         /// </summary>
-        public void PutPointsInSkill(Character character, string skill, int points)
+        public void PutPointsInSkill(Character character, Globals.SkillType skill, int points)
         {
             if (character == null) throw new ArgumentNullException("character");
 
             if (!AreSkillsSet(character))
                 throw new Exception(Exceptions.CHAR_SKILLS_NOT_SET);
 
-            if (!IsValidSkillName(skill))
-                throw new ArgumentException(Exceptions.CHAR_INVALID_SKILL_NAME);
-
             if (points < 1) return;
 
             if (points > character.SkillPoints)
                 throw new Exception(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
 
-            var properties = character.Skills.GetType().GetProperties();
+            var skillVal = GetSkill(character, skill);
 
-            foreach (var prop in properties)
-            {
-                if (prop.Name.Equals(skill, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    var propSkill = Convert.ToInt32(prop.GetValue(character.Skills));
+            if ((skillVal + points) > MAX_SKILL_LEVEL)
+                throw new Exception(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
 
-                    if ((propSkill + points) > MAX_SKILL_LEVEL)
-                        throw new Exception(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
-
-                    prop.SetValue(character.Skills, (propSkill + points));
-                    character.SkillPoints -= points;
-                    return;
-                }
-            }
+            SetSkill(character, skill, skillVal + points);
+            character.SkillPoints -= points;
         }
 
         /// <summary>
@@ -193,11 +175,11 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Checks if all the tags are unique.
         /// </summary>
-        private bool AreUniqueTags(string tag1, string tag2, string tag3)
+        private bool AreUniqueTags(Globals.SkillType tag1, Globals.SkillType tag2, Globals.SkillType tag3)
         {
-            if (tag1.Equals(tag2, StringComparison.InvariantCultureIgnoreCase) ||
-                tag1.Equals(tag3, StringComparison.InvariantCultureIgnoreCase) ||
-                tag2.Equals(tag3, StringComparison.InvariantCultureIgnoreCase))
+            if (tag1.Equals(tag2) ||
+                tag1.Equals(tag3) ||
+                tag2.Equals(tag3))
                 return false;
 
             return true;
@@ -206,17 +188,9 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Sets a character's tag skill.
         /// </summary>
-        private void SetTagSkill(Character character, string tag)
+        private void SetTagSkill(Character character, Globals.SkillType tag)
         {
-            var properties = character.Skills.GetType().GetProperties();
-
-            foreach (var prop in properties)
-            {
-                if (prop.Name.Equals(tag, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    prop.SetValue(character.Skills, (Convert.ToInt32(prop.GetValue(character.Skills)) + 15));
-                }
-            }
+            SetSkill(character, tag, GetSkill(character, tag) + 15);
         }
 
         /// <summary>

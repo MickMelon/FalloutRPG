@@ -35,7 +35,7 @@ namespace FalloutRPG.Modules.Roleplay
 
             var fixedName = StringHelper.ToTitleCase(name);
 
-            if (await _charService.CheckDuplicateNames(Context.User.Id, fixedName))
+            if (await _charService.HasDuplicateName(Context.User.Id, fixedName))
                 return;
 
             character.Name = fixedName;
