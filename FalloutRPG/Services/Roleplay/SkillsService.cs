@@ -8,6 +8,9 @@ namespace FalloutRPG.Services.Roleplay
     public class SkillsService
     {
         private const int DEFAULT_SKILL_POINTS = 10;
+
+        private const int TAG_ADDITION = 15;
+
         public const int MAX_SKILL_LEVEL = 200;
 
         private readonly CharacterService _charService;
@@ -87,6 +90,9 @@ namespace FalloutRPG.Services.Roleplay
             return (int)typeof(SkillSheet).GetProperty(skill.ToString()).GetValue(skillSheet);
         }
 
+        /// <summary>
+        /// Returns the value of the specified character's given skill.
+        /// </summary>
         /// <returns>Returns 0 if character or skills are null.</returns>
         public int GetSkill(Character character, Globals.SkillType skill) =>
             GetSkill(character?.Skills, skill);
@@ -188,15 +194,15 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Sets a character's tag skill.
         /// </summary>
-        private void SetTagSkill(Character character, Globals.SkillType tag)
+        public void SetTagSkill(Character character, Globals.SkillType tag)
         {
-            SetSkill(character, tag, GetSkill(character, tag) + 15);
+            SetSkill(character, tag, GetSkill(character, tag) + TAG_ADDITION);
         }
 
         /// <summary>
         /// Initializes a character's skills.
         /// </summary>
-        private void InitializeSkills(Character character)
+        public void InitializeSkills(Character character)
         {
             character.Skills = new SkillSheet()
             {

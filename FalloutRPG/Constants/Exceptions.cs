@@ -25,5 +25,13 @@ namespace FalloutRPG.Constants
         public const string CHAR_NOT_ENOUGH_SPECIAL_POINTS = "Not enough SPECIAL points.";
         public const string CHAR_SPECIAL_POINTS_GOES_OVER_MAX = "Unable to add SPECIAL points because it will take skill above the max level.";
         public const string CHAR_TOO_MANY = "You have reached the limit of characters per account.";
+
+        // NPC Exceptions
+        public const string NPC_CHAR_EXISTS = "A character with that name already exists!";
+        public const string NPC_LEVEL_TOO_HIGH = "The given level was too high for the NPC preset.";
+        public const string NPC_LEVEL_TOO_LOW = "The given level was too low for the NPC preset.";
+        public const string NPC_INVALID_PRESET = "The specified NPC preset was invalid.";
+        public const string NPC_INVALID_PRESET_DISABLED = "The specified NPC preset is not enabled yet.";
+        public const string NPC_PRESET_EXISTS = "The specified name matched an existing NPC preset";
     }
 }
