@@ -399,6 +399,45 @@ namespace FalloutRPG.Migrations
             DROP TABLE sqlitestudio_temp_table;
 
             PRAGMA foreign_keys = 1;");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_SkillsId",
+                table: "Characters",
+                column: "SkillsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_SpecialId",
+                table: "Characters",
+                column: "SpecialId");
+
+            migrationBuilder.CreateTable(
+            name: "NpcPresets",
+            columns: table => new
+            {
+                Id = table.Column<int>(nullable: false)
+                    .Annotation("Sqlite:Autoincrement", true),
+                Name = table.Column<string>(nullable: true),
+                Enabled = table.Column<bool>(nullable: false),
+                SpecialId = table.Column<int>(nullable: true),
+                Tag1 = table.Column<int>(nullable: false),
+                Tag2 = table.Column<int>(nullable: false),
+                Tag3 = table.Column<int>(nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_NpcPresets", x => x.Id);
+                table.ForeignKey(
+                    name: "FK_NpcPresets_Special_SpecialId",
+                    column: x => x.SpecialId,
+                    principalTable: "Special",
+                    principalColumn: "Id",
+                    onDelete: ReferentialAction.Restrict);
+            });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NpcPresets_SpecialId",
+                table: "NpcPresets",
+                column: "SpecialId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

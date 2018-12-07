@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FalloutRPG.Migrations
 {
     [DbContext(typeof(RpgContext))]
-    [Migration("20181203143044_Npcs")]
+    [Migration("20181207180317_Npcs")]
     partial class Npcs
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
