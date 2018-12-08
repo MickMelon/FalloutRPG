@@ -116,5 +116,6 @@
         public const string ERR_EFFECT_NAME_DUPLICATE = FAILURE_EMOJI + "An effect already exists with the given name. ({0})";
         public const string ERR_EFFECT_NAME_TOO_LONG = FAILURE_EMOJI + "The given effect name was too long. ({0})";
         public const string ERR_EFFECT_NOT_ALPHABETICAL = FAILURE_EMOJI + "The effect name must contain only letters. ({0})";
+        public const string ERR_EFFECT_ALREADY_APPLIED = FAILURE_EMOJI + "The specified effect is already applied. ({0})";
     }
 }
