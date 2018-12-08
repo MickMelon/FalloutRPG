@@ -46,7 +46,16 @@ namespace FalloutRPG.Services
             await _commands.AddModulesAsync(
                 assembly: Assembly.GetEntryAssembly(),
                 services: _services);
-            _client.MessageReceived += HandleCommandAsync;
+
+            #pragma warning disable CS1998
+            _client.MessageReceived += async (message) =>
+            #pragma warning restore CS1998
+            {
+                #pragma warning disable CS4014
+                Task.Run(() => HandleCommandAsync(message));
+                #pragma warning restore CS4014
+            };
+
             _commands.CommandExecuted += OnCommandExecutedAsync;
         }
 
@@ -80,24 +89,32 @@ namespace FalloutRPG.Services
         /// </summary>
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
-            if (!(messageParam is SocketUserMessage message) || message.Author.IsBot) return;
-
-            int argPos = 0;
-            var context = new SocketCommandContext(_client, message);
-
-            if (!(message.HasStringPrefix(_config["prefix"], ref argPos) ||
-                message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
+            try
             {
-                await _expService.ProcessExperienceAsync(context);
-                return;
+                if (!(messageParam is SocketUserMessage message) || message.Author.IsBot) return;
+
+                int argPos = 0;
+                var context = new SocketCommandContext(_client, message);
+
+                if (!(message.HasStringPrefix(_config["prefix"], ref argPos) ||
+                    message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
+                {
+                    await _expService.ProcessExperienceAsync(context);
+                    return;
+                }
+
+                var result = await _commands.ExecuteAsync(
+                    context: context,
+                    argPos: argPos,
+                    services: _services);
+
+                await OnCommandExecutedAsync(null, context, result);
             }
-
-            var result = await _commands.ExecuteAsync(
-                context: context,
-                argPos: argPos,
-                services: _services);
-
-            await OnCommandExecutedAsync(null, context, result);
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }
