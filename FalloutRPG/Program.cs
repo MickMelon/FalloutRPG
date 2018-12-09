@@ -88,13 +88,13 @@ namespace FalloutRPG
 
             // Database
             .AddEntityFrameworkSqlite().AddDbContext<RpgContext>(optionsAction: options => options.UseSqlite("Filename=CharacterDB.db"))
-            .AddTransient<IRepository<Player>, EfRepository<Player>>()
-            .AddTransient<IRepository<Character>, EfRepository<Character>>()
-            .AddTransient<IRepository<SkillSheet>, EfRepository<SkillSheet>>()
-            .AddTransient<IRepository<Special>, EfRepository<Special>>()
-            .AddTransient<IRepository<NpcPreset>, EfRepository<NpcPreset>>()
-            .AddTransient<IRepository<Effect>, EfRepository<Effect>>()
-            .AddTransient<IRepository<Item>, EfRepository<Item>>()
+            .AddTransient<IRepository<Player>, EfSqliteRepository<Player>>()
+            .AddTransient<IRepository<Character>, EfSqliteRepository<Character>>()
+            .AddTransient<IRepository<SkillSheet>, EfSqliteRepository<SkillSheet>>()
+            .AddTransient<IRepository<Special>, EfSqliteRepository<Special>>()
+            .AddTransient<IRepository<NpcPreset>, EfSqliteRepository<NpcPreset>>()
+            .AddTransient<IRepository<Effect>, EfSqliteRepository<Effect>>()
+            .AddTransient<IRepository<Item>, EfSqliteRepository<Item>>()
             .BuildServiceProvider();
 
         /// <summary>
