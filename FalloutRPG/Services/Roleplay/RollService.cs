@@ -113,16 +113,16 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         public string RollAttribute(Character character, Globals.SkillType skill, bool useEffects) =>
-            RollAttribute(character, skill, useEffects);
+            RollAttribute(character, (Enum)skill, useEffects);
 
         public string RollAttribute(Character character, Globals.SpecialType special, bool useEffects) =>
-            RollAttribute(character, special, useEffects);
+            RollAttribute(character, (Enum)special, useEffects);
 
         private string RollAttribute(Character character, Enum attribute, bool useEffects)
         {
             double result = 0.0;
-            Special special = null;
-            SkillSheet skills = null;
+            Special special = character.Special;
+            SkillSheet skills = character.Skills;
 
             if (useEffects)
             {
