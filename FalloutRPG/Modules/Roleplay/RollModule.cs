@@ -12,18 +12,13 @@ namespace FalloutRPG.Modules.Roleplay
     [Ratelimit(Globals.RATELIMIT_TIMES, Globals.RATELIMIT_SECONDS, Measure.Seconds)]
     public class RollModule : ModuleBase<SocketCommandContext>
     {
-        private readonly SkillsService _skillsService;
-        private readonly SpecialService _specialService;
         private readonly RollService _rollService;
         private readonly HelpService _helpService;
 
-        public RollModule(SkillsService skillsService,
-            SpecialService specialService,
+        public RollModule(
             RollService rollService,
             HelpService helpService)
         {
-            _skillsService = skillsService;
-            _specialService = specialService;
             _rollService = rollService;
             _helpService = helpService;
         }
@@ -41,22 +36,10 @@ namespace FalloutRPG.Modules.Roleplay
 
             if (attribute is Globals.SkillType skill)
             {
-                if (!_skillsService.AreSkillsSet(character))
-                {
-                    await ReplyAsync(String.Format(Messages.ERR_SKILLS_NOT_FOUND, Context.User.Mention));
-                    return;
-                }
-
                 result = _rollService.RollAttribute(character, skill, useEffects);
             }
             if (attribute is Globals.SpecialType special)
             {
-                if (!_specialService.IsSpecialSet(character))
-                {
-                    await ReplyAsync(String.Format(Messages.ERR_SPECIAL_NOT_FOUND, Context.User.Mention));
-                    return;
-                }
-
                 result = _rollService.RollAttribute(character, special, useEffects);
             }
 
@@ -66,15 +49,19 @@ namespace FalloutRPG.Modules.Roleplay
         public class RollPlayerModule : RollModule
         {
             private readonly CharacterService _characterService;
+            private readonly SkillsService _skillsService;
+            private readonly SpecialService _specialService;
 
             public RollPlayerModule(
                 CharacterService characterService,
                 SkillsService skillsService, 
                 SpecialService specialService, 
                 RollService rollService, 
-                HelpService helpService) : base(skillsService, specialService, rollService, helpService)
+                HelpService helpService) : base(rollService, helpService)
             {
                 _characterService = characterService;
+                _skillsService = skillsService;
+                _specialService = specialService;
             }
 
             [Command("roll")]
@@ -107,6 +94,18 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
+                if (!_specialService.IsSpecialSet(character))
+                {
+                    await ReplyAsync(String.Format(Messages.ERR_SPECIAL_NOT_FOUND, Context.User.Mention));
+                    return;
+                }
+
+                if (!_skillsService.AreSkillsSet(character))
+                {
+                    await ReplyAsync(String.Format(Messages.ERR_SKILLS_NOT_FOUND, Context.User.Mention));
+                    return;
+                }
+
                 await RollAsync(character, attribute, useEffects);
             }
         }
@@ -114,6 +113,8 @@ namespace FalloutRPG.Modules.Roleplay
         [Group("npc")]
         public class RollNpcModule : RollModule
         {
+            private readonly SkillsService _skillsService;
+            private readonly SpecialService _specialService;
             private readonly NpcService _npcService;
 
             public RollNpcModule(
@@ -121,8 +122,10 @@ namespace FalloutRPG.Modules.Roleplay
                 SkillsService skillsService,
                 SpecialService specialService,
                 RollService rollService,
-                HelpService helpService) : base(skillsService, specialService, rollService, helpService)
+                HelpService helpService) : base(rollService, helpService)
             {
+                _skillsService = skillsService;
+                _specialService = specialService;
                 _npcService = npcService;
             }
 
@@ -154,6 +157,24 @@ namespace FalloutRPG.Modules.Roleplay
                 {
                     await ReplyAsync(String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, Context.User.Mention));
                     return;
+                }
+
+                if (attribute is Globals.SkillType skill)
+                {
+                    if (_skillsService.GetSkill(character, skill) <= 0)
+                    {
+                        await ReplyAsync(String.Format(Messages.NPC_CANT_USE_SKILL, character.Name));
+                        return;
+                    }
+                }
+
+                if (attribute is Globals.SpecialType special)
+                {
+                    if (_specialService.GetSpecial(character, special) <= 0)
+                    {
+                        await ReplyAsync(String.Format(Messages.NPC_CANT_USE_SPECIAL, character.Name));
+                        return;
+                    }
                 }
 
                 await RollAsync(character, attribute, useEffects);
