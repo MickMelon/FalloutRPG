@@ -40,6 +40,12 @@ namespace FalloutRPG.Modules.Roleplay
             {
                 var preset = await _presetService.GetNpcPreset(type);
 
+                if (preset == null)
+                {
+                    await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
+                    return;
+                }
+
                 _npcService.CreateNpc(name, preset, level);
                 await ReplyAsync(String.Format(Messages.NPC_CREATED_SUCCESS, type, name));
             }
