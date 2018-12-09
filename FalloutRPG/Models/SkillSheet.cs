@@ -2,7 +2,6 @@
 {
     public class SkillSheet : BaseModel
     {
-        public int CharacterId { get; set; }
         public int Barter { get; set; }
         public int EnergyWeapons { get; set; }
         public int Explosives { get; set; }

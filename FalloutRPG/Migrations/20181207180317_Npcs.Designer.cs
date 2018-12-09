@@ -3,14 +3,16 @@ using System;
 using FalloutRPG.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FalloutRPG.Migrations
 {
     [DbContext(typeof(RpgContext))]
-    partial class RpgContextModelSnapshot : ModelSnapshot
+    [Migration("20181207180317_Npcs")]
+    partial class Npcs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
