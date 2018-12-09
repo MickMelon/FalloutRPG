@@ -27,14 +27,14 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("create")]
         [Alias("new")]
-        public async Task CreateNewNpc(string type, string name)
+        public async Task CreateNewNpcAsync(string type, string name)
         {
-            await CreateNewNpc(type, name, 1);
+            await CreateNewNpcAsync(type, name, 1);
         }
 
         [Command("create")]
         [Alias("new")]
-        public async Task CreateNewNpc(string name, string type, int level)
+        public async Task CreateNewNpcAsync(string name, string type, int level)
         {
             try
             {
