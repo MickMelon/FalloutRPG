@@ -34,12 +34,10 @@ namespace FalloutRPG.Services.Roleplay
             _rand = random;
         }
 
-        public async Task CreateNpc(string name, string npcType, int level)
+        public Character CreateNpc(string name, NpcPreset preset, int level)
         {
             if (Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) != null)
                 throw new Exception(Exceptions.NPC_CHAR_EXISTS);
-
-            NpcPreset preset = await _presetService.GetNpcPreset(npcType);
 
             if (preset == null)
                 throw new Exception(Exceptions.NPC_INVALID_PRESET);
@@ -62,6 +60,8 @@ namespace FalloutRPG.Services.Roleplay
             NpcTimers.Add(newNpc, timer);
 
             Npcs.Add(newNpc);
+
+            return newNpc;
         }
 
         public Character FindNpc(string name) => Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
