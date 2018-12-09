@@ -79,6 +79,8 @@ namespace FalloutRPG
             .AddSingleton<CharacterService>()
             .AddSingleton<ExperienceService>()
             .AddSingleton<EffectsService>()
+            .AddSingleton<NpcPresetService>()
+            .AddSingleton<NpcService>()
 
             // Casino
             .AddSingleton<GamblingService>()
@@ -93,6 +95,7 @@ namespace FalloutRPG
             .AddTransient<IRepository<SkillSheet>, EfSqliteRepository<SkillSheet>>()
             .AddTransient<IRepository<Special>, EfSqliteRepository<Special>>()
             .AddTransient<IRepository<Effect>, EfSqliteRepository<Effect>>()
+            .AddTransient<IRepository<NpcPreset>, EfSqliteRepository<NpcPreset>>()
             .BuildServiceProvider();
 
         /// <summary>
