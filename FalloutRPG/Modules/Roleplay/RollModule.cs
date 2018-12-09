@@ -177,6 +177,7 @@ namespace FalloutRPG.Modules.Roleplay
                     }
                 }
 
+                _npcService.ResetNpcTimer(character);
                 await RollAsync(character, attribute, useEffects);
             }
         }
