@@ -50,7 +50,9 @@ namespace FalloutRPG.Services.Roleplay
         /// <param name="typeString">The name of the NPC preset to find.</param>
         /// <returns>An NpcPreset with the given name in the database if it exists.</returns>
         public async Task<NpcPreset> GetNpcPreset(string typeString) =>
-            await _presetRepository.Query.Where(x => x.Name.Equals(typeString, StringComparison.OrdinalIgnoreCase)).FirstOrDefaultAsync();
+            await _presetRepository.Query.Where(x => x.Name.Equals(typeString, StringComparison.OrdinalIgnoreCase))
+            .Include(x => x.Special)
+            .FirstOrDefaultAsync();
 
         public async Task SaveNpcPreset(NpcPreset npcPreset)
         {
