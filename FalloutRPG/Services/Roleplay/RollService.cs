@@ -11,12 +11,12 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class RollService
     {
+        private readonly EffectsService _effectsService;
         private readonly SpecialService _specService;
         private readonly SkillsService _skillsService;
         private readonly IConfiguration _config;
 
         private readonly Random _rand;
-
         public const int MAX_SUCCESS_ROLL_CAP = 95;
 
         private double LUCK_INFLUENCE;
@@ -24,8 +24,14 @@ namespace FalloutRPG.Services.Roleplay
         private int LUCK_INFLUENCE_SPECIAL_CUTOFF;
         private bool LUCK_INFLUENCE_ENABLED;
 
-        public RollService(SpecialService specService, SkillsService skillsService, IConfiguration config, Random rand)
+        public RollService(
+            EffectsService effectsService,
+            SpecialService specService,
+            SkillsService skillsService,
+            IConfiguration config,
+            Random rand)
         {
+            _effectsService = effectsService;
             _specService = specService;
             _skillsService = skillsService;
             _config = config;
@@ -104,6 +110,36 @@ namespace FalloutRPG.Services.Roleplay
             resultPercent = Math.Round(resultPercent * 100.0, 1);
 
             return resultPercent;
+        }
+
+        public string RollAttribute(Character character, Globals.SkillType skill, bool useEffects) =>
+            RollAttribute(character, skill, useEffects);
+
+        public string RollAttribute(Character character, Globals.SpecialType special, bool useEffects) =>
+            RollAttribute(character, special, useEffects);
+
+        private string RollAttribute(Character character, Enum attribute, bool useEffects)
+        {
+            double result = 0.0;
+            Special special = null;
+            SkillSheet skills = null;
+
+            if (useEffects)
+            {
+                special = _effectsService.GetEffectiveSpecial(character);
+                skills = _effectsService.GetEffectiveSkills(character);
+            }
+
+            if (attribute is Globals.SpecialType)
+            {
+                result = GetRollResult(_specService.GetSpecial(special, (Globals.SpecialType)attribute), special.Luck, true);
+            }
+            else if (attribute is Globals.SkillType)
+            {
+                result = GetRollResult(_skillsService.GetSkill(skills, (Globals.SkillType)attribute), special.Luck, false);
+            }
+
+            return $"{GetRollMessage(character.Name, attribute.ToString(), result)}";
         }
 
         public string GetRollMessage(string charName, string roll, double percent)

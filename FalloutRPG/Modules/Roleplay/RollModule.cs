@@ -1,6 +1,7 @@
 ﻿using Discord.Commands;
 using FalloutRPG.Addons;
 using FalloutRPG.Constants;
+using FalloutRPG.Models;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
@@ -11,25 +12,19 @@ namespace FalloutRPG.Modules.Roleplay
     [Ratelimit(Globals.RATELIMIT_TIMES, Globals.RATELIMIT_SECONDS, Measure.Seconds)]
     public class RollModule : ModuleBase<SocketCommandContext>
     {
-        private readonly CharacterService _characterService;
-        private readonly EffectsService _effectsService;
-        private readonly RollService _rollService;
         private readonly SkillsService _skillsService;
         private readonly SpecialService _specialService;
+        private readonly RollService _rollService;
         private readonly HelpService _helpService;
 
-        public RollModule(CharacterService characterService,
-            EffectsService effectsService,
-            RollService rollService,
-            SkillsService skillsService,
+        public RollModule(SkillsService skillsService,
             SpecialService specialService,
+            RollService rollService,
             HelpService helpService)
         {
-            _characterService = characterService;
-            _effectsService = effectsService;
-            _rollService = rollService;
             _skillsService = skillsService;
             _specialService = specialService;
+            _rollService = rollService;
             _helpService = helpService;
         }
 
@@ -40,87 +35,128 @@ namespace FalloutRPG.Modules.Roleplay
             await _helpService.ShowRollHelpAsync(Context);
         }
 
-        [Command("roll")]
-        [Alias("r")]
-        public async Task RollSkill(Globals.SkillType skillToRoll) =>
-            await RollSkill(skillToRoll, false);
-
-        [Command("broll")]
-        [Alias("br")]
-        public async Task RollSkillBuffed(Globals.SkillType skillToRoll) =>
-            await RollSkill(skillToRoll, true);
-
-        private async Task RollSkill(Globals.SkillType skillToRoll, bool useEffects)
+        protected async Task RollAsync(Character character, Enum attribute, bool useEffects)
         {
-            var character = await _characterService.GetCharacterAsync(Context.User.Id);
+            string result = "";
 
-            if (character == null)
+            if (attribute is Globals.SkillType skill)
             {
-                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
-                return;
+                if (!_skillsService.AreSkillsSet(character))
+                {
+                    await ReplyAsync(String.Format(Messages.ERR_SKILLS_NOT_FOUND, Context.User.Mention));
+                    return;
+                }
+
+                result = _rollService.RollAttribute(character, skill, useEffects);
+            }
+            if (attribute is Globals.SpecialType special)
+            {
+                if (!_specialService.IsSpecialSet(character))
+                {
+                    await ReplyAsync(String.Format(Messages.ERR_SPECIAL_NOT_FOUND, Context.User.Mention));
+                    return;
+                }
+
+                result = _rollService.RollAttribute(character, special, useEffects);
             }
 
-            if (!_skillsService.AreSkillsSet(character))
+            await ReplyAsync($"{result} ({Context.User.Mention})");
+        }
+
+        public class RollPlayerModule : RollModule
+        {
+            private readonly CharacterService _characterService;
+
+            public RollPlayerModule(
+                CharacterService characterService,
+                SkillsService skillsService, 
+                SpecialService specialService, 
+                RollService rollService, 
+                HelpService helpService) : base(skillsService, specialService, rollService, helpService)
             {
-                await ReplyAsync(String.Format(Messages.ERR_SKILLS_NOT_FOUND, Context.User.Mention));
-                return;
+                _characterService = characterService;
             }
 
-            if (useEffects)
-            {
-                var effectiveValue = _skillsService.GetSkill(_effectsService.GetEffectiveSkills(character), skillToRoll);
-                var effectiveLuck = _effectsService.GetEffectiveSpecial(character).Luck;
+            [Command("roll")]
+            [Alias("r")]
+            public async Task RollSkill(Globals.SkillType skillToRoll) =>
+            await RollPlayerAsync(skillToRoll, false);
 
-                await ReplyAsync($"{Messages.MUSCLE_EMOJI}{_rollService.GetRollMessage(character.Name, skillToRoll.ToString(), _rollService.GetRollResult(effectiveValue, effectiveLuck, false))} ({Context.User.Mention})");
-            }
-            else
-            {
-                var skillValue = _skillsService.GetSkill(character, skillToRoll);
+            [Command("roll")]
+            [Alias("r")]
+            public async Task RollSpecial(Globals.SpecialType specialToRoll) =>
+                await RollPlayerAsync(specialToRoll, false);
 
-                await ReplyAsync($"{_rollService.GetRollMessage(character.Name, skillToRoll.ToString(), _rollService.GetRollResult(skillValue, character.Special.Luck, false))} ({Context.User.Mention})");
+            [Command("broll")]
+            [Alias("br")]
+            public async Task RollSkillBuffed(Globals.SkillType skillToRoll) =>
+                await RollPlayerAsync(skillToRoll, true);
+
+            [Command("broll")]
+            [Alias("br")]
+            public async Task RollSpecialBuffed(Globals.SpecialType specialToRoll) =>
+                await RollPlayerAsync(specialToRoll, true);
+
+            private async Task RollPlayerAsync(Enum attribute, bool useEffects)
+            {
+                var character = await _characterService.GetCharacterAsync(Context.User.Id);
+
+                if (character == null)
+                {
+                    await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
+                    return;
+                }
+
+                await RollAsync(character, attribute, useEffects);
             }
         }
 
-        [Command("roll")]
-        [Alias("r")]
-        public async Task RollSpecial(Globals.SpecialType specialToRoll) =>
-            await RollSpecial(specialToRoll, false);
-
-        [Command("broll")]
-        [Alias("br")]
-        public async Task RollSpecialBuffed(Globals.SpecialType specialToRoll) =>
-            await RollSpecial(specialToRoll, true);
-
-        private async Task RollSpecial(Globals.SpecialType specialToRoll, bool useEffects)
+        [Group("npc")]
+        public class RollNpcModule : RollModule
         {
-            var character = await _characterService.GetCharacterAsync(Context.User.Id);
+            private readonly NpcService _npcService;
 
-            if (character == null)
+            public RollNpcModule(
+                NpcService npcService,
+                SkillsService skillsService,
+                SpecialService specialService,
+                RollService rollService,
+                HelpService helpService) : base(skillsService, specialService, rollService, helpService)
             {
-                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
-                return;
+                _npcService = npcService;
             }
 
-            if (!_specialService.IsSpecialSet(character))
+            [Command("roll")]
+            [Alias("r")]
+            public async Task RollSkill(string name, Globals.SkillType skillToRoll) =>
+                await RollNpcAsync(name, skillToRoll, false);
+
+            [Command("roll")]
+            [Alias("r")]
+            public async Task RollSpecial(string name, Globals.SpecialType specialToRoll) =>
+                await RollNpcAsync(name, specialToRoll, false);
+
+            [Command("broll")]
+            [Alias("br")]
+            public async Task RollSkillBuffed(string name, Globals.SkillType skillToRoll) =>
+                await RollNpcAsync(name, skillToRoll, false);
+
+            [Command("broll")]
+            [Alias("br")]
+            public async Task RollSpecialBuffed(string name, Globals.SpecialType specialToRoll) =>
+                await RollNpcAsync(name, specialToRoll, false);
+
+            private async Task RollNpcAsync(string name, Enum attribute, bool useEffects)
             {
-                await ReplyAsync(String.Format(Messages.ERR_SPECIAL_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+                var character = _npcService.FindNpc(name);
 
-            if (useEffects)
-            {
-                var newSpecial = _effectsService.GetEffectiveSpecial(character);
+                if (character == null)
+                {
+                    await ReplyAsync(String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, Context.User.Mention));
+                    return;
+                }
 
-                var effectiveValue = _specialService.GetSpecial(newSpecial, specialToRoll);
-                var effectiveLuck = newSpecial.Luck;
-
-                await ReplyAsync($"{Messages.MUSCLE_EMOJI}{_rollService.GetRollMessage(character.Name, specialToRoll.ToString(), _rollService.GetRollResult(effectiveValue, effectiveLuck, true))} {Context.User.Mention}");
-            }
-            else
-            {
-                var specialValue = _specialService.GetSpecial(character, specialToRoll);
-
-                await ReplyAsync($"{_rollService.GetRollMessage(character.Name, specialToRoll.ToString(), _rollService.GetRollResult(specialValue, character.Special.Luck, true))} {Context.User.Mention}");
+                await RollAsync(character, attribute, useEffects);
             }
         }
     }
