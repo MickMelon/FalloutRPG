@@ -218,13 +218,14 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            // product.Categories
-            //var categories = product.Categorizations.Select(c => c.Category);
-
-            //if (character.Effects == null) character.Effects = new List<Effect>();
             if (character.EffectCharacters == null) character.EffectCharacters = new List<EffectCharacter>();
 
-            // character.Effects.Add(effect);
+            if (character.EffectCharacters.Any(x => x.Effect.Equals(effect)))
+            {
+                await ReplyAsync(String.Format(Messages.ERR_EFFECT_ALREADY_APPLIED, Context.User.Mention));
+                return;
+            }
+
             character.EffectCharacters.Add(new EffectCharacter { Character = character, Effect = effect });
             await _charService.SaveCharacterAsync(character);
 
