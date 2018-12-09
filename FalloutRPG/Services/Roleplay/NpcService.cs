@@ -50,15 +50,23 @@ namespace FalloutRPG.Services.Roleplay
 
             _skillsService.InitializeSkills(newNpc);
 
-            _skillsService.SetTagSkill(newNpc, preset.Tag1);
-            _skillsService.SetTagSkill(newNpc, preset.Tag2);
-            _skillsService.SetTagSkill(newNpc, preset.Tag3);
-
             int skillPoints = _skillsService.CalculateSkillPointsForLevel(newNpc.Special.Intelligence, level);
 
-            _skillsService.SetSkill(newNpc, preset.Tag1, _skillsService.GetSkill(newNpc, preset.Tag1) + skillPoints / 3);
-            _skillsService.SetSkill(newNpc, preset.Tag2, _skillsService.GetSkill(newNpc, preset.Tag2) + skillPoints / 3);
-            _skillsService.SetSkill(newNpc, preset.Tag3, _skillsService.GetSkill(newNpc, preset.Tag3) + skillPoints / 3);
+            if (preset.Tag1.HasValue)
+            {
+                _skillsService.SetTagSkill(newNpc, preset.Tag1.Value);
+                _skillsService.SetSkill(newNpc, preset.Tag1.Value, _skillsService.GetSkill(newNpc, preset.Tag1.Value) + skillPoints / 3);
+            }
+            if (preset.Tag2.HasValue)
+            {
+                _skillsService.SetTagSkill(newNpc, preset.Tag2.Value);
+                _skillsService.SetSkill(newNpc, preset.Tag2.Value, _skillsService.GetSkill(newNpc, preset.Tag2.Value) + skillPoints / 3);
+            }
+            if (preset.Tag3.HasValue)
+            {
+                _skillsService.SetTagSkill(newNpc, preset.Tag3.Value);
+                _skillsService.SetSkill(newNpc, preset.Tag3.Value, _skillsService.GetSkill(newNpc, preset.Tag3.Value) + skillPoints / 3);
+            }
 
             var timer = new Timer();
             timer.Elapsed += (sender, e) => OnDurationElasped(sender, e, newNpc);
