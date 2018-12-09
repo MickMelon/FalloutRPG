@@ -140,6 +140,11 @@ namespace FalloutRPG.Services.Roleplay
             return DEFAULT_SKILL_POINTS + (intelligence / 2);
         }
 
+        public int CalculateSkillPointsForLevel(int intelligence, int level)
+        {
+            return CalculateSkillPoints(intelligence) * (level - 1);
+        }
+
         /// <summary>
         /// Puts an amount of points in a specified skill.
         /// </summary>
