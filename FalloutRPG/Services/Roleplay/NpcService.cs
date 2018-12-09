@@ -36,7 +36,7 @@ namespace FalloutRPG.Services.Roleplay
 
         public Character CreateNpc(string name, NpcPreset preset, int level)
         {
-            if (Npcs.Find(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) != null)
+            if (FindNpc(name) != null)
                 throw new Exception(Exceptions.NPC_CHAR_EXISTS);
 
             if (preset == null)
