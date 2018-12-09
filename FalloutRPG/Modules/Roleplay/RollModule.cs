@@ -142,12 +142,12 @@ namespace FalloutRPG.Modules.Roleplay
             [Command("broll")]
             [Alias("br")]
             public async Task RollSkillBuffed(string name, Globals.SkillType skillToRoll) =>
-                await RollNpcAsync(name, skillToRoll, false);
+                await RollNpcAsync(name, skillToRoll, true);
 
             [Command("broll")]
             [Alias("br")]
             public async Task RollSpecialBuffed(string name, Globals.SpecialType specialToRoll) =>
-                await RollNpcAsync(name, specialToRoll, false);
+                await RollNpcAsync(name, specialToRoll, true);
 
             private async Task RollNpcAsync(string name, Enum attribute, bool useEffects)
             {
