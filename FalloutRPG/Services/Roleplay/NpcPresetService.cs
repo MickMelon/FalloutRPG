@@ -25,19 +25,13 @@ namespace FalloutRPG.Services.Roleplay
 
         public async Task<bool> CreateNpcPresetAsync(string name)
         {
-            return await CreateNpcPresetAsync(name, 0, 0, 0, 0, 0, 0, 0);
-        }
-
-        public async Task<bool> CreateNpcPresetAsync(string name, int str, int per, int end, int cha, int @int, int agi, int luc)
-        {
             // NPC preset with name exists
             if (await GetNpcPreset(name) != null)
                 return false;
 
             NpcPreset preset = new NpcPreset
             {
-                Name = name,
-                Special = new Models.Statistic { Strength = str, Perception = per, Endurance = end, Charisma = cha, Intelligence = @int, Agility = agi, Luck = luc }
+                Name = name
             };
 
             await _presetRepository.AddAsync(preset);
@@ -51,7 +45,7 @@ namespace FalloutRPG.Services.Roleplay
         /// <returns>An NpcPreset with the given name in the database if it exists.</returns>
         public async Task<NpcPreset> GetNpcPreset(string typeString) =>
             await _presetRepository.Query.Where(x => x.Name.Equals(typeString, StringComparison.OrdinalIgnoreCase))
-            .Include(x => x.Special)
+            .Include(x => x.Statistics)
             .FirstOrDefaultAsync();
 
         public async Task SaveNpcPreset(NpcPreset npcPreset)

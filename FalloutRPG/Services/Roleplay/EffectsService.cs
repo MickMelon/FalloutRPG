@@ -57,7 +57,7 @@ namespace FalloutRPG.Services.Roleplay
 
         public IList<StatisticValue> GetEffectiveStatistics(Character character)
         {
-            var newStats = _skillsService.CloneSkills(character.Skills);
+            var newStats = _skillsService.CloneStatistics(character.Statistics);
 
             // Loop through all applied effects, then loop through every StatisticValue in the effect,
             // then actually apply them

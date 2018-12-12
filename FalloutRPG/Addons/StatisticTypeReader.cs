@@ -5,11 +5,11 @@ using FalloutRPG.Constants;
 
 namespace FalloutRPG.Addons
 {
-    public class AttributeTypeReader : TypeReader
+    public class StatisticTypeReader : TypeReader
     {
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
-            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as an Attribute."));
+            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as a Statistic."));
         }
     }
 }

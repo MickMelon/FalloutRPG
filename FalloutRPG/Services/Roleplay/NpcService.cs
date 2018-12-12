@@ -44,29 +44,11 @@ namespace FalloutRPG.Services.Roleplay
             if (preset.Enabled == false)
                 throw new Exception(Exceptions.NPC_INVALID_PRESET_DISABLED);
 
-            Character newNpc = new Character { Name = name, Special = preset.Special };
+            Character newNpc = new Character { Name = name, Statistics = preset.Statistics };
 
             // Trying to keep this OOP as possible...
 
             _skillsService.InitializeSkills(newNpc);
-
-            int skillPoints = _skillsService.CalculateSkillPointsForLevel(newNpc.Special.Intelligence, level);
-
-            if (preset.Tag1.HasValue)
-            {
-                _skillsService.SetTagSkill(newNpc, preset.Tag1.Value);
-                _skillsService.SetSkill(newNpc, preset.Tag1.Value, _skillsService.GetSkill(newNpc, preset.Tag1.Value) + skillPoints / 3);
-            }
-            if (preset.Tag2.HasValue)
-            {
-                _skillsService.SetTagSkill(newNpc, preset.Tag2.Value);
-                _skillsService.SetSkill(newNpc, preset.Tag2.Value, _skillsService.GetSkill(newNpc, preset.Tag2.Value) + skillPoints / 3);
-            }
-            if (preset.Tag3.HasValue)
-            {
-                _skillsService.SetTagSkill(newNpc, preset.Tag3.Value);
-                _skillsService.SetSkill(newNpc, preset.Tag3.Value, _skillsService.GetSkill(newNpc, preset.Tag3.Value) + skillPoints / 3);
-            }
 
             var timer = new Timer();
             timer.Elapsed += (sender, e) => OnDurationElasped(sender, e, newNpc);

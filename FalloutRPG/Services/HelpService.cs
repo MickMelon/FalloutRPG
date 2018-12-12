@@ -3,6 +3,8 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
+using FalloutRPG.Services.Roleplay;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,10 +12,12 @@ namespace FalloutRPG.Services
 {
     public class HelpService
     {
+        private readonly SkillsService _skillsService;
         private readonly InteractiveService _interactiveService;
 
-        public HelpService(InteractiveService interactiveService)
+        public HelpService(SkillsService skillsService, InteractiveService interactiveService)
         {
+            _skillsService = skillsService;
             _interactiveService = interactiveService;
         }
 
@@ -115,7 +119,7 @@ namespace FalloutRPG.Services
             var userInfo = context.User;
             var message = new StringBuilder();
 
-            foreach (var skill in Globals.SKILL_NAMES)
+            foreach (var skill in _skillsService.Skills.Select(x => x.Name))
                 message.Append($"{skill}\n");
 
             var embed = EmbedHelper.BuildBasicEmbed("Command: $help skills", message.ToString());

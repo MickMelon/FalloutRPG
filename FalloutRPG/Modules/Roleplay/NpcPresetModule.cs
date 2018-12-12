@@ -59,7 +59,7 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            var match = preset.Special.Where(x => x.Equals(special)).FirstOrDefault();
+            var match = preset.Statistics.Where(x => x.Equals(special)).FirstOrDefault();
             if (match != null) match.Value = newValue;
 
             await _presetService.SaveNpcPreset(preset);
@@ -77,10 +77,6 @@ namespace FalloutRPG.Modules.Roleplay
                 await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
                 return;
             }
-
-            preset.Tag1 = tag1;
-            preset.Tag2 = tag2;
-            preset.Tag3 = tag3;
             
             await _presetService.SaveNpcPreset(preset);
 
@@ -116,9 +112,8 @@ namespace FalloutRPG.Modules.Roleplay
 
             StringBuilder sb = new StringBuilder();
 
-            foreach (var prop in typeof(NpcPreset).GetProperties())
-                if (Globals.SKILL_NAMES.Contains(prop.Name) || Globals.SPECIAL_NAMES.Contains(prop.Name) || prop.Name.Equals("Enabled") || prop.Name.Contains("Range"))
-                    sb.Append($"{prop.Name}: {prop.GetValue(preset)}\n");
+            foreach (var stat in preset.Statistics)
+                sb.Append($"{stat.Statistic.Name}: {stat.Value}\n");
 
             await dmChannel.SendMessageAsync(Context.User.Mention, embed: EmbedHelper.BuildBasicEmbed($"Preset info for {preset.Name}:", sb.ToString()));
         }

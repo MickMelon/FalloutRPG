@@ -12,7 +12,7 @@ namespace FalloutRPG.Constants
         public static CharacterResult CharacterNotFound(string mention = "") =>
             new CharacterResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_CHAR_NOT_FOUND, mention));
 
-        public static CharacterResult NpcNotFound(string mention = "", string npcName = "") =>
+        public static CharacterResult NpcNotFound(string mention = "") =>
             new CharacterResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, mention));
     }
 }

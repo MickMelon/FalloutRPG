@@ -54,10 +54,12 @@ namespace FalloutRPG.Services.Roleplay
             return resultPercent;
         }
 
+        // TODO: decide which method should be handling calling GetEffectiveStatistics,
+        // the module, or this service
         public string RollStatistic(Character character, StatisticValue statistic)
         {
             if (statistic.Statistic is Skill skill && statistic.Value < skill.MinimumValue)
-                return "too low xd";
+                return Messages.ERR_SKILLS_TOO_LOW;
 
             double result = GetRollResult(statistic);
 

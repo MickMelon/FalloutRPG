@@ -61,6 +61,7 @@
         public const string ERR_SPECIAL_ALREADY_SET = FAILURE_EMOJI + "Character SPECIAL is already set. ({0})";
         public const string ERR_SKILLS_NONE_TO_CLAIM = FAILURE_EMOJI + "You don't have any skill points that you can claim. ({0})";
         public const string ERR_SKILLS_POINTS_BELOW_ONE = FAILURE_EMOJI + "You cannot put less than one point in a skill. ({0})";
+        public const string ERR_SKILLS_TOO_LOW = FAILURE_EMOJI + "The skill's level was too low to use. ({0})";
 
         // Gambling Messages
         public const string BET_PLACED = SUCCESS_EMOJI + "{0}, bet placed!";

@@ -3,6 +3,7 @@ using FalloutRPG.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace FalloutRPG.Services.Roleplay
 
         private readonly CharacterService _charService;
 
-        private readonly Special[] _special;
+        public readonly ReadOnlyCollection<Special> Special;
 
         public SpecialService(CharacterService charService)
         {
@@ -45,7 +46,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         private bool IsValidSpecialName(string special)
         {
-            return _special.Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
+            return Special.Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
         }
 
         /// <summary>
@@ -130,7 +131,7 @@ namespace FalloutRPG.Services.Roleplay
         public bool IsSpecialSet(Character character)
         {
             if (character == null || character.Statistics == null) return false;
-            if (character.Special.Count() != _special.Length) return false;
+            if (character.Special.Count() != Special.Count) return false;
 
             return true;
         }

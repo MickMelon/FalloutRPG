@@ -9,6 +9,9 @@ namespace FalloutRPG.Constants
         {
         }
 
+        public static StatisticResult SkillNotHighEnough(string mention = "") =>
+            new StatisticResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_SKILLS_NOT_FOUND, mention));
+
         public static StatisticResult SkillsNotSet(string mention = "") =>
             new StatisticResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_SKILLS_NOT_FOUND, mention));
 
