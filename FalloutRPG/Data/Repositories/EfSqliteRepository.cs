@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FalloutRPG.Data.Repositories
 {
-    public class EfSqliteRepository<T> : IRepository<T> where T : BaseModel, new()
+    public class EfSqliteRepository<T> : IRepository<T> where T : BaseModel
     {
         private readonly RpgContext _context;
 

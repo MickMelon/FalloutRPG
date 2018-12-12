@@ -49,7 +49,7 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("edit")]
-        public async Task EditPresetSpecialAsync(string name, int str, int per, int end, int cha, int @int, int agi, int luc)
+        public async Task EditPresetSpecialAsync(string name, Special special, int newValue)
         {
             var preset = await _presetService.GetNpcPreset(name);
 
@@ -59,14 +59,16 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            preset.Special = new Special { Strength = str, Perception = per, Endurance = end, Intelligence = @int, Agility = agi, Luck = luc };
+            var match = preset.Special.Where(x => x.Equals(special)).FirstOrDefault();
+            if (match != null) match.Value = newValue;
+
             await _presetService.SaveNpcPreset(preset);
 
             await ReplyAsync(String.Format(Messages.NPC_PRESET_EDIT_SPECIAL, preset.Name, Context.User.Mention));
         }
 
         [Command("edit")]
-        public async Task EditPresetTagsAsync(string name, Globals.SkillType tag1, Globals.SkillType tag2, Globals.SkillType tag3)
+        public async Task EditPresetTagsAsync(string name, Skill tag1, Skill tag2, Skill tag3)
         {
             var preset = await _presetService.GetNpcPreset(name);
 
@@ -79,6 +81,7 @@ namespace FalloutRPG.Modules.Roleplay
             preset.Tag1 = tag1;
             preset.Tag2 = tag2;
             preset.Tag3 = tag3;
+            
             await _presetService.SaveNpcPreset(preset);
 
             await ReplyAsync(String.Format(Messages.NPC_PRESET_EDIT_TAGS, preset.Name, Context.User.Mention));

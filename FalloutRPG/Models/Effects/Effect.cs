@@ -8,8 +8,7 @@ namespace FalloutRPG.Models.Effects
 
         public ulong OwnerId { get; set; }
 
-        public virtual IList<EffectSpecial> SpecialAdditions { get; set; }
-        public virtual IList<EffectSkill> SkillAdditions { get; set; }
+        public virtual IList<StatisticValue> StatisticEffects { get; set; }
 
         public virtual IList<EffectCharacter> EffectCharacters { get; set; }
     }

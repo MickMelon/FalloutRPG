@@ -1,9 +1,11 @@
 ﻿using Discord;
 using Discord.Commands;
 using FalloutRPG.Constants;
+using FalloutRPG.Models;
 using FalloutRPG.Services.Roleplay;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,45 +38,18 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command]
-        public async Task CheckSkill(IUser user, Globals.SkillType skill, int minimum)
+        public async Task<RuntimeResult> CheckStatistic(IUser user, Statistic stat, int minimum)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
 
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, user.Username));
-                return;
-            }
-            if (!_skillsService.AreSkillsSet(character))
-            {
-                await ReplyAsync(String.Format(Messages.ERR_SKILLS_NOT_FOUND, user.Username));
-                return;
-            }
+            if (character == null) return CharacterResult.CharacterNotFound();
 
-            int skillValue = _skillsService.GetSkill(character, skill);
+            var match = character.Statistics.FirstOrDefault(x => x.Statistic.Equals(stat));
+            if (match == null) return GenericResult.FromError("Statistic not found for character.");
 
-            await ReplyAsync(GetCheckMessage(character.Name, skill.ToString(), skillValue, minimum));
-        }
-
-        [Command]
-        public async Task CheckSpecial(IUser user, Globals.SpecialType special, int minimum)
-        {
-            var character = await _charService.GetCharacterAsync(user.Id);
-
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, user.Username));
-                return;
-            }
-            if (!_specialService.IsSpecialSet(character))
-            {
-                await ReplyAsync(String.Format(Messages.ERR_SPECIAL_NOT_FOUND, user.Username));
-                return;
-            }
-
-            int specialValue = _specialService.GetSpecial(character, special);
-
-            await ReplyAsync(GetCheckMessage(character.Name, special.ToString(), specialValue, minimum));
+            int statValue = match.Value;
+            
+            return GenericResult.FromSuccess(GetCheckMessage(character.Name, stat.Name, statValue, minimum));
         }
     }
 }

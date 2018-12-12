@@ -16,17 +16,10 @@ namespace FalloutRPG.Services.Roleplay
         private const int MAX_CHARACTERS = 25;
 
         private readonly IRepository<Character> _charRepository;
-        private readonly IRepository<SkillSheet> _skillRepository;
-        private readonly IRepository<Special> _specialRepository;
 
-        public CharacterService(
-            IRepository<Character> charRepository,
-            IRepository<SkillSheet> skillRepository,
-            IRepository<Special> specialRepository)
+        public CharacterService(IRepository<Character> charRepository)
         {
             _charRepository = charRepository;
-            _skillRepository = skillRepository;
-            _specialRepository = specialRepository;
         }
 
         /// <summary>
@@ -38,10 +31,7 @@ namespace FalloutRPG.Services.Roleplay
             .Include(c => c.Skills)
             .Include(c => c.EffectCharacters)
                 .ThenInclude(x => x.Effect)
-                    .ThenInclude(x => x.SkillAdditions)
-            .Include(c => c.EffectCharacters)
-                .ThenInclude(x => x.Effect)
-                    .ThenInclude(x => x.SpecialAdditions)
+                    .ThenInclude(x => x.StatisticEffects)
             .FirstOrDefaultAsync();
 
         /// <summary>
@@ -55,10 +45,7 @@ namespace FalloutRPG.Services.Roleplay
             .Include(c => c.Skills)
             .Include(c => c.EffectCharacters)
                 .ThenInclude(x => x.Effect)
-                    .ThenInclude(x => x.SkillAdditions)
-            .Include(c => c.EffectCharacters)
-                .ThenInclude(x => x.Effect)
-                    .ThenInclude(x => x.SpecialAdditions)
+                    .ThenInclude(x => x.StatisticEffects)
             .ToListAsync();
 
         /// <summary>
@@ -94,32 +81,7 @@ namespace FalloutRPG.Services.Roleplay
                 Experience = 0,
                 SkillPoints = 0,
                 Money = 1000,
-                Special = new Special()
-                {
-                    Strength = 0,
-                    Perception = 0,
-                    Endurance = 0,
-                    Charisma = 0,
-                    Intelligence = 0,
-                    Agility = 0,
-                    Luck = 0
-                },
-                Skills = new SkillSheet()
-                {
-                    Barter = 0,
-                    EnergyWeapons = 0,
-                    Explosives = 0,
-                    Guns = 0,
-                    Lockpick = 0,
-                    Medicine = 0,
-                    MeleeWeapons = 0,
-                    Repair = 0,
-                    Science = 0,
-                    Sneak = 0,
-                    Speech = 0,
-                    Survival = 0,
-                    Unarmed = 0
-                },
+                Statistics = new List<StatisticValue>(),
                 EffectCharacters = new List<EffectCharacter>()
             };
 
@@ -162,8 +124,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public async Task ResetCharacterAsync(Character character)
         {
-            await _skillRepository.DeleteAsync(character.Skills);
-            await _specialRepository.DeleteAsync(character.Special);
+            character.Statistics = new List<StatisticValue>();
             character.IsReset = true;
             await SaveCharacterAsync(character);
         }

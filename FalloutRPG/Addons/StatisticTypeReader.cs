@@ -5,7 +5,7 @@ using FalloutRPG.Constants;
 
 namespace FalloutRPG.Addons
 {
-    public class SkillTypeReader : TypeReader
+    public class AttributeTypeReader : TypeReader
     {
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {

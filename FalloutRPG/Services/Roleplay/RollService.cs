@@ -19,88 +19,28 @@ namespace FalloutRPG.Services.Roleplay
         private readonly Random _rand;
         public const int MAX_SUCCESS_ROLL_CAP = 95;
 
-        private double LUCK_INFLUENCE;
-        private int LUCK_INFLUENCE_SKILL_CUTOFF;
-        private int LUCK_INFLUENCE_SPECIAL_CUTOFF;
-        private bool LUCK_INFLUENCE_ENABLED;
-
         public RollService(
             EffectsService effectsService,
             SpecialService specService,
             SkillsService skillsService,
-            IConfiguration config,
             Random rand)
         {
             _effectsService = effectsService;
             _specService = specService;
             _skillsService = skillsService;
-            _config = config;
             _rand = rand;
-
-            LoadLuckInfluenceConfig();
         }
 
-        /// <summary>
-        /// Loads the luck influence configuration from the
-        /// configuration file.
-        /// </summary>
-        private void LoadLuckInfluenceConfig()
-        {
-            try
-            {
-                LUCK_INFLUENCE_ENABLED = bool.Parse(_config["roleplay:luck-influenced-rolls"]);
-
-                if (LUCK_INFLUENCE_ENABLED)
-                {
-                    LUCK_INFLUENCE = double.Parse(_config["roleplay:luck-influence-percentage"]);
-                    LUCK_INFLUENCE_SKILL_CUTOFF = int.Parse(_config["roleplay:luck-influence-skill-cutoff"]);
-                    LUCK_INFLUENCE_SPECIAL_CUTOFF = int.Parse(_config["roleplay:luck-influence-special-cutoff"]);
-
-                    if (LUCK_INFLUENCE <= 0 || LUCK_INFLUENCE > 100)
-                    {
-                        Console.WriteLine("Luck influence settings improperly configured, check Config.json");
-                        LUCK_INFLUENCE = 0;
-                    }
-
-                    if (LUCK_INFLUENCE_SKILL_CUTOFF <= 0 || LUCK_INFLUENCE_SKILL_CUTOFF > SkillsService.MAX_SKILL_LEVEL ||
-                        LUCK_INFLUENCE_SPECIAL_CUTOFF <=  0 || LUCK_INFLUENCE_SPECIAL_CUTOFF > SpecialService.MAX_SPECIAL)
-                    {
-                        Console.WriteLine("Luck influence skill or special cutoff setting improperly configured, check Config.json");
-                        LUCK_INFLUENCE_SKILL_CUTOFF = 0;
-                        LUCK_INFLUENCE_SPECIAL_CUTOFF = 0;
-                    }
-                }
-                else
-                {
-                    LUCK_INFLUENCE = 0;
-                    LUCK_INFLUENCE_SKILL_CUTOFF = 0;
-                    LUCK_INFLUENCE_SPECIAL_CUTOFF = 0;
-                }
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Luck influence settings improperly configured, check Config.json");
-                LUCK_INFLUENCE = 0;
-                LUCK_INFLUENCE_SKILL_CUTOFF = 0;
-            }
-        }
-
-        public double GetRollResult(int attribute, int luck, bool isSpecial)
+        public double GetRollResult(StatisticValue stat)
         {
             double rng = _rand.Next(1, 101);
 
-            double maxSuccessRoll;
+            double maxSuccessRoll = 0.0;
 
-            if (isSpecial)
-                maxSuccessRoll = Math.Round(32.2 * Math.Sqrt(attribute) - 7);
-            else
-                maxSuccessRoll = Math.Round(10 * Math.Sqrt(attribute) - 0.225 * attribute - 1);
-
-            double luckMultiplier = 1.0 - (luck - 5 * (LUCK_INFLUENCE / 100.0));
-
-            // Ensures that Luck influence never guarantees success
-            if (LUCK_INFLUENCE_ENABLED && attribute < LUCK_INFLUENCE_SKILL_CUTOFF && MAX_SUCCESS_ROLL_CAP * luckMultiplier > maxSuccessRoll)
-                rng *= luckMultiplier;
+            if (stat.Statistic is Special)
+                maxSuccessRoll = Math.Round(32.2 * Math.Sqrt(stat.Value) - 7);
+            else if (stat.Statistic is Skill)
+                maxSuccessRoll = Math.Round(10 * Math.Sqrt(stat.Value) - 0.225 * stat.Value - 1);
 
             // Ensure success is never guaranteed
             if (maxSuccessRoll > MAX_SUCCESS_ROLL_CAP) maxSuccessRoll = MAX_SUCCESS_ROLL_CAP;
@@ -109,37 +49,19 @@ namespace FalloutRPG.Services.Roleplay
             double resultPercent = (maxSuccessRoll - rng) / maxSuccessRoll;
             resultPercent = Math.Round(resultPercent * 100.0, 1);
 
+            // TODO: implement luck influence with resultPercent
+
             return resultPercent;
         }
 
-        public string RollAttribute(Character character, Globals.SkillType skill, bool useEffects) =>
-            RollAttribute(character, (Enum)skill, useEffects);
-
-        public string RollAttribute(Character character, Globals.SpecialType special, bool useEffects) =>
-            RollAttribute(character, (Enum)special, useEffects);
-
-        private string RollAttribute(Character character, Enum attribute, bool useEffects)
+        public string RollStatistic(Character character, StatisticValue statistic)
         {
-            double result = 0.0;
-            Special special = character.Special;
-            SkillSheet skills = character.Skills;
+            if (statistic.Statistic is Skill skill && statistic.Value < skill.MinimumValue)
+                return "too low xd";
 
-            if (useEffects)
-            {
-                special = _effectsService.GetEffectiveSpecial(character);
-                skills = _effectsService.GetEffectiveSkills(character);
-            }
+            double result = GetRollResult(statistic);
 
-            if (attribute is Globals.SpecialType)
-            {
-                result = GetRollResult(_specService.GetSpecial(special, (Globals.SpecialType)attribute), special.Luck, true);
-            }
-            else if (attribute is Globals.SkillType)
-            {
-                result = GetRollResult(_skillsService.GetSkill(skills, (Globals.SkillType)attribute), special.Luck, false);
-            }
-
-            return $"{GetRollMessage(character.Name, attribute.ToString(), result)}";
+            return $"{GetRollMessage(character.Name, statistic.Statistic.ToString(), result)}";
         }
 
         public string GetRollMessage(string charName, string roll, double percent)

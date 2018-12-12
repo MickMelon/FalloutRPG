@@ -1,6 +1,7 @@
 ﻿using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
+using FalloutRPG.Models;
 using FalloutRPG.Models.Effects;
 using FalloutRPG.Services.Roleplay;
 using System;
@@ -92,7 +93,7 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command]
-        public async Task EditEffectAsync(string name, Globals.SkillType skill, int value)
+        public async Task EditEffectAsync(string name, Statistic stat, int value)
         {
             var effect = (await _effectsService.GetAllOwnedEffectsAsync(Context.User.Id)).Find(x => x.Name.Equals(name));
 
@@ -102,48 +103,18 @@ namespace FalloutRPG.Modules.Roleplay
                 return;
             }
 
-            var match = effect.SkillAdditions.FirstOrDefault(x => x.Skill.Equals(skill));
+            var match = effect.StatisticEffects.FirstOrDefault(x => x.Statistic.Equals(stat));
 
             if (match != null)
             {
                 if (value == 0)
-                    effect.SkillAdditions.Remove(match);
+                    effect.StatisticEffects.Remove(match);
                 else
-                    match.EffectValue = value;
+                    match.Value = value;
             }
             else
             {
-                effect.SkillAdditions.Add(new EffectSkill { Skill = skill, EffectValue = value });
-            }
-
-            await _effectsService.SaveEffectAsync(effect);
-
-            await ReplyAsync(String.Format(Messages.EFFECT_EDIT_SUCCESS, Context.User.Mention));
-        }
-
-        [Command]
-        public async Task EditEffectAsync(string name, Globals.SpecialType special, int value)
-        {
-            var effect = (await _effectsService.GetAllOwnedEffectsAsync(Context.User.Id)).Find(x => x.Name.Equals(name));
-
-            if (effect == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_FOUND, Context.User.Mention));
-                return;
-            }
-
-            var match = effect.SpecialAdditions.FirstOrDefault(x => x.SpecialAttribute.Equals(special));
-
-            if (match != null)
-            {
-                if (value == 0)
-                    effect.SpecialAdditions.Remove(match);
-                else
-                    match.EffectValue = value;
-            }
-            else
-            {
-                effect.SpecialAdditions.Add(new EffectSpecial { SpecialAttribute = special, EffectValue = value });
+                effect.StatisticEffects.Add(new StatisticValue { Statistic = stat, Value = value });
             }
 
             await _effectsService.SaveEffectAsync(effect);

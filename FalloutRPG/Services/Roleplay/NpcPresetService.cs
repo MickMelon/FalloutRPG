@@ -37,7 +37,7 @@ namespace FalloutRPG.Services.Roleplay
             NpcPreset preset = new NpcPreset
             {
                 Name = name,
-                Special = new Special { Strength = str, Perception = per, Endurance = end, Charisma = cha, Intelligence = @int, Agility = agi, Luck = luc }
+                Special = new Models.Statistic { Strength = str, Perception = per, Endurance = end, Charisma = cha, Intelligence = @int, Agility = agi, Luck = luc }
             };
 
             await _presetRepository.AddAsync(preset);

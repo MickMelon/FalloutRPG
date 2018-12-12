@@ -3,9 +3,12 @@ using Discord.Commands;
 using FalloutRPG.Addons;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
+using FalloutRPG.Models;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
@@ -67,26 +70,18 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                var skills = character.Skills;
+                var stats = character.Statistics;
                 if (useEffects)
-                    skills = _effectsService.GetEffectiveSkills(character);
+                    stats = _effectsService.GetEffectiveStatistics(character);
 
-                var embed = EmbedHelper.BuildBasicEmbed("Command: $skills",
-                    $"**Name:** {character.Name}\n" +
-                    $"**Barter:** {skills.Barter}\n" +
-                    $"**Energy Weapons:** {skills.EnergyWeapons}\n" +
-                    $"**Explosives:** {skills.Explosives}\n" +
-                    $"**Guns:** {skills.Guns}\n" +
-                    $"**Lockpick:** {skills.Lockpick}\n" +
-                    $"**Medicine:** {skills.Medicine}\n" +
-                    $"**Melee Weapons:** {skills.MeleeWeapons}\n" +
-                    $"**Repair:** {skills.Repair}\n" +
-                    $"**Science:** {skills.Science}\n" +
-                    $"**Sneak:** {skills.Sneak}\n" +
-                    $"**Speech:** {skills.Speech}\n" +
-                    $"**Survival:** {skills.Survival}\n" +
-                    $"**Unarmed:** {skills.Unarmed}\n" +
-                    $"*You have {character.SkillPoints} left to spend! ($char skills spend)*");
+                StringBuilder message = new StringBuilder($"**Name:** {character.Name}\n");
+
+                foreach (var skill in stats.Where(x => x.Statistic is Skill))
+                    message.Append($"**{skill.Statistic.Name}:** {skill.Value}\n");
+
+                message.Append($"*You have {character.SkillPoints} left to spend! ($char skills spend)*");
+
+                var embed = EmbedHelper.BuildBasicEmbed("Command: $skills", message.ToString());
 
                 await ReplyAsync(userInfo.Mention, embed: embed);
             }
@@ -100,7 +95,7 @@ namespace FalloutRPG.Modules.Roleplay
 
             [Command("set")]
             [Alias("tag")]
-            public async Task SetSkillsAsync(Globals.SkillType tag1, Globals.SkillType tag2, Globals.SkillType tag3)
+            public async Task SetSkillsAsync(Skill tag1, Skill tag2, Skill tag3)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
@@ -130,7 +125,7 @@ namespace FalloutRPG.Modules.Roleplay
 
             [Command("spend")]
             [Alias("put")]
-            public async Task SpendSkillPointsAsync(Globals.SkillType skill, int points)
+            public async Task SpendSkillPointsAsync(Skill skill, int points)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
@@ -167,41 +162,46 @@ namespace FalloutRPG.Modules.Roleplay
             [Command("claim")]
             public async Task ClaimSkillPointsAsync()
             {
-                var userInfo = Context.User;
-                var character = await _charService.GetCharacterAsync(userInfo.Id);
+                // TODO: ...obviously
+                await Task.Delay(0);
+                throw new NotImplementedException();
 
-                if (character == null)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                // var userInfo = Context.User;
+                // var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (!character.IsReset)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
-                    return;
-                }
+                // if (character == null)
+                // {
+                //     await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
+                //     return;
+                // }
 
-                if (!_skillsService.AreSkillsSet(character))
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_SKILLS_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                // if (!character.IsReset)
+                // {
+                //     await ReplyAsync(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
+                //     return;
+                // }
 
-                int pointsPerLevel = _skillsService.CalculateSkillPoints(character.Special.Intelligence);
-                int totalPoints = pointsPerLevel * (character.Level - 1);
+                // if (!_skillsService.AreSkillsSet(character))
+                // {
+                //     await ReplyAsync(string.Format(Messages.ERR_SKILLS_NOT_FOUND, userInfo.Mention));
+                //     return;
+                // }
 
-                if (totalPoints < 1)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
-                    return;
-                }
+                // int pointsPerLevel = 0;
+                // //int pointsPerLevel = _skillsService.CalculateSkillPoints(character.Special.Intelligence);
+                // int totalPoints = pointsPerLevel * (character.Level - 1);
 
-                character.SkillPoints += totalPoints;
-                character.IsReset = false;
-                await _charService.SaveCharacterAsync(character);
+                // if (totalPoints < 1)
+                // {
+                //     await ReplyAsync(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
+                //     return;
+                // }
 
-                await ReplyAsync(string.Format(Messages.SKILLS_POINTS_CLAIMED, totalPoints, userInfo.Mention));
+                // character.SkillPoints += totalPoints;
+                // character.IsReset = false;
+                // await _charService.SaveCharacterAsync(character);
+
+                // await ReplyAsync(string.Format(Messages.SKILLS_POINTS_CLAIMED, totalPoints, userInfo.Mention));
             }
         }
     }

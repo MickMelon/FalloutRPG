@@ -1,6 +1,11 @@
 using FalloutRPG.Constants;
 using FalloutRPG.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Services.Roleplay
@@ -16,16 +21,29 @@ namespace FalloutRPG.Services.Roleplay
         private readonly CharacterService _charService;
         private readonly SpecialService _specService;
 
-        public SkillsService(CharacterService charService, SpecialService specService)
+        private readonly IConfiguration _config;
+
+        public readonly ReadOnlyCollection<Skill> Skills;
+
+        public SkillsService(CharacterService charService, SpecialService specService, IConfiguration config,
+        IOptionsMonitor<SkillConfig> skillConfig)
         {
             _charService = charService;
             _specService = specService;
+            _config = config;
+            Skills = new ReadOnlyCollection<Skill>(skillConfig.CurrentValue.Skills.ToList());
+
+            LoadSkillConfiguration();
+        }
+
+        void LoadSkillConfiguration()
+        {
         }
 
         /// <summary>
         /// Set character's tag skills.
         /// </summary>
-        public async Task SetTagSkills(Character character, Globals.SkillType tag1, Globals.SkillType tag2, Globals.SkillType tag3)
+        public async Task SetTagSkills(Character character, Skill tag1, Skill tag2, Skill tag3)
         {
             if (character == null) throw new ArgumentNullException("character");
 
@@ -36,7 +54,7 @@ namespace FalloutRPG.Services.Roleplay
                 throw new ArgumentException(Exceptions.CHAR_TAGS_NOT_UNIQUE);
 
             InitializeSkills(character);
-            
+
             SetTagSkill(character, tag1);
             SetTagSkill(character, tag2);
             SetTagSkill(character, tag3);
@@ -45,68 +63,49 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
-        /// Checks if character's skills are set.
+        /// Returns the value of the specified character's given skill.
         /// </summary>
-        public bool AreSkillsSet(Character character)
+        /// <returns>Returns 0 if character or skills are null.</returns>
+        public int GetSkill(IList<StatisticValue> skillSheet, Skill skill)
         {
-            if (character == null || character.Skills == null)
-                return false;
+            var match = skillSheet.FirstOrDefault(x => x.Statistic.Equals(skill));
 
-            var properties = character.Skills.GetType().GetProperties();
+            if (match == null)
+                return -1;
 
-            foreach (var prop in properties)
-            {
-                if (prop.Name.Equals("CharacterId") || prop.Name.Equals("Id"))
-                    continue;
-
-                var value = Convert.ToInt32(prop.GetValue(character.Skills));
-                if (value == 0) return false;
-            }
-
-            return true;
+            return match.Value;
         }
 
-        public SkillSheet CloneSkills(SkillSheet skillSheet)
+        // TODO: Move common methods into a new service called StatisticsService?
+        public IList<StatisticValue> CloneStatistics(IList<StatisticValue> skills)
         {
-            var skills = new SkillSheet();
+            var copy = new List<StatisticValue>();
 
-            foreach (var item in typeof(SkillSheet).GetProperties())
-                item.SetValue(skills, item.GetValue(skillSheet));
+            foreach (var skill in skills)
+                copy.Add(new StatisticValue { Statistic = skill.Statistic, Value = skill.Value });
 
-            skills.Id = -1;
-
-            return skills;
+            return copy;
         }
 
         /// <summary>
         /// Returns the value of the specified character's given skill.
         /// </summary>
         /// <returns>Returns 0 if character or skills are null.</returns>
-        public int GetSkill(SkillSheet skillSheet, Globals.SkillType skill)
-        {
-            if (skillSheet == null)
-                return 0;
-
-            return (int)typeof(SkillSheet).GetProperty(skill.ToString()).GetValue(skillSheet);
-        }
-
-        /// <summary>
-        /// Returns the value of the specified character's given skill.
-        /// </summary>
-        /// <returns>Returns 0 if character or skills are null.</returns>
-        public int GetSkill(Character character, Globals.SkillType skill) =>
-            GetSkill(character?.Skills, skill);
+        public int GetSkill(Character character, Skill skill) =>
+            GetSkill(character?.Statistics, skill);
 
         /// <summary>
         /// Sets the value of the specified character's given skill.
         /// </summary>
         /// <returns>Returns false if skills are null.</returns>
-        public bool SetSkill(SkillSheet skillSheet, Globals.SkillType skill, int newValue)
+        public bool SetSkill(IList<StatisticValue> skillSheet, Skill skill, int newValue)
         {
-            if (skillSheet == null)
+            var match = skillSheet.FirstOrDefault(x => x.Statistic.Equals(skill));
+
+            if (match == null)
                 return false;
 
-            typeof(SkillSheet).GetProperty(skill.ToString()).SetValue(skillSheet, newValue);
+            match.Value = newValue;
             return true;
         }
 
@@ -114,20 +113,8 @@ namespace FalloutRPG.Services.Roleplay
         /// Sets the value of the specified character's given skill.
         /// </summary>
         /// <returns>Returns false if character or skills are null.</returns>
-        public bool SetSkill(Character character, Globals.SkillType skill, int newValue) =>
-            SetSkill(character?.Skills, skill, newValue);
-
-        /// <summary>
-        /// Gives character their skill points from leveling up.
-        /// </summary>
-        public void GiveSkillPoints(Character character)
-        {
-            if (character == null) throw new ArgumentNullException("character");
-
-            var points = CalculateSkillPoints(character.Special.Intelligence);
-
-            character.SkillPoints += points;
-        }
+        public bool SetSkill(Character character, Skill skill, int newValue) =>
+            SetSkill(character?.Statistics, skill, newValue);
 
         /// <summary>
         /// Calculate skill points given on level up.
@@ -148,12 +135,9 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Puts an amount of points in a specified skill.
         /// </summary>
-        public void PutPointsInSkill(Character character, Globals.SkillType skill, int points)
+        public void PutPointsInSkill(Character character, Skill skill, int points)
         {
             if (character == null) throw new ArgumentNullException("character");
-
-            if (!AreSkillsSet(character))
-                throw new Exception(Exceptions.CHAR_SKILLS_NOT_SET);
 
             if (points < 1) return;
 
@@ -170,23 +154,17 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
-        /// Checks if the tag name matches any of the skill names.
+        /// Checks if the special name is valid.
         /// </summary>
         private bool IsValidSkillName(string skill)
         {
-            skill = skill.Trim();
-
-            foreach (var name in Globals.SKILL_NAMES)
-                if (skill.Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                    return true;
-
-            return false;
+            return Skills.Select(sk => sk.AliasesArray).Any(aliases => aliases.Contains(skill));
         }
 
         /// <summary>
         /// Checks if all the tags are unique.
         /// </summary>
-        private bool AreUniqueTags(Globals.SkillType tag1, Globals.SkillType tag2, Globals.SkillType tag3)
+        private bool AreUniqueTags(Skill tag1, Skill tag2, Skill tag3)
         {
             if (tag1.Equals(tag2) ||
                 tag1.Equals(tag3) ||
@@ -199,7 +177,7 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Sets a character's tag skill.
         /// </summary>
-        public void SetTagSkill(Character character, Globals.SkillType tag)
+        public void SetTagSkill(Character character, Skill tag)
         {
             SetSkill(character, tag, GetSkill(character, tag) + TAG_ADDITION);
         }
@@ -209,30 +187,34 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public void InitializeSkills(Character character)
         {
-            character.Skills = new SkillSheet()
+            foreach (var skill in Skills)
             {
-                Barter = CalculateSkill(character.Special.Charisma, character.Special.Luck),
-                EnergyWeapons = CalculateSkill(character.Special.Perception, character.Special.Luck),
-                Explosives = CalculateSkill(character.Special.Perception, character.Special.Luck),
-                Guns = CalculateSkill(character.Special.Agility, character.Special.Luck),
-                Lockpick = CalculateSkill(character.Special.Perception, character.Special.Luck),
-                Medicine = CalculateSkill(character.Special.Intelligence, character.Special.Luck),
-                MeleeWeapons = CalculateSkill(character.Special.Strength, character.Special.Luck),
-                Repair = CalculateSkill(character.Special.Intelligence, character.Special.Luck),
-                Science = CalculateSkill(character.Special.Intelligence, character.Special.Luck),
-                Sneak = CalculateSkill(character.Special.Agility, character.Special.Luck),
-                Speech = CalculateSkill(character.Special.Charisma, character.Special.Luck),
-                Survival = CalculateSkill(character.Special.Endurance, character.Special.Luck),
-                Unarmed = CalculateSkill(character.Special.Endurance, character.Special.Luck)
-            };
+                character.Statistics.Add(
+                    new StatisticValue
+                    {
+                        Statistic = skill,
+                        Value = CalculateSkill(_specService.GetSpecial(character, skill.Special))
+                    });
+            }
         }
 
         /// <summary>
         /// Calculates a skill based on New Vegas formula.
         /// </summary>
-        private int CalculateSkill(int stat, int luck)
+        private int CalculateSkill(int stat, int luck = 0)
         {
             return (2 + (2 * stat) + (luck / 2));
+        }
+
+        /// <summary>
+        /// Checks if a character's special has been set.
+        /// </summary>
+        public bool AreSkillsSet(Character character)
+        {
+            if (character == null || character.Statistics == null) return false;
+            if (character.Skills.Count() <= 0) return false;
+
+            return true;
         }
     }
 }

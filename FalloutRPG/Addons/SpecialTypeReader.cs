@@ -9,12 +9,7 @@ namespace FalloutRPG.Addons
     {
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
-            if (Globals.SPECIAL_ALIASES.TryGetValue(input, out Globals.SpecialType result))
-            {
-                return Task.FromResult(TypeReaderResult.FromSuccess(result));
-            }
-
-            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as a Special."));
+            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as an Attribute."));
         }
     }
 }

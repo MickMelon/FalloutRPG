@@ -1,6 +1,8 @@
 ﻿using FalloutRPG.Constants;
 using FalloutRPG.Models;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,6 +14,8 @@ namespace FalloutRPG.Services.Roleplay
         public const int MAX_SPECIAL = 10;
 
         private readonly CharacterService _charService;
+
+        private readonly Special[] _special;
 
         public SpecialService(CharacterService charService)
         {
@@ -41,55 +45,42 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         private bool IsValidSpecialName(string special)
         {
-            foreach (var name in Globals.SPECIAL_NAMES)
-                if (special.Equals(name, StringComparison.InvariantCultureIgnoreCase) ||
-                    special.Equals(name.Substring(0, 3), StringComparison.InvariantCultureIgnoreCase))
-                    return true;
-
-            return false;
-        }
-
-        public Special CloneSpecial(Special special)
-        {
-            var newSpecial = new Special();
-
-            foreach (var item in typeof(Special).GetProperties())
-                item.SetValue(newSpecial, item.GetValue(special));
-
-            newSpecial.Id = -1;
-
-            return newSpecial;
+            return _special.Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
         }
 
         /// <summary>
         /// Returns the value of the specified special.
         /// </summary>
-        /// <returns>Returns 0 if special values are null.</returns>
-        public int GetSpecial(Special specialSheet, Globals.SpecialType special)
+        /// <returns>Returns -1 if special values are null.</returns>
+        public int GetSpecial(IList<StatisticValue> specialSheet, Special special)
         {
-            if (specialSheet == null)
-                return 0;
+            var match = specialSheet.FirstOrDefault(x => x.Statistic.Equals(special));
 
-            return (int)typeof(Special).GetProperty(special.ToString()).GetValue(specialSheet);
+            if (match == null)
+                return -1;
+
+            return match.Value;
         }
 
         /// <summary>
         /// Returns the value of the specified character's given special.
         /// </summary>
-        /// <returns>Returns 0 if character or special values are null.</returns>
-        public int GetSpecial(Character character, Globals.SpecialType special) =>
-            GetSpecial(character?.Special, special);
+        /// <returns>Returns -1 if character or special values are null.</returns>
+        public int GetSpecial(Character character, Special special) =>
+            GetSpecial(character?.Statistics, special);
 
         /// <summary>
         /// Sets the value of the specified character's given special.
         /// </summary>
         /// <returns>Returns false if special is null.</returns>
-        public bool SetSpecial(Special specialSheet, Globals.SpecialType special, int newValue)
+        public bool SetSpecial(IList<StatisticValue> specialSheet, Special special, int newValue)
         {
-            if (specialSheet == null)
+            var match = specialSheet.FirstOrDefault(x => x.Statistic.Equals(special));
+
+            if (match == null)
                 return false;
 
-            typeof(Special).GetProperty(special.ToString()).SetValue(specialSheet, newValue);
+            match.Value = newValue;
             return true;
         }
 
@@ -97,8 +88,18 @@ namespace FalloutRPG.Services.Roleplay
         /// Sets the value of the specified character's given special.
         /// </summary>
         /// <returns>Returns false if character or special are null.</returns>
-        public bool SetSpecial(Character character, Globals.SpecialType special, int newValue) =>
-            SetSpecial(character?.Special, special, newValue);
+        public bool SetSpecial(Character character, Special special, int newValue) =>
+            SetSpecial(character?.Statistics, special, newValue);
+
+        public IList<StatisticValue> CloneSpecial(List<StatisticValue> special)
+        {
+            var copy = new List<StatisticValue>();
+
+            foreach (var spec in special)
+                copy.Add(new StatisticValue { Statistic = spec.Statistic, Value = spec.Value });
+
+            return copy;
+        }
 
         /// <summary>
         /// Checks if each number in SPECIAL is between 1 and 10
@@ -120,16 +121,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         private void InitializeSpecial(Character character, int[] special)
         {
-            character.Special = new Special()
-            {
-                Strength = special[0],
-                Perception = special[1],
-                Endurance = special[2],
-                Charisma = special[3],
-                Intelligence = special[4],
-                Agility = special[5],
-                Luck = special[6]
-             };
+            //character.Statistics.Add(new StatisticValue { Statistic = new Special { Nam}})
         }
 
         /// <summary>
@@ -137,18 +129,8 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public bool IsSpecialSet(Character character)
         {
-            if (character == null || character.Special == null) return false;
-
-            var properties = character.Special.GetType().GetProperties();
-
-            foreach (var prop in properties)
-            {
-                if (prop.Name.Equals("CharacterId") || prop.Name.Equals("Id"))
-                    continue;
-
-                var value = Convert.ToInt32(prop.GetValue(character.Special));
-                if (value == 0) return false;
-            }
+            if (character == null || character.Statistics == null) return false;
+            if (character.Special.Count() != _special.Length) return false;
 
             return true;
         }

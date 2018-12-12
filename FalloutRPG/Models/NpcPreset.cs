@@ -11,10 +11,6 @@ namespace FalloutRPG.Models
 
         public bool Enabled { get; set; }
 
-        public Special Special { get; set; }
-
-        public Globals.SkillType? Tag1 { get; set; }
-        public Globals.SkillType? Tag2 { get; set; }
-        public Globals.SkillType? Tag3 { get; set; }
+        public IList<StatisticValue> Statistics { get; set; }
     }
 }

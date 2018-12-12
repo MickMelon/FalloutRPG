@@ -131,7 +131,7 @@
         public const string NPC_PRESET_EDIT_SPECIAL = SUCCESS_EMOJI + "NPC preset: `{0}` S.P.E.C.I.A.L. values changed. ({1})";
 
         // NPC Error Messages
-        public const string ERR_NPC_CHAR_NOT_FOUND = FAILURE_EMOJI + "An NPC with the given name could not be found.";
+        public const string ERR_NPC_CHAR_NOT_FOUND = FAILURE_EMOJI + "An NPC with the given name could not be found. ({0})";
         public const string ERR_NPC_PRESET_NOT_FOUND = FAILURE_EMOJI + "An NPC preset with the given name could not be found. ({0})";
         public const string ERR_NPC_PRESET_CREATE = FAILURE_EMOJI + "NPC preset creation failed. ({0})";
         public const string ERR_NPC_PRESET_ENABLE = FAILURE_EMOJI + "Failed to enable NPC preset: {0}. (Check for typos) ({1})";

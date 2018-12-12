@@ -38,7 +38,6 @@ namespace FalloutRPG
         public async Task MainAsync()
         {
             config = BuildConfig();
-
             var services = BuildServiceProvider();
 
             services.GetRequiredService<LogService>();
@@ -89,11 +88,14 @@ namespace FalloutRPG
             // Addons
             .AddSingleton<InteractiveService>()
 
+            // Configuration
+
+            .Configure<SkillConfig>(config)
+
             // Database
             .AddEntityFrameworkSqlite().AddDbContext<RpgContext>(optionsAction: options => options.UseSqlite("Filename=CharacterDB.db"))
             .AddTransient<IRepository<Character>, EfSqliteRepository<Character>>()
-            .AddTransient<IRepository<SkillSheet>, EfSqliteRepository<SkillSheet>>()
-            .AddTransient<IRepository<Special>, EfSqliteRepository<Special>>()
+            .AddTransient<IRepository<Statistic>, EfSqliteRepository<Statistic>>()
             .AddTransient<IRepository<Effect>, EfSqliteRepository<Effect>>()
             .AddTransient<IRepository<NpcPreset>, EfSqliteRepository<NpcPreset>>()
             .BuildServiceProvider();
@@ -104,6 +106,7 @@ namespace FalloutRPG
         private IConfiguration BuildConfig() => new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("Config.json")
+            .AddJsonFile("StatisticsConfig.json")
             .Build();
     }
 }

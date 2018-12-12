@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace FalloutRPG.Data.Repositories
 {
-    public interface IRepository<T> where T : BaseModel, new()
+    public interface IRepository<T> where T : BaseModel
     {
         List<T> FetchAll();
         IQueryable<T> Query { get; }

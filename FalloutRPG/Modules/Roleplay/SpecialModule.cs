@@ -3,8 +3,11 @@ using Discord.Commands;
 using FalloutRPG.Addons;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
+using FalloutRPG.Models;
 using FalloutRPG.Services.Roleplay;
 using System;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
@@ -60,19 +63,16 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                var special = character.Special;
+                var stats = character.Statistics;
                 if (useEffects)
-                    special = _effectsService.GetEffectiveSpecial(character);
+                    stats = _effectsService.GetEffectiveStatistics(character);
 
-                var embed = EmbedHelper.BuildBasicEmbed("Command: $special",
-                    $"**Name:** {character.Name}\n" +
-                    $"**STR:** {special.Strength}\n" +
-                    $"**PER:** {special.Perception}\n" +
-                    $"**END:** {special.Endurance}\n" +
-                    $"**CHA:** {special.Charisma}\n" +
-                    $"**INT:** {special.Intelligence}\n" +
-                    $"**AGI:** {special.Agility}\n" +
-                    $"**LUC:** {special.Luck}");
+                StringBuilder message = new StringBuilder($"**Name:** {character.Name}\n");
+
+                foreach (var special in stats.Where(x => x.Statistic is Special))
+                    message.Append($"**{special.Statistic.Name}:** {special.Value}\n");
+
+                var embed = EmbedHelper.BuildBasicEmbed("Command: $special", message.ToString());
 
                 await ReplyAsync(userInfo.Mention, embed: embed);
             }

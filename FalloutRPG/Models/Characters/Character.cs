@@ -1,7 +1,10 @@
-﻿using FalloutRPG.Models.Effects;
+﻿using FalloutRPG.Constants;
+using FalloutRPG.Models.Effects;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace FalloutRPG.Models
 {
@@ -30,8 +33,12 @@ namespace FalloutRPG.Models
         public float SkillPoints { get; set; }
         public bool IsReset { get; set; }
 
-        public Special Special { get; set; }
-        public SkillSheet Skills { get; set; }
+        public IList<StatisticValue> Statistics { get; set; }
+
+        [NotMapped]
+        public IList<StatisticValue> Skills => Statistics.Where(x => x.Statistic is Skill).ToList();
+        [NotMapped]
+        public IList<StatisticValue> Special => Statistics.Where(x => x.Statistic is Special).ToList();
 
         public virtual IList<EffectCharacter> EffectCharacters { get; set; }
 
