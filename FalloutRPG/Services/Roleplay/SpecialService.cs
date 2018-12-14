@@ -18,47 +18,15 @@ namespace FalloutRPG.Services.Roleplay
         public const int MAX_SPECIAL = 10;
 
         private readonly CharacterService _charService;
+        private readonly StatisticsService _statService;
 
-        private readonly IRepository<Statistic> _statRepo;
+        public IReadOnlyCollection<Special> Specials { get => (ReadOnlyCollection<Special>)_statService.Statistics.OfType<Special>(); }
 
-        public ReadOnlyCollection<Special> Specials { get; private set; }
-
-        public SpecialService(CharacterService charService, IRepository<Statistic> statRepo)
+        public SpecialService(CharacterService charService, StatisticsService statService)
         {
             _charService = charService;
-
-            _statRepo = statRepo;
-
-            Specials = new ReadOnlyCollection<Special>(_statRepo.Query.OfType<Special>().ToList());
+            _statService = statService;
         }
-
-        public async Task<RuntimeResult> AddSpecialAsync(string name)
-        {
-            if (_statRepo.Query.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
-                return StatisticResult.StatisticAlreadyExists();
-
-            var newSpecial = new Special
-            {
-                Name = name,
-                Aliases = name + "/"
-            };
-
-            await _statRepo.AddAsync(newSpecial);
-            await ReloadSpecialsAsync();            
-
-            return GenericResult.FromSuccess(Messages.SPECIAL_ADDED);
-        }
-
-        public async Task<RuntimeResult> DeleteSpecialAsync(Skill skill)
-        {
-            await _statRepo.DeleteAsync(skill);
-            await ReloadSpecialsAsync();
-
-            return GenericResult.FromSuccess(Messages.SKILLS_REMOVED);
-        }
-
-        public async Task ReloadSpecialsAsync() =>
-            Specials = new ReadOnlyCollection<Special>(await _statRepo.Query.OfType<Special>().ToListAsync());
 
         /// <summary>
         /// Set character's special.
@@ -83,60 +51,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         private bool IsValidSpecialName(string special)
         {
-            return Specials.Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
-        }
-
-        /// <summary>
-        /// Returns the value of the specified special.
-        /// </summary>
-        /// <returns>Returns -1 if special values are null.</returns>
-        public int GetSpecial(IList<StatisticValue> specialSheet, Special special)
-        {
-            var match = specialSheet.FirstOrDefault(x => x.Statistic.Equals(special));
-
-            if (match == null)
-                return -1;
-
-            return match.Value;
-        }
-
-        /// <summary>
-        /// Returns the value of the specified character's given special.
-        /// </summary>
-        /// <returns>Returns -1 if character or special values are null.</returns>
-        public int GetSpecial(Character character, Special special) =>
-            GetSpecial(character?.Statistics, special);
-
-        /// <summary>
-        /// Sets the value of the specified character's given special.
-        /// </summary>
-        /// <returns>Returns false if special is null.</returns>
-        public bool SetSpecial(IList<StatisticValue> specialSheet, Special special, int newValue)
-        {
-            var match = specialSheet.FirstOrDefault(x => x.Statistic.Equals(special));
-
-            if (match == null)
-                return false;
-
-            match.Value = newValue;
-            return true;
-        }
-
-        /// <summary>
-        /// Sets the value of the specified character's given special.
-        /// </summary>
-        /// <returns>Returns false if character or special are null.</returns>
-        public bool SetSpecial(Character character, Special special, int newValue) =>
-            SetSpecial(character?.Statistics, special, newValue);
-
-        public IList<StatisticValue> CloneSpecial(List<StatisticValue> special)
-        {
-            var copy = new List<StatisticValue>();
-
-            foreach (var spec in special)
-                copy.Add(new StatisticValue { Statistic = spec.Statistic, Value = spec.Value });
-
-            return copy;
+            return _statService.Statistics.OfType<Special>().Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
         }
 
         /// <summary>

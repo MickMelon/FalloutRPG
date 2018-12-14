@@ -23,20 +23,18 @@ namespace FalloutRPG.Services.Roleplay
 
         private readonly CharacterService _charService;
         private readonly SpecialService _specService;
-        private readonly IRepository<Statistic> _statRepo;
+        private readonly StatisticsService _statService;
         
-        public ReadOnlyCollection<Skill> Skills { get; private set; }
+        public IReadOnlyCollection<Skill> Skills { get => (ReadOnlyCollection<Skill>)_statService.Statistics.OfType<Skill>(); }
 
-        public SkillsService(CharacterService charService, 
-        SpecialService specService,
-        IRepository<Statistic> statRepo)
+        public SkillsService(
+            CharacterService charService, 
+            SpecialService specService,
+            StatisticsService statService)
         {
             _charService = charService;
             _specService = specService;
-
-            _statRepo = statRepo;
-
-            Skills = new ReadOnlyCollection<Skill>(_statRepo.Query.OfType<Skill>().ToList());
+            _statService = statService;
         }
 
         /// <summary>
@@ -61,34 +59,6 @@ namespace FalloutRPG.Services.Roleplay
             await _charService.SaveCharacterAsync(character);
         }
 
-        public async Task<RuntimeResult> AddSkillAsync(string name, Special special)
-        {
-            if (_statRepo.Query.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
-                return StatisticResult.StatisticAlreadyExists();
-
-            var newSkill = new Skill
-            {
-                Name = name,
-                Special = special,
-                Aliases = name + "/"
-            };
-
-            await _statRepo.AddAsync(newSkill);
-
-            await ReloadSkillsAsync();            
-
-            return GenericResult.FromSuccess(Messages.SKILLS_ADDED);
-        }
-
-        public async Task<RuntimeResult> DeleteSkillAsync(Skill skill)
-        {
-            await _statRepo.DeleteAsync(skill);
-
-            await ReloadSkillsAsync();
-
-            return GenericResult.FromSuccess(Messages.SKILLS_REMOVED);
-        }
-
         /// <summary>
         /// Returns the value of the specified character's given skill.
         /// </summary>
@@ -102,46 +72,6 @@ namespace FalloutRPG.Services.Roleplay
 
             return match.Value;
         }
-
-        /// <summary>
-        /// Returns the value of the specified character's given skill.
-        /// </summary>
-        /// <returns>Returns 0 if character or skills are null.</returns>
-        public int GetSkill(Character character, Skill skill) =>
-            GetSkill(character?.Statistics, skill);
-
-        /// <summary>
-        /// Sets the value of the specified character's given skill.
-        /// </summary>
-        /// <returns>Returns false if skills are null.</returns>
-        public bool SetSkill(IList<StatisticValue> skillSheet, Skill skill, int newValue)
-        {
-            var match = skillSheet.FirstOrDefault(x => x.Statistic.Equals(skill));
-
-            if (match == null)
-                return false;
-
-            match.Value = newValue;
-            return true;
-        }
-
-        /// <summary>
-        /// Sets the value of the specified character's given skill.
-        /// </summary>
-        /// <returns>Returns false if character or skills are null.</returns>
-        public bool SetSkill(Character character, Skill skill, int newValue) =>
-            SetSkill(character?.Statistics, skill, newValue);
-
-        // TODO: Move common methods into a new service called StatisticsService?
-        public IList<StatisticValue> CloneStatistics(IList<StatisticValue> skills)
-        {
-            var copy = new List<StatisticValue>();
-
-            foreach (var skill in skills)
-                copy.Add(new StatisticValue { Statistic = skill.Statistic, Value = skill.Value });
-
-            return copy;
-        }    
 
         /// <summary>
         /// Calculate skill points given on level up.
@@ -171,12 +101,12 @@ namespace FalloutRPG.Services.Roleplay
             if (points > character.SkillPoints)
                 throw new Exception(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
 
-            var skillVal = GetSkill(character, skill);
+            var skillVal = _statService.GetStatistic(character, skill);
 
             if ((skillVal + points) > MAX_SKILL_LEVEL)
                 throw new Exception(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
 
-            SetSkill(character, skill, skillVal + points);
+            _statService.SetStatistic(character, skill, skillVal + points);
             character.SkillPoints -= points;
         }
 
@@ -206,7 +136,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public void SetTagSkill(Character character, Skill tag)
         {
-            SetSkill(character, tag, GetSkill(character, tag) + TAG_ADDITION);
+            _statService.SetStatistic(character, tag, _statService.GetStatistic(character, tag) + TAG_ADDITION);
         }
 
         /// <summary>
@@ -220,7 +150,7 @@ namespace FalloutRPG.Services.Roleplay
                     new StatisticValue
                     {
                         Statistic = skill,
-                        Value = CalculateSkill(_specService.GetSpecial(character, skill.Special))
+                        Value = CalculateSkill(_statService.GetStatistic(character, skill.Special))
                     });
             }
         }
@@ -243,8 +173,5 @@ namespace FalloutRPG.Services.Roleplay
 
             return true;
         }
-
-        public async Task ReloadSkillsAsync() =>
-            Skills = new ReadOnlyCollection<Skill>(await _statRepo.Query.OfType<Skill>().ToListAsync());
     }
 }

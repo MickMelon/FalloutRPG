@@ -14,20 +14,19 @@ namespace FalloutRPG.Services.Roleplay
     public class EffectsService
     {
         private readonly CharacterService _characterService;
+        private readonly StatisticsService _statService;
+
         private readonly IRepository<Effect> _effectsRepository;
-        private readonly SkillsService _skillsService;
-        private readonly SpecialService _specialService;
 
         public EffectsService(
             CharacterService characterService,
-            IRepository<Effect> effectsRepository,
-            SkillsService skillsService,
-            SpecialService specialService)
+            StatisticsService statService,
+            IRepository<Effect> effectsRepository)
         {
             _characterService = characterService;
+            _statService = statService;
+
             _effectsRepository = effectsRepository;
-            _skillsService = skillsService;
-            _specialService = specialService;
         }
 
         public async Task CreateEffectAsync(string name, ulong ownerId) =>
@@ -57,7 +56,7 @@ namespace FalloutRPG.Services.Roleplay
 
         public IList<StatisticValue> GetEffectiveStatistics(Character character)
         {
-            var newStats = _skillsService.CloneStatistics(character.Statistics);
+            var newStats = _statService.CloneStatistics(character.Statistics);
 
             // Loop through all applied effects, then loop through every StatisticValue in the effect,
             // then actually apply them

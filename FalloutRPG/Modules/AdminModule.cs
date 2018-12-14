@@ -5,6 +5,8 @@ using FalloutRPG.Helpers;
 using FalloutRPG.Models;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules
@@ -19,18 +21,21 @@ namespace FalloutRPG.Modules
         private readonly ExperienceService _experienceService;
         private readonly SkillsService _skillsService;
         private readonly SpecialService _specialService;
+        private readonly StatisticsService _statService;
         private readonly HelpService _helpService;
 
         public AdminModule(CharacterService charService,
             ExperienceService experienceService,
             SkillsService skillsService,
             SpecialService specialService,
+            StatisticsService statService,
             HelpService helpService)
         {
             _charService = charService;
             _experienceService = experienceService;
             _skillsService = skillsService;
             _specialService = specialService;
+            _statService = statService;
             _helpService = helpService;
         }
 
@@ -43,13 +48,51 @@ namespace FalloutRPG.Modules
         [Command("addskill")]
         public async Task<RuntimeResult> AddSkillAsync(string name, Special special)
         {
-            return await _skillsService.AddSkillAsync(name, special);
+            if (_statService.NameExists(name))
+                return StatisticResult.StatisticAlreadyExists();
+
+            var newSkill = new Skill
+            {
+                Name = name,
+                Special = special,
+                Aliases = name + "/"
+            };
+
+            await _statService.AddStatisticAsync(newSkill);         
+
+            return GenericResult.FromSuccess(Messages.SKILLS_ADDED);
         }
 
         [Command("addspecial")]
         public async Task<RuntimeResult> AddSpecialAsync(string name)
         {
-            return await _specialService.AddSpecialAsync(name);
+            if (_statService.NameExists(name))
+                return StatisticResult.StatisticAlreadyExists();
+
+            var newSpecial = new Special
+            {
+                Name = name,
+                Aliases = name + "/"
+            };
+
+            await _statService.AddStatisticAsync(newSpecial);        
+
+            return GenericResult.FromSuccess(Messages.SPECIAL_ADDED);
+        }
+
+        [Command("deletestat")]
+        public async Task<RuntimeResult> DeleteStatAsync(Statistic stat)
+        {
+            await _statService.DeleteStatisticAsync(stat);
+
+            return GenericResult.FromSuccess(Messages.SKILLS_REMOVED);
+        }
+
+        [Command("addalias")]
+        public RuntimeResult AddAlias(Statistic stat, string alias)
+        {
+            stat.Aliases += alias + "/";
+            return GenericResult.FromSuccess("Alias added successfully.");
         }
 
         [Command("givemoney")]
