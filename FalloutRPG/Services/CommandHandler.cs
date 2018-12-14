@@ -99,8 +99,6 @@ namespace FalloutRPG.Services
                     context: context,
                     argPos: argPos,
                     services: _services);
-
-                await OnCommandExecutedAsync(null, context, result);
             }
             catch (Exception e)
             {
