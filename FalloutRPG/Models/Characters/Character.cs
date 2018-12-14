@@ -30,7 +30,7 @@ namespace FalloutRPG.Models
             private set { }
         }
 
-        public float SkillPoints { get; set; }
+        public float ExperiencePoints { get; set; }
         public bool IsReset { get; set; }
 
         public IList<StatisticValue> Statistics { get; set; }

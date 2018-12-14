@@ -98,7 +98,7 @@ namespace FalloutRPG.Services.Roleplay
 
             if (points < 1) return;
 
-            if (points > character.SkillPoints)
+            if (points > character.ExperiencePoints)
                 throw new Exception(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
 
             var skillVal = _statService.GetStatistic(character, skill);
@@ -107,7 +107,7 @@ namespace FalloutRPG.Services.Roleplay
                 throw new Exception(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
 
             _statService.SetStatistic(character, skill, skillVal + points);
-            character.SkillPoints -= points;
+            character.ExperiencePoints -= points;
         }
 
         /// <summary>

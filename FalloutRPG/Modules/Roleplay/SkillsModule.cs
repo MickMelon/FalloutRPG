@@ -79,7 +79,7 @@ namespace FalloutRPG.Modules.Roleplay
                 foreach (var skill in stats.Where(x => x.Statistic is Skill))
                     message.Append($"**{skill.Statistic.Name}:** {skill.Value}\n");
 
-                message.Append($"*You have {character.SkillPoints} left to spend! ($char skills spend)*");
+                message.Append($"*You have {character.ExperiencePoints}XP left to spend! ($char skills spend)*");
 
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $skills", message.ToString());
 

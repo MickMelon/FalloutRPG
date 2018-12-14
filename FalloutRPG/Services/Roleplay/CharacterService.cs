@@ -77,7 +77,7 @@ namespace FalloutRPG.Services.Roleplay
                 Description = "",
                 Story = "",
                 Experience = 0,
-                SkillPoints = 0,
+                ExperiencePoints = 0,
                 Money = 1000,
                 Statistics = new List<StatisticValue>(),
                 EffectCharacters = new List<EffectCharacter>()

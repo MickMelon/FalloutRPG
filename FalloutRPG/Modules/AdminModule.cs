@@ -125,7 +125,7 @@ namespace FalloutRPG.Modules
             var character = await _charService.GetCharacterAsync(user.Id);
             if (character == null) return;
 
-            character.SkillPoints += points;
+            character.ExperiencePoints += points;
 
             await _charService.SaveCharacterAsync(character);
             await ReplyAsync(string.Format(Messages.ADM_GAVE_SKILL_POINTS, Context.User.Mention));

@@ -196,7 +196,7 @@ namespace FalloutRPG.Services.Roleplay
             if (character == null) throw new ArgumentNullException("character");
             var user = _client.GetUser(character.DiscordId);
 
-            await user.SendMessageAsync(string.Format(Messages.SKILLS_LEVEL_UP, user.Mention, character.SkillPoints));
+            await user.SendMessageAsync(string.Format(Messages.SKILLS_LEVEL_UP, user.Mention, character.ExperiencePoints));
         }
 
         /// <summary>
