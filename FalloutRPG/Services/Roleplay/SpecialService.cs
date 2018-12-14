@@ -39,13 +39,14 @@ namespace FalloutRPG.Services.Roleplay
 
             var newSpecial = new Special
             {
-                Name = name
+                Name = name,
+                Aliases = name + "/"
             };
 
             await _statRepo.AddAsync(newSpecial);
             await ReloadSpecialsAsync();            
 
-            return GenericResult.FromSuccess(Messages.SKILLS_ADDED);
+            return GenericResult.FromSuccess(Messages.SPECIAL_ADDED);
         }
 
         public async Task<RuntimeResult> DeleteSpecialAsync(Skill skill)

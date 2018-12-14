@@ -69,7 +69,8 @@ namespace FalloutRPG.Services.Roleplay
             var newSkill = new Skill
             {
                 Name = name,
-                Special = special
+                Special = special,
+                Aliases = name + "/"
             };
 
             await _statRepo.AddAsync(newSkill);
