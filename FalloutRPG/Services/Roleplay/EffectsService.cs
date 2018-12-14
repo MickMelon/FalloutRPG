@@ -90,7 +90,7 @@ namespace FalloutRPG.Services.Roleplay
 
             sb.Append($"__{effect.Name}__:\n");
 
-            var specEffects = effect.StatisticEffects.Where(x => x.Statistic.StatisticType == Globals.StatisticType.Special);
+            var specEffects = effect.StatisticEffects.Where(x => x.Statistic is Special);
             if (specEffects.Count() > 0)
             {
                 sb.Append("**S.P.E.C.I.A.L.:** ");
@@ -104,7 +104,7 @@ namespace FalloutRPG.Services.Roleplay
                 }
             }
 
-            var skillEffects = effect.StatisticEffects.Where(x => x.Statistic.StatisticType == Globals.StatisticType.Skill);
+            var skillEffects = effect.StatisticEffects.Where(x => x.Statistic is Skill);
             if (skillEffects.Count() > 0)
             {
                 sb.Append("\n**Skills:** ");

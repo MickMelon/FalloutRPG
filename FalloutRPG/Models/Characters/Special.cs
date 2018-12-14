@@ -6,6 +6,5 @@ namespace FalloutRPG.Models
 {
     public class Special : Statistic
     {
-        public override Globals.StatisticType StatisticType => Globals.StatisticType.Special;
     }
 }

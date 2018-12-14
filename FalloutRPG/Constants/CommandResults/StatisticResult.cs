@@ -10,12 +10,15 @@ namespace FalloutRPG.Constants
         }
 
         public static StatisticResult SkillNotHighEnough(string mention = "") =>
-            new StatisticResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_SKILLS_NOT_FOUND, mention));
+            new StatisticResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_SKILLS_TOO_LOW, mention));
 
         public static StatisticResult SkillsNotSet(string mention = "") =>
             new StatisticResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_SKILLS_NOT_FOUND, mention));
 
         public static StatisticResult SpecialNotSet(string mention = "") =>
             new StatisticResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_SPECIAL_NOT_FOUND, mention));
+
+        public static StatisticResult StatisticAlreadyExists(string mention = "") =>
+            new StatisticResult(CommandError.Unsuccessful, String.Format(Messages.ERR_STAT_ALREADY_EXISTS, mention));
     }
 }

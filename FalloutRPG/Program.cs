@@ -88,10 +88,6 @@ namespace FalloutRPG
             // Addons
             .AddSingleton<InteractiveService>()
 
-            // Configuration
-
-            .Configure<SkillConfig>(config)
-
             // Database
             .AddEntityFrameworkSqlite().AddDbContext<RpgContext>(optionsAction: options => options.UseSqlite("Filename=CharacterDB.db"))
             .AddTransient<IRepository<Character>, EfSqliteRepository<Character>>()
@@ -104,9 +100,8 @@ namespace FalloutRPG
         /// Builds the configuration from the Config.json file.
         /// </summary>
         private IConfiguration BuildConfig() => new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
             .AddJsonFile("Config.json")
-            .AddJsonFile("StatisticsConfig.json")
             .Build();
     }
 }

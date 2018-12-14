@@ -27,8 +27,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public async Task<Character> GetCharacterAsync(ulong discordId) =>
             await _charRepository.Query.Where(c => c.DiscordId == discordId && c.Active == true)
-            .Include(c => c.Special)
-            .Include(c => c.Skills)
+            .Include(c => c.Statistics)
             .Include(c => c.EffectCharacters)
                 .ThenInclude(x => x.Effect)
                     .ThenInclude(x => x.StatisticEffects)
@@ -41,8 +40,7 @@ namespace FalloutRPG.Services.Roleplay
         /// <returns></returns>
         public async Task<List<Character>> GetAllCharactersAsync(ulong discordId) =>
             await _charRepository.Query.Where(c => c.DiscordId == discordId)
-            .Include(c => c.Special)
-            .Include(c => c.Skills)
+            .Include(c => c.Statistics)
             .Include(c => c.EffectCharacters)
                 .ThenInclude(x => x.Effect)
                     .ThenInclude(x => x.StatisticEffects)

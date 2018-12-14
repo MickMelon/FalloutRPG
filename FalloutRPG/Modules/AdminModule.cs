@@ -2,6 +2,7 @@
 using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
+using FalloutRPG.Models;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System.Threading.Tasks;
@@ -37,6 +38,18 @@ namespace FalloutRPG.Modules
         public async Task ShowAdminHelpAsync()
         {
             await _helpService.ShowAdminHelpAsync(Context);
+        }
+
+        [Command("addskill")]
+        public async Task<RuntimeResult> AddSkillAsync(string name, Special special)
+        {
+            return await _skillsService.AddSkillAsync(name, special);
+        }
+
+        [Command("addspecial")]
+        public async Task<RuntimeResult> AddSpecialAsync(string name)
+        {
+            return await _specialService.AddSpecialAsync(name);
         }
 
         [Command("givemoney")]

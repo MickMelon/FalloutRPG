@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using FalloutRPG.Constants;
 using FalloutRPG.Services.Roleplay;
@@ -41,6 +42,8 @@ namespace FalloutRPG.Services
         public async Task InstallCommandsAsync()
         {
             _commands.AddTypeReader(typeof(Models.Statistic), new Addons.StatisticTypeReader());
+            _commands.AddTypeReader(typeof(Models.Skill), new Addons.SkillTypeReader());
+            _commands.AddTypeReader(typeof(Models.Special), new Addons.SpecialTypeReader());
 
             await _commands.AddModulesAsync(
                 assembly: Assembly.GetEntryAssembly(),
@@ -58,28 +61,18 @@ namespace FalloutRPG.Services
             _commands.CommandExecuted += OnCommandExecutedAsync;
         }
 
-        private async Task OnCommandExecutedAsync(CommandInfo command, ICommandContext context, IResult result)
+        private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            if (result is PreconditionResult preResult)
-            {
-                await context.Channel.SendMessageAsync(preResult.ErrorReason);
-            }
-            else if (!string.IsNullOrEmpty(result?.ErrorReason))
-            {
-                if (result.Error.Value.ToString().Equals("ObjectNotFound") ||
-                     result.Error.Value.ToString().Equals("BadArgCount"))
-                {
-                    await context.Channel.SendMessageAsync(string.Format(Messages.ERR_CMD_USAGE, context.User.Mention));
-                }
-                else if (result.Error.Value.ToString().Equals("UnknownCommand"))
-                {
-                    await context.Channel.SendMessageAsync(string.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
-                }
-                else
-                {
-                    await context.Channel.SendMessageAsync(result.ToString());
-                }                    
-            }
+            string message = result.ToString();
+
+            if (!String.IsNullOrEmpty(message))
+                await context.Channel.SendMessageAsync(message);
+            else if (result.IsSuccess)
+                await context.Channel.SendMessageAsync($"{Messages.SUCCESS_EMOJI} Command executed successfully.");
+            else if (result.Error == CommandError.UnknownCommand)
+                await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
+            else if (result.Error == CommandError.Unsuccessful)
+                await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_USAGE, context.User.Mention));
         }
 
         /// <summary>

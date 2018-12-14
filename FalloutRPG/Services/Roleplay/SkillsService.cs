@@ -1,5 +1,8 @@
+using Discord.Commands;
 using FalloutRPG.Constants;
+using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System;
@@ -20,24 +23,20 @@ namespace FalloutRPG.Services.Roleplay
 
         private readonly CharacterService _charService;
         private readonly SpecialService _specService;
+        private readonly IRepository<Statistic> _statRepo;
+        
+        public ReadOnlyCollection<Skill> Skills { get; private set; }
 
-        private readonly IConfiguration _config;
-
-        public readonly ReadOnlyCollection<Skill> Skills;
-
-        public SkillsService(CharacterService charService, SpecialService specService, IConfiguration config,
-        IOptionsMonitor<SkillConfig> skillConfig)
+        public SkillsService(CharacterService charService, 
+        SpecialService specService,
+        IRepository<Statistic> statRepo)
         {
             _charService = charService;
             _specService = specService;
-            _config = config;
-            Skills = new ReadOnlyCollection<Skill>(skillConfig.CurrentValue.Skills.ToList());
 
-            LoadSkillConfiguration();
-        }
+            _statRepo = statRepo;
 
-        void LoadSkillConfiguration()
-        {
+            Skills = new ReadOnlyCollection<Skill>(_statRepo.Query.OfType<Skill>().ToList());
         }
 
         /// <summary>
@@ -62,6 +61,33 @@ namespace FalloutRPG.Services.Roleplay
             await _charService.SaveCharacterAsync(character);
         }
 
+        public async Task<RuntimeResult> AddSkillAsync(string name, Special special)
+        {
+            if (_statRepo.Query.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                return StatisticResult.StatisticAlreadyExists();
+
+            var newSkill = new Skill
+            {
+                Name = name,
+                Special = special
+            };
+
+            await _statRepo.AddAsync(newSkill);
+
+            await ReloadSkillsAsync();            
+
+            return GenericResult.FromSuccess(Messages.SKILLS_ADDED);
+        }
+
+        public async Task<RuntimeResult> DeleteSkillAsync(Skill skill)
+        {
+            await _statRepo.DeleteAsync(skill);
+
+            await ReloadSkillsAsync();
+
+            return GenericResult.FromSuccess(Messages.SKILLS_REMOVED);
+        }
+
         /// <summary>
         /// Returns the value of the specified character's given skill.
         /// </summary>
@@ -74,17 +100,6 @@ namespace FalloutRPG.Services.Roleplay
                 return -1;
 
             return match.Value;
-        }
-
-        // TODO: Move common methods into a new service called StatisticsService?
-        public IList<StatisticValue> CloneStatistics(IList<StatisticValue> skills)
-        {
-            var copy = new List<StatisticValue>();
-
-            foreach (var skill in skills)
-                copy.Add(new StatisticValue { Statistic = skill.Statistic, Value = skill.Value });
-
-            return copy;
         }
 
         /// <summary>
@@ -115,6 +130,17 @@ namespace FalloutRPG.Services.Roleplay
         /// <returns>Returns false if character or skills are null.</returns>
         public bool SetSkill(Character character, Skill skill, int newValue) =>
             SetSkill(character?.Statistics, skill, newValue);
+
+        // TODO: Move common methods into a new service called StatisticsService?
+        public IList<StatisticValue> CloneStatistics(IList<StatisticValue> skills)
+        {
+            var copy = new List<StatisticValue>();
+
+            foreach (var skill in skills)
+                copy.Add(new StatisticValue { Statistic = skill.Statistic, Value = skill.Value });
+
+            return copy;
+        }    
 
         /// <summary>
         /// Calculate skill points given on level up.
@@ -216,5 +242,8 @@ namespace FalloutRPG.Services.Roleplay
 
             return true;
         }
+
+        public async Task ReloadSkillsAsync() =>
+            Skills = new ReadOnlyCollection<Skill>(await _statRepo.Query.OfType<Skill>().ToListAsync());
     }
 }

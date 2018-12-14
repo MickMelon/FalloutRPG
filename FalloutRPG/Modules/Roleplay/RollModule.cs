@@ -47,6 +47,7 @@ namespace FalloutRPG.Modules.Roleplay
                 HelpService helpService) : base(rollService, helpService)
             {
                 _characterService = characterService;
+                _effectsService = effectsService;
                 _skillsService = skillsService;
                 _specialService = specialService;
             }

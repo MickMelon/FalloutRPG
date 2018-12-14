@@ -1,5 +1,8 @@
-﻿using FalloutRPG.Constants;
+﻿using Discord.Commands;
+using FalloutRPG.Constants;
+using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,12 +19,45 @@ namespace FalloutRPG.Services.Roleplay
 
         private readonly CharacterService _charService;
 
-        public readonly ReadOnlyCollection<Special> Special;
+        private readonly IRepository<Statistic> _statRepo;
 
-        public SpecialService(CharacterService charService)
+        public ReadOnlyCollection<Special> Specials { get; private set; }
+
+        public SpecialService(CharacterService charService, IRepository<Statistic> statRepo)
         {
             _charService = charService;
+
+            _statRepo = statRepo;
+
+            Specials = new ReadOnlyCollection<Special>(_statRepo.Query.OfType<Special>().ToList());
         }
+
+        public async Task<RuntimeResult> AddSpecialAsync(string name)
+        {
+            if (_statRepo.Query.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                return StatisticResult.StatisticAlreadyExists();
+
+            var newSpecial = new Special
+            {
+                Name = name
+            };
+
+            await _statRepo.AddAsync(newSpecial);
+            await ReloadSpecialsAsync();            
+
+            return GenericResult.FromSuccess(Messages.SKILLS_ADDED);
+        }
+
+        public async Task<RuntimeResult> DeleteSpecialAsync(Skill skill)
+        {
+            await _statRepo.DeleteAsync(skill);
+            await ReloadSpecialsAsync();
+
+            return GenericResult.FromSuccess(Messages.SKILLS_REMOVED);
+        }
+
+        public async Task ReloadSpecialsAsync() =>
+            Specials = new ReadOnlyCollection<Special>(await _statRepo.Query.OfType<Special>().ToListAsync());
 
         /// <summary>
         /// Set character's special.
@@ -46,7 +82,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         private bool IsValidSpecialName(string special)
         {
-            return Special.Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
+            return Specials.Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
         }
 
         /// <summary>
@@ -122,7 +158,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         private void InitializeSpecial(Character character, int[] special)
         {
-            //character.Statistics.Add(new StatisticValue { Statistic = new Special { Nam}})
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -131,8 +167,9 @@ namespace FalloutRPG.Services.Roleplay
         public bool IsSpecialSet(Character character)
         {
             if (character == null || character.Statistics == null) return false;
-            if (character.Special.Count() != Special.Count) return false;
-
+            if (character.Special.Count() != Specials.Count) return false;
+            if (character.Special.All(x => x.Value == 0)) return false;
+            
             return true;
         }
     }

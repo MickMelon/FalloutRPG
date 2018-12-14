@@ -2,6 +2,9 @@
 using System;
 using System.Threading.Tasks;
 using FalloutRPG.Constants;
+using FalloutRPG.Services.Roleplay;
+using System.Linq;
+using FalloutRPG.Models;
 
 namespace FalloutRPG.Addons
 {
@@ -9,7 +12,14 @@ namespace FalloutRPG.Addons
     {
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
-            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as an Attribute."));
+            var skillService = (SkillsService)services.GetService(typeof(SkillsService));
+            
+            var match = skillService.Skills.FirstOrDefault(x => x.AliasesArray.Contains(input));
+
+            if (match is Skill s)
+                return Task.FromResult(TypeReaderResult.FromSuccess(s));
+
+            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as a Skill."));
         }
     }
 }

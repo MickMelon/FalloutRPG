@@ -14,7 +14,6 @@ namespace FalloutRPG.Services.Roleplay
         private readonly EffectsService _effectsService;
         private readonly SpecialService _specService;
         private readonly SkillsService _skillsService;
-        private readonly IConfiguration _config;
 
         private readonly Random _rand;
         public const int MAX_SUCCESS_ROLL_CAP = 95;
