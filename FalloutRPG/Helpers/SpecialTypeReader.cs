@@ -6,7 +6,7 @@ using FalloutRPG.Services.Roleplay;
 using System.Linq;
 using FalloutRPG.Models;
 
-namespace FalloutRPG.Addons
+namespace FalloutRPG.Helpers
 {
     public class SpecialTypeReader : TypeReader
     {

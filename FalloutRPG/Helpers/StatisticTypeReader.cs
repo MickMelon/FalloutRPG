@@ -7,7 +7,7 @@ using FalloutRPG.Models;
 using System.Linq;
 using FalloutRPG.Services.Roleplay;
 
-namespace FalloutRPG.Addons
+namespace FalloutRPG.Helpers
 {
     public class StatisticTypeReader : TypeReader
     {
