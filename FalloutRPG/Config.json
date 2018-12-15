@@ -10,9 +10,33 @@
   },
   "roleplay": {
     "exp-channels": [ "" ],
-    "luck-influenced-rolls": true,
-    "luck-influence-percentage": 3.1,
-    "luck-influence-skill-cutoff": 100,
-    "luck-influence-special-cutoff": 5
+    "skill-prices":
+    {
+      "1": 150,
+      "2": 200,
+      "3": 250,
+      "4": 325,
+      "5": 450,
+      "6": 575,
+      "7": 700,
+      "8": 850,
+      "9": 1050,
+      "10": 1200,
+      "11": 1350,
+      "12": 1500
+    },
+    "special-prices":
+    {
+      "1": 400,
+      "2": 450,
+      "3": 600,
+      "4": 750,
+      "5": 850,
+      "6": 1050,
+      "7": 1200,
+      "8": 1350,
+      "9": 1500,
+      "10": 2000
+    }
   }
 }
