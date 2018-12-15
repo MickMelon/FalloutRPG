@@ -12,6 +12,7 @@ namespace FalloutRPG.Services.Roleplay
     {
         private readonly NpcPresetService _presetService;
         private readonly SkillsService _skillsService;
+        private readonly StatisticsService _statService;
 
         private readonly List<Character> Npcs;
         private readonly Dictionary<Character, Timer> NpcTimers;
@@ -20,13 +21,14 @@ namespace FalloutRPG.Services.Roleplay
 
         private static readonly TimeSpan NPC_ACTIVE_DURATION = TimeSpan.FromHours(12);
 
-        public NpcService(SkillsService skillsService,
-            NpcPresetService presetService,
-            IRepository<NpcPreset> presetRepository,
+        public NpcService(NpcPresetService presetService,
+            SkillsService skillsService,
+            StatisticsService statService,
             Random random)
         {
             _presetService = presetService;
             _skillsService = skillsService;
+            _statService = statService;
 
             Npcs = new List<Character>();
             NpcTimers = new Dictionary<Character, Timer>();
@@ -48,7 +50,7 @@ namespace FalloutRPG.Services.Roleplay
 
             // Trying to keep this OOP as possible...
 
-            _skillsService.InitializeSkills(newNpc);
+            _statService.InitializeStatistics(newNpc.Statistics);
 
             var timer = new Timer();
             timer.Elapsed += (sender, e) => OnDurationElasped(sender, e, newNpc);

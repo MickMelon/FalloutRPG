@@ -31,6 +31,8 @@ namespace FalloutRPG.Models
         }
 
         public float ExperiencePoints { get; set; }
+        public int TagPoints { get; set; }
+        
         public bool IsReset { get; set; }
 
         public IList<StatisticValue> Statistics { get; set; }

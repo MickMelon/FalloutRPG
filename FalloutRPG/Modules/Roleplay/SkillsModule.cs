@@ -95,113 +95,64 @@ namespace FalloutRPG.Modules.Roleplay
 
             [Command("set")]
             [Alias("tag")]
-            public async Task SetSkillsAsync(Skill tag1, Skill tag2, Skill tag3)
+            public async Task<RuntimeResult> SetSkillsAsync(Skill tag, int points)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (character == null)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
-
-                if (_skillsService.AreSkillsSet(character))
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_SKILLS_ALREADY_SET, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+                if (_skillsService.AreSkillsTagged(character)) return StatisticResult.SkillsAlreadyTagged(Context.User.Mention);
 
                 try
                 {
-                    await _skillsService.SetTagSkills(character, tag1, tag2, tag3);
-                    await ReplyAsync(string.Format(Messages.SKILLS_SET_SUCCESS, userInfo.Mention));
+                    await _skillsService.TagSkill(character, tag, points);
+                    return GenericResult.FromSuccess(string.Format(Messages.SKILLS_SET_SUCCESS, userInfo.Mention));
                 }
                 catch (Exception e)
                 {
-                    await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
+                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
                 }
-            }
+}
 
             [Command("spend")]
             [Alias("put")]
-            public async Task SpendSkillPointsAsync(Skill skill, int points)
+            public async Task<RuntimeResult> SpendSkillPointsAsync(Skill skill, int points)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (character == null)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
 
-                if (!_skillsService.AreSkillsSet(character))
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_SKILLS_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
 
-                if (points < 1)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_SKILLS_POINTS_BELOW_ONE, userInfo.Mention));
-                    return;
-                }
+                if (points < 1) return GenericResult.FromError(string.Format(Messages.ERR_SKILLS_POINTS_BELOW_ONE, userInfo.Mention));
 
                 try
                 {
-                    _skillsService.PutPointsInSkill(character, skill, points);
-                    await ReplyAsync(string.Format(Messages.SKILLS_SPEND_POINTS_SUCCESS, userInfo.Mention));
+                    _skillsService.UpgradeSkill(character, skill);
+                    return GenericResult.FromSuccess(String.Format(Messages.SKILLS_SPEND_POINTS_SUCCESS, userInfo.Mention));
                 }
                 catch (Exception e)
                 {
-                    await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
+                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
                 }
             }
 
             [Command("claim")]
-            public async Task ClaimSkillPointsAsync()
+            public async Task<RuntimeResult> ClaimSkillPointsAsync()
             {
-                // TODO: ...obviously
-                await Task.Delay(0);
-                throw new NotImplementedException();
+                var userInfo = Context.User;
+                var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                // var userInfo = Context.User;
-                // var character = await _charService.GetCharacterAsync(userInfo.Id);
+                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+                if (!character.IsReset) return GenericResult.FromError(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
+                if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
 
-                // if (character == null)
-                // {
-                //     await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                //     return;
-                // }
+                character.ExperiencePoints = character.Experience;
+                character.IsReset = false;
+                await _charService.SaveCharacterAsync(character);
 
-                // if (!character.IsReset)
-                // {
-                //     await ReplyAsync(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
-                //     return;
-                // }
-
-                // if (!_skillsService.AreSkillsSet(character))
-                // {
-                //     await ReplyAsync(string.Format(Messages.ERR_SKILLS_NOT_FOUND, userInfo.Mention));
-                //     return;
-                // }
-
-                // int pointsPerLevel = 0;
-                // //int pointsPerLevel = _skillsService.CalculateSkillPoints(character.Special.Intelligence);
-                // int totalPoints = pointsPerLevel * (character.Level - 1);
-
-                // if (totalPoints < 1)
-                // {
-                //     await ReplyAsync(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
-                //     return;
-                // }
-
-                // character.SkillPoints += totalPoints;
-                // character.IsReset = false;
-                // await _charService.SaveCharacterAsync(character);
-
-                // await ReplyAsync(string.Format(Messages.SKILLS_POINTS_CLAIMED, totalPoints, userInfo.Mention));
+                return GenericResult.FromSuccess(string.Format(Messages.SKILLS_POINTS_CLAIMED, character.ExperiencePoints, userInfo.Mention));
             }
         }
     }

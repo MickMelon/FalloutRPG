@@ -25,6 +25,7 @@ namespace FalloutRPG.Constants
         public const string CHAR_NOT_ENOUGH_SPECIAL_POINTS = "Not enough SPECIAL points.";
         public const string CHAR_SPECIAL_POINTS_GOES_OVER_MAX = "Unable to add SPECIAL points because it will take skill above the max level.";
         public const string CHAR_TOO_MANY = "You have reached the limit of characters per account.";
+        public const string CHAR_TAGS_OUT_OF_RANGE = "Tag value was either too low or too high. (You may only have two skills set to 6.)";
 
         // NPC Exceptions
         public const string NPC_CHAR_EXISTS = "A character with that name already exists!";

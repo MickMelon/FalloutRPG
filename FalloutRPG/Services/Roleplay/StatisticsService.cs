@@ -87,6 +87,27 @@ namespace FalloutRPG.Services.Roleplay
         public bool SetStatistic(Character character, Statistic stat, int newValue) =>
             SetStatistic(character?.Statistics, stat, newValue);
 
+        /// <summary>
+        /// Adds missing entries in a StatisticValue IList if
+        /// the list does not already contain an entry for every statistic in the database.
+        /// </summary>
+        public void InitializeStatistics(IList<StatisticValue> statValues)
+        {
+            foreach (var stat in Statistics)
+            {
+                if (!statValues.Select(x => x.Statistic).Contains(stat))
+                {
+                    statValues.Add(
+                        new StatisticValue
+                        {
+                            Statistic = stat,
+                            Value = 0
+                        }
+                    );
+                }
+            }
+        }
+
         public IList<StatisticValue> CloneStatistics(IList<StatisticValue> statistics)
         {
             var copy = new List<StatisticValue>();
