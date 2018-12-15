@@ -25,17 +25,20 @@ namespace FalloutRPG.Modules.Roleplay
             private readonly CharacterService _charService;
             private readonly EffectsService _effectsService;
             private readonly SkillsService _skillsService;
+            private readonly StatisticsService _statsService;
             private readonly HelpService _helpService;
 
             public CharacterSkillsModule(
                 CharacterService charService,
                 EffectsService effectsService,
                 SkillsService skillsService,
+                StatisticsService statsService,
                 HelpService helpService)
             {
                 _charService = charService;
                 _effectsService = effectsService;
                 _skillsService = skillsService;
+                _statsService = statsService;
                 _helpService = helpService;
             }
 
@@ -148,6 +151,8 @@ namespace FalloutRPG.Modules.Roleplay
                 if (!character.IsReset) return GenericResult.FromError(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
                 if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
 
+                _statsService.InitializeStatistics(character.Statistics);
+                character.TagPoints = SkillsService.POINTS_TAG;
                 character.ExperiencePoints = character.Experience;
                 character.IsReset = false;
                 await _charService.SaveCharacterAsync(character);
