@@ -14,8 +14,12 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class SpecialService
     {
-        private const int DEFAULT_SPECIAL_POINTS = 40;
-        public const int MAX_SPECIAL = 10;
+        public const int DEFAULT_SPECIAL_POINTS = 29;
+
+        public const int SPECIAL_MAX = 10;
+        private const int SPECIAL_MAX_CHARGEN = 8;
+        private const int SPECIAL_MAX_CHARGEN_QUANTITY = 2;
+        private const int SPECIAL_MIN = 1;
 
         private readonly CharacterService _charService;
         private readonly StatisticsService _statService;
@@ -31,19 +35,40 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Set character's special.
         /// </summary>
-        public async Task SetInitialSpecialAsync(Character character, int[] special)
+        public async Task SetInitialSpecialAsync(Character character, Special special, int points)
         {
             if (character == null) throw new ArgumentNullException("character");
 
-            if (!IsSpecialInRange(special))
-                throw new ArgumentException(Exceptions.CHAR_SPECIAL_NOT_IN_RANGE);
+            if (!IsSpecialInRange(character.Skills, points))
+                throw new ArgumentException(Exceptions.CHAR_TAGS_OUT_OF_RANGE);
 
-            if (special.Sum() != DEFAULT_SPECIAL_POINTS)
-                throw new ArgumentException(Exceptions.CHAR_SPECIAL_DOESNT_ADD_UP);
+            // Refund special points used if overwriting the same skill
+            character.SpecialPoints += _statService.GetStatistic(character, special);
 
-            InitializeSpecial(character, special);
+            if (character.SpecialPoints - points < 0)
+                throw new Exception(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
+
+            _statService.SetStatistic(character, special, points);
+            character.SpecialPoints -= points;
 
             await _charService.SaveCharacterAsync(character);
+        }
+
+        private bool IsSpecialInRange(IList<StatisticValue> stats, int points)
+        {
+            var special = stats.Where(x => x.Statistic is Special);
+
+            if (points < SPECIAL_MIN || points > SPECIAL_MAX_CHARGEN)
+                return false;
+
+            // Unique MUSH rules :/
+            if (special.Where(sp => sp.Value == SPECIAL_MAX_CHARGEN).Count() > SPECIAL_MAX_CHARGEN_QUANTITY)
+                return false;
+
+            if (points == SPECIAL_MAX_CHARGEN && special.Where(sp => sp.Value == SPECIAL_MAX_CHARGEN).Count() >= SPECIAL_MAX_CHARGEN_QUANTITY)
+                return false;
+
+            return true;
         }
 
         /// <summary>
@@ -55,26 +80,22 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
-        /// Checks if each number in SPECIAL is between 1 and 10
-        /// and ensures there are 7 elements in the input array.
+        /// Checks if each number in SPECIAL is in valid range
+        /// and ensures that the given list's Count matches the
+        /// configured amount.
         /// </summary>
-        private bool IsSpecialInRange(int[] special)
+        private bool IsSpecialInRange(IList<StatisticValue> stats)
         {
-            if (special.Length != 7) return false;
+            var special = stats.Where(x => x.Statistic is Special);
+
+            if (special.Count() != Specials.Count) return false;
+            if (special.Sum(x => x.Value) != DEFAULT_SPECIAL_POINTS) return false;
 
             foreach (var sp in special)
-                if (sp < 1 || sp > 10)
+                if (sp.Value < SPECIAL_MIN || sp.Value > SPECIAL_MAX)
                     return false;
 
             return true;
-        }
-
-        /// <summary>
-        /// Initializes character's special.
-        /// </summary>
-        private void InitializeSpecial(Character character, int[] special)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -83,8 +104,8 @@ namespace FalloutRPG.Services.Roleplay
         public bool IsSpecialSet(Character character)
         {
             if (character == null || character.Statistics == null) return false;
-            if (character.Special.Count() != Specials.Count) return false;
-            if (character.Special.All(x => x.Value == 0)) return false;
+            if (character.SpecialPoints > 0) return false;
+            if (character.Special.Sum(x => x.Value) < DEFAULT_SPECIAL_POINTS) return false;
             
             return true;
         }

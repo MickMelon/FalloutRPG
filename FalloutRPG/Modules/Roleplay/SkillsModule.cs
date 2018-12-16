@@ -115,20 +115,17 @@ namespace FalloutRPG.Modules.Roleplay
                 {
                     return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
                 }
-}
+            }
 
             [Command("spend")]
             [Alias("put")]
-            public async Task<RuntimeResult> SpendSkillPointsAsync(Skill skill, int points)
+            public async Task<RuntimeResult> SpendSkillPointsAsync(Skill skill)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
                 if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
-
                 if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
-
-                if (points < 1) return GenericResult.FromError(string.Format(Messages.ERR_SKILLS_POINTS_BELOW_ONE, userInfo.Mention));
 
                 try
                 {
@@ -152,7 +149,7 @@ namespace FalloutRPG.Modules.Roleplay
                 if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
 
                 _statsService.InitializeStatistics(character.Statistics);
-                character.TagPoints = SkillsService.POINTS_TAG;
+                character.TagPoints = SkillsService.TAG_POINTS;
                 character.ExperiencePoints = character.Experience;
                 character.IsReset = false;
                 await _charService.SaveCharacterAsync(character);

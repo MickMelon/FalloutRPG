@@ -38,8 +38,14 @@ namespace FalloutRPG.Services.Roleplay
             await ReloadStatisticsAsync();
         }
 
+        public async Task SaveStatisticAsync(Statistic stat)
+        {
+            await _statRepo.SaveAsync(stat);
+            await ReloadStatisticsAsync();
+        }
+
         private async Task ReloadStatisticsAsync() =>
-            Statistics = new ReadOnlyCollection<Statistic>(await _statRepo.FetchAllAsync());
+            Statistics = (await _statRepo.FetchAllAsync()).AsReadOnly();
 
         public bool NameExists(string name) =>
             Statistics.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));

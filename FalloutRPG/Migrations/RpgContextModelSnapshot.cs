@@ -29,6 +29,8 @@ namespace FalloutRPG.Migrations
 
                     b.Property<int>("Experience");
 
+                    b.Property<int>("ExperiencePoints");
+
                     b.Property<bool>("IsReset");
 
                     b.Property<int>("Level");
@@ -37,9 +39,11 @@ namespace FalloutRPG.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<float>("SkillPoints");
+                    b.Property<int>("SpecialPoints");
 
                     b.Property<string>("Story");
+
+                    b.Property<int>("TagPoints");
 
                     b.HasKey("Id");
 
@@ -100,6 +104,8 @@ namespace FalloutRPG.Migrations
                         .IsRequired();
 
                     b.Property<string>("Name");
+
+                    b.Property<int>("StatisticFlag");
 
                     b.HasKey("Id");
 

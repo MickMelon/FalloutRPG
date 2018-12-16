@@ -78,6 +78,8 @@ namespace FalloutRPG.Services.Roleplay
                 Story = "",
                 Experience = 0,
                 ExperiencePoints = 0,
+                SpecialPoints = SpecialService.DEFAULT_SPECIAL_POINTS,
+                TagPoints = SkillsService.TAG_POINTS,
                 Money = 1000,
                 Statistics = new List<StatisticValue>(),
                 EffectCharacters = new List<EffectCharacter>()

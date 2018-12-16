@@ -78,32 +78,22 @@ namespace FalloutRPG.Modules.Roleplay
             }
 
             [Command("set")]
-            public async Task SetSpecialAsync(int str, int per, int end, int cha, int inte, int agi, int luc)
+            public async Task<RuntimeResult> SetSpecialAsync(Special special, int amount)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
-                var special = new int[] { str, per, end, cha, inte, agi, luc };
 
-                if (character == null)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
-
-                if (_specService.IsSpecialSet(character))
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_SPECIAL_ALREADY_SET, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound();
+                if (_specService.IsSpecialSet(character)) return StatisticResult.SpecialAlreadySet();
 
                 try
                 {
-                    await _specService.SetInitialSpecialAsync(character, special);
-                    await ReplyAsync(string.Format(Messages.SPECIAL_SET_SUCCESS, userInfo.Mention));
+                    await _specService.SetInitialSpecialAsync(character, special, amount);
+                    return GenericResult.FromSuccess(String.Format(Messages.SPECIAL_SET_SUCCESS, userInfo.Mention));
                 }
                 catch (Exception e)
                 {
-                    await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
+                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
                 }
             }
         }

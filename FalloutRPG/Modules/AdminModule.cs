@@ -89,10 +89,44 @@ namespace FalloutRPG.Modules
         }
 
         [Command("addalias")]
-        public RuntimeResult AddAlias(Statistic stat, string alias)
+        public async Task<RuntimeResult> AddAliasAsync(Statistic stat, string alias)
         {
             stat.Aliases += alias + "/";
+
+            await _statService.SaveStatisticAsync(stat);
+
             return GenericResult.FromSuccess("Alias added successfully.");
+        }
+
+        [Command("clearaliases")]
+        public async Task<RuntimeResult> ClearAliasesAsync(Statistic stat, string alias)
+        {
+            stat.Aliases = "";
+
+            await _statService.SaveStatisticAsync(stat);
+
+            return GenericResult.FromSuccess("Aliases cleared successfully.");
+        }
+
+        [Command("setdescription")]
+        [Alias("setdesc")]
+        public async Task<RuntimeResult> SetStatDescriptionAsync(Statistic stat, string desc)
+        {
+            stat.Description = desc;
+
+            await _statService.SaveStatisticAsync(stat);
+
+            return GenericResult.FromSuccess("Description set successfully.");
+        }
+
+        [Command("setflag")]
+        public async Task<RuntimeResult> SetStatisticFlagAsync(Statistic stat, Globals.StatisticFlag flag)
+        {
+            stat.StatisticFlag = flag;
+
+            await _statService.SaveStatisticAsync(stat);
+
+            return GenericResult.FromSuccess("Flag set successfully.");
         }
 
         [Command("givemoney")]

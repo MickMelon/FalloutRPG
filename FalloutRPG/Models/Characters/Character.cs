@@ -23,14 +23,14 @@ namespace FalloutRPG.Models
         {
             get
             {
-                if (Experience == 0) return 1;
-                return Convert.ToInt32((Math.Sqrt(Experience + 125) / (10 * Math.Sqrt(5))));
+                return Experience / 1000 + 1;
             }
 
             private set { }
         }
 
-        public float ExperiencePoints { get; set; }
+        public int ExperiencePoints { get; set; }
+        public int SpecialPoints { get; set; }
         public int TagPoints { get; set; }
         
         public bool IsReset { get; set; }

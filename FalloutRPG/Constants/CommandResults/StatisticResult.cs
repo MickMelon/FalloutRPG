@@ -21,6 +21,9 @@ namespace FalloutRPG.Constants
         public static StatisticResult SpecialNotSet(string mention = "") =>
             new StatisticResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_SPECIAL_NOT_FOUND, mention));
 
+        public static StatisticResult SpecialAlreadySet(string mention = "") =>
+            new StatisticResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_SPECIAL_ALREADY_SET, mention));
+
         public static StatisticResult StatisticAlreadyExists(string mention = "") =>
             new StatisticResult(CommandError.Unsuccessful, String.Format(Messages.ERR_STAT_ALREADY_EXISTS, mention));
     }

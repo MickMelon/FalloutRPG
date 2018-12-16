@@ -18,10 +18,15 @@ namespace FalloutRPG.Services.Roleplay
         private List<ulong> experienceEnabledChannels;
         private Random _random;
 
+        private bool intelligenceEnabled;
+        private int intelligenceBaseline;
+        private double intelligenceMultiplier;
+
         private const int DEFAULT_EXP_GAIN = 100;
         private const int DEFAULT_EXP_RANGE_FROM = 10;
         private const int DEFAULT_EXP_RANGE_TO = 50;
-        private const int COOLDOWN_INTERVAL = 60000;
+        private const int COOLDOWN_INTERVAL = 15000;
+        private const int ALLOWED_CONSECUTIVE_MESSAGES = 5;
 
         private readonly CharacterService _charService;
         private readonly SkillsService _skillsService;
@@ -41,7 +46,7 @@ namespace FalloutRPG.Services.Roleplay
             _config = config;
 
             cooldownTimers = new Dictionary<ulong, Timer>();
-            LoadExperienceEnabledChannels();
+            LoadExperienceConfig();
             _random = random;
         }
 
@@ -57,6 +62,11 @@ namespace FalloutRPG.Services.Roleplay
             var character = await _charService.GetCharacterAsync(userInfo.Id);
 
             if (character == null || context.Message.ToString().StartsWith("(")) return;
+
+            // filter out users abusing monologues for exp
+            var cache = context.Channel.GetCachedMessages(ALLOWED_CONSECUTIVE_MESSAGES)
+                .Where(x => !x.Author.Equals(context.Client.CurrentUser));
+            if (cache.All(x => x.Author.Equals(context.User))) return;
 
             var expToGive = GetRandomExperience();
 
@@ -79,6 +89,7 @@ namespace FalloutRPG.Services.Roleplay
             var initialLevel = character.Level;
 
             character.Experience += experience;
+            character.ExperiencePoints += experience;
             await _charService.SaveCharacterAsync(character);
 
             var levelUp = false;
@@ -104,6 +115,21 @@ namespace FalloutRPG.Services.Roleplay
             int rangeTo = DEFAULT_EXP_RANGE_TO)
         {
             return _random.Next(rangeFrom, rangeTo);
+        }
+
+        public int GetExperienceFromMessage(Character character, int messageLength)
+        {
+            int expValue = messageLength / 100;
+
+            if (intelligenceEnabled)
+            {
+                var intStat = character.Statistics.Where(x => x.Statistic.StatisticFlag == Globals.StatisticFlag.Intelligence).FirstOrDefault();
+
+                if (intStat != null)
+                    expValue *= (int)(1 + (intStat.Value - intelligenceBaseline) * intelligenceMultiplier);
+            }
+
+            return expValue;
         }
 
         /// <summary>
@@ -162,7 +188,7 @@ namespace FalloutRPG.Services.Roleplay
         /// Loads the experience enabled channels from the
         /// configuration file.
         /// </summary>
-        private void LoadExperienceEnabledChannels()
+        private void LoadExperienceConfig()
         {
             try
             {
@@ -171,10 +197,19 @@ namespace FalloutRPG.Services.Roleplay
                     .GetChildren()
                     .Select(x => UInt64.Parse(x.Value))
                     .ToList();
+
+                intelligenceEnabled = _config
+                    .GetValue<bool>("roleplay:intelligence-based-exp-gain:enabled");
+
+                intelligenceBaseline = _config
+                    .GetValue<int>("roleplay:intelligence-based-exp-gain:baseline");
+                
+                intelligenceMultiplier = _config
+                    .GetValue<double>("roleplay:intelligence-based-exp-gain:multiplier");
             }
             catch (Exception)
             {
-                Console.WriteLine("You have not specified any experience enabled channels in Config.json");
+                Console.WriteLine("Experience settings improperly configured, Config.json.");
             }
         }
 

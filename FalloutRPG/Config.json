@@ -10,6 +10,11 @@
   },
   "roleplay": {
     "exp-channels": [ "" ],
+    "intelligence-based-exp-gain": {
+      "enabled": true,
+      "baseline": 3,
+      "multiplier": 0.01
+    },
     "skill-prices":
     {
       "1": 150,

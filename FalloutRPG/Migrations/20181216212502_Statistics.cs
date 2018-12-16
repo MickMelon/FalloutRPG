@@ -6,24 +6,58 @@ namespace FalloutRPG.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "EffectSkill");
+
+            migrationBuilder.DropTable(
+                name: "EffectSpecial");
+
+            migrationBuilder.DropTable(
+                name: "NpcPresets");
+
+            migrationBuilder.DropTable(
+                name: "SkillSheet");
+
+            migrationBuilder.DropTable(
+                name: "Special");
+
+            migrationBuilder.CreateTable(
+                name: "NpcPresets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(nullable: true),
+                    Enabled = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NpcPresets", x => x.Id);
+                });
+
+            // Drop and add new columns to Character
             migrationBuilder.Sql(@"
+                PRAGMA foreign_keys = 0;
+                
                 CREATE TABLE sqlitestudio_temp_table AS SELECT *
                                                           FROM Characters;
                 
                 DROP TABLE Characters;
                 
                 CREATE TABLE Characters (
-                    Id          INTEGER         NOT NULL,
-                    DiscordId   NUMERIC (20, 0) NOT NULL,
-                    Description NTEXT,
-                    Story       NTEXT,
-                    Experience  INT             NOT NULL,
-                    SkillPoints REAL            NOT NULL,
-                    Money       BIGINT,
-                    Level       INT,
-                    IsReset     BIT,
-                    Name        NVARCHAR (64),
-                    Active      BIT,
+                    Id               INTEGER         NOT NULL,
+                    DiscordId        NUMERIC (20, 0) NOT NULL,
+                    Description      NTEXT,
+                    Story            NTEXT,
+                    Experience       INT             NOT NULL,
+                    Money            BIGINT,
+                    Level            INT,
+                    IsReset          BIT,
+                    Name             NVARCHAR (64),
+                    Active           BIT,
+                    ExperiencePoints INTEGER,
+                    SpecialPoints    INTEGER,
+                    TagPoints        INTEGER,
                     CONSTRAINT PK_Characters PRIMARY KEY (
                         Id
                     )
@@ -35,7 +69,6 @@ namespace FalloutRPG.Migrations
                                            Description,
                                            Story,
                                            Experience,
-                                           SkillPoints,
                                            Money,
                                            Level,
                                            IsReset,
@@ -47,7 +80,6 @@ namespace FalloutRPG.Migrations
                                               Description,
                                               Story,
                                               Experience,
-                                              SkillPoints,
                                               Money,
                                               Level,
                                               IsReset,
@@ -55,54 +87,9 @@ namespace FalloutRPG.Migrations
                                               Active
                                          FROM sqlitestudio_temp_table;
                 
-                DROP TABLE sqlitestudio_temp_table;");
-
-            // drop foreign keys and indexes from Characters
-            //migrationBuilder.DropTable(
-            //    name: "EffectSkill");
-
-            //migrationBuilder.DropTable(
-            //    name: "EffectSpecial");
-
-            //migrationBuilder.DropTable(
-            //    name: "SkillSheet");
-
-            //migrationBuilder.DropTable(
-            //    name: "Special");
-
-            
-
-            // drop foreign keys and indexes from NpcPresets
-            migrationBuilder.Sql(@"
-                CREATE TABLE sqlitestudio_temp_table AS SELECT *
-                                                          FROM NpcPresets;
+                DROP TABLE sqlitestudio_temp_table;
                 
-                DROP TABLE NpcPresets;
-                
-                CREATE TABLE NpcPresets (
-                    Id      INTEGER NOT NULL
-                                    CONSTRAINT PK_NpcPresets PRIMARY KEY AUTOINCREMENT,
-                    Name    TEXT,
-                    Enabled INTEGER NOT NULL
-                );
-                
-                INSERT INTO NpcPresets (
-                                           Id,
-                                           Name,
-                                           Enabled
-                                       )
-                                       SELECT Id,
-                                              Name,
-                                              Enabled
-                                         FROM sqlitestudio_temp_table;
-                
-                DROP TABLE sqlitestudio_temp_table;");
-
-            migrationBuilder.Sql(@"PRAGMA foreign_keys = 0;
-                DROP TABLE EffectSkill;
-                DROP TABLE EffectSpecial;
-                DROP TABLE SkillSheet;
-                DROP TABLE Special;");
+                PRAGMA foreign_keys = 1;");
 
             migrationBuilder.CreateTable(
                 name: "Statistic",
@@ -113,6 +100,7 @@ namespace FalloutRPG.Migrations
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Aliases = table.Column<string>(nullable: true),
+                    StatisticFlag = table.Column<int>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     SpecialId = table.Column<int>(nullable: true),
                     MinimumValue = table.Column<int>(nullable: true)
@@ -169,7 +157,7 @@ namespace FalloutRPG.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex( /////////////////////////
+            migrationBuilder.CreateIndex(
                 name: "IX_Statistic_SpecialId",
                 table: "Statistic",
                 column: "SpecialId");
@@ -194,7 +182,13 @@ namespace FalloutRPG.Migrations
                 table: "StatisticValue",
                 column: "StatisticId");
 
-            migrationBuilder.Sql(@"PRAGMA foreign_keys = 1;");
+            migrationBuilder.AddForeignKey(
+                name: "FK_Statistic_Statistic_SpecialId",
+                table: "Statistic",
+                column: "SpecialId",
+                principalTable: "Statistic",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
