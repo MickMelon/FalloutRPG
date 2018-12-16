@@ -15,8 +15,10 @@
       "baseline": 3,
       "multiplier": 0.01
     },
-    "skill-prices":
-    {
+    "starting-skill-points": 36,
+    "starting-skill-max-level": 6,
+    "starting-skills-at-max-level": 2,
+    "skill-prices": {
       "1": 150,
       "2": 200,
       "3": 250,
@@ -30,8 +32,8 @@
       "11": 1350,
       "12": 1500
     },
-    "special-prices":
-    {
+    "starting-special-points": 29,
+    "special-prices": {
       "1": 400,
       "2": 450,
       "3": 600,

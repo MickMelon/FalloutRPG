@@ -11,12 +11,10 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class SkillsService
     {
-        private const int DEFAULT_SKILL_POINTS = 10;
-
-        public const int TAG_MIN = 0;
-        public const int TAG_MAX = 6;
-        private const int TAG_MAX_QUANTITY = 2;
-        public const int TAG_POINTS = 36;
+        public static int TAG_MIN = 1;
+        public static int TAG_MAX = 6;
+        public static int TAG_MAX_QUANTITY = 2;
+        public static int TAG_POINTS = 36;
 
         public const int MAX_SKILL_LEVEL = 12;
 
@@ -41,10 +39,10 @@ namespace FalloutRPG.Services.Roleplay
 
             _config = config;
 
-            LoadSkillPrices();
+            LoadSkilLConfig();
         }
 
-        void LoadSkillPrices()
+        void LoadSkilLConfig()
         {
             try
             {
@@ -54,6 +52,10 @@ namespace FalloutRPG.Services.Roleplay
                     temp.Add(Int32.Parse(item.Key), Int32.Parse(item.Value));
 
                 _skillPrices = temp;
+
+                TAG_POINTS = _config.GetValue<int>("roleplay:starting-skill-points");
+                TAG_MAX = _config.GetValue<int>("roleplay:starting-skill-max-level");
+                TAG_MAX_QUANTITY = _config.GetValue<int>("roleplay:starting-skills-at-max-level");
             }
             catch (Exception)
             {

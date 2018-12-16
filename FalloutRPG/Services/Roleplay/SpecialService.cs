@@ -3,6 +3,7 @@ using FalloutRPG.Constants;
 using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class SpecialService
     {
-        public const int DEFAULT_SPECIAL_POINTS = 29;
+        public static int SPECIAL_POINTS = 29;
 
         public const int SPECIAL_MAX = 10;
         private const int SPECIAL_MAX_CHARGEN = 8;
@@ -23,13 +24,40 @@ namespace FalloutRPG.Services.Roleplay
 
         private readonly CharacterService _charService;
         private readonly StatisticsService _statService;
+        private readonly IConfiguration _config;
 
         public IReadOnlyCollection<Special> Specials { get => (ReadOnlyCollection<Special>)_statService.Statistics.OfType<Special>(); }
+        private IReadOnlyDictionary<int, int> _specialPrices;
 
-        public SpecialService(CharacterService charService, StatisticsService statService)
+        public SpecialService(CharacterService charService,
+            IConfiguration config,
+            StatisticsService statService)
         {
             _charService = charService;
             _statService = statService;
+            _config = config;
+
+            LoadSpecialConfig();
+        }
+
+        void LoadSpecialConfig()
+        {
+            try
+            {
+                var temp = new Dictionary<int, int>();
+
+                foreach (var item in _config.GetSection("roleplay:skill-prices").GetChildren())
+                    temp.Add(Int32.Parse(item.Key), Int32.Parse(item.Value));
+
+                _specialPrices = temp;
+
+                SPECIAL_POINTS = _config.GetValue<int>("roleplay:starting-special-points");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Special settings improperly configured, check Config.json.");
+                throw;
+            }
         }
 
         /// <summary>
@@ -89,7 +117,7 @@ namespace FalloutRPG.Services.Roleplay
             var special = stats.Where(x => x.Statistic is Special);
 
             if (special.Count() != Specials.Count) return false;
-            if (special.Sum(x => x.Value) != DEFAULT_SPECIAL_POINTS) return false;
+            if (special.Sum(x => x.Value) != SPECIAL_POINTS) return false;
 
             foreach (var sp in special)
                 if (sp.Value < SPECIAL_MIN || sp.Value > SPECIAL_MAX)
@@ -105,7 +133,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             if (character == null || character.Statistics == null) return false;
             if (character.SpecialPoints > 0) return false;
-            if (character.Special.Sum(x => x.Value) < DEFAULT_SPECIAL_POINTS) return false;
+            if (character.Special.Sum(x => x.Value) < SPECIAL_POINTS) return false;
             
             return true;
         }
