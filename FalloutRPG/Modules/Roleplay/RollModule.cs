@@ -75,9 +75,7 @@ namespace FalloutRPG.Modules.Roleplay
                 // TODO: maybe add a method like _effectsService.GetEffectiveStatistic(character, Statistic)
                 if (useEffects) stats = _effectsService.GetEffectiveStatistics(character);
 
-                var statValue = stats.FirstOrDefault(x => x.Statistic.Equals(stat));
-
-                string result = _rollService.RollStatistic(character, statValue);
+                string result = _rollService.RollStatistic(character, stat);
                 return GenericResult.FromSuccess($"{result} ({Context.User.Mention})");
             }
         }
@@ -131,7 +129,7 @@ namespace FalloutRPG.Modules.Roleplay
 
                 _npcService.ResetNpcTimer(character);
 
-                string result = _rollService.RollStatistic(character, statValue);
+                string result = _rollService.RollStatistic(character, stat);
                 return GenericResult.FromSuccess($"{result} ({Context.User.Mention}) {Messages.NPC_SUFFIX}");
             }
         }

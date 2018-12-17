@@ -3,6 +3,7 @@ using FalloutRPG.Constants;
 using FalloutRPG.Models;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,95 +15,72 @@ namespace FalloutRPG.Services.Roleplay
         private readonly EffectsService _effectsService;
         private readonly SpecialService _specService;
         private readonly SkillsService _skillsService;
+        private readonly StatisticsService _statService;
 
         private readonly Random _rand;
-        public const int MAX_SUCCESS_ROLL_CAP = 95;
+
+        private const int DICE_SIDES = 8;
+        private const int SUCCESS_ROLL = 8;
 
         public RollService(
             EffectsService effectsService,
             SpecialService specService,
             SkillsService skillsService,
+            StatisticsService statService,
             Random rand)
         {
             _effectsService = effectsService;
             _specService = specService;
             _skillsService = skillsService;
+            _statService = statService;
             _rand = rand;
         }
 
-        public double GetRollResult(StatisticValue stat)
+        public int[] GetRollResult(Character character, Statistic stat, int extraDie = 0)
         {
-            double rng = _rand.Next(1, 101);
+            int numOfDie = _statService.GetStatistic(character, stat) + extraDie;
 
-            double maxSuccessRoll = 0.0;
+            if (stat is Skill skill)
+            {
+                var specValue = _statService.GetStatistic(character, skill.Special);
 
-            if (stat.Statistic is Special)
-                maxSuccessRoll = Math.Round(32.2 * Math.Sqrt(stat.Value) - 7);
-            else if (stat.Statistic is Skill)
-                maxSuccessRoll = Math.Round(10 * Math.Sqrt(stat.Value) - 0.225 * stat.Value - 1);
+                // TODO: maybe should make GetStatistic return a Nullable?
+                if (specValue != -1)
+                    numOfDie += specValue;
+            }
+                
 
-            // Ensure success is never guaranteed
-            if (maxSuccessRoll > MAX_SUCCESS_ROLL_CAP) maxSuccessRoll = MAX_SUCCESS_ROLL_CAP;
+            int[] die = new int[numOfDie];
 
-            // compares your roll with your skills, and how much better you did than the bare minimum
-            double resultPercent = (maxSuccessRoll - rng) / maxSuccessRoll;
-            resultPercent = Math.Round(resultPercent * 100.0, 1);
+            for (int dice = 0; dice < die.Length; dice++)
+                die[dice] = _rand.Next(1, DICE_SIDES + 1);
 
-            // TODO: implement luck influence with resultPercent
-
-            return resultPercent;
+            return die;
         }
 
-        // TODO: decide which method should be handling calling GetEffectiveStatistics,
-        // the module, or this service
-        public string RollStatistic(Character character, StatisticValue statistic)
+        public string RollStatistic(Character character, Statistic stat)
         {
-            if (statistic.Statistic is Skill skill && statistic.Value < skill.MinimumValue)
+            if (stat is Skill skill && _statService.GetStatistic(character, stat) < skill.MinimumValue)
                 return Messages.ERR_SKILLS_TOO_LOW;
 
-            double result = GetRollResult(statistic);
+            var result = GetRollResult(character, stat);
 
-            return $"{GetRollMessage(character.Name, statistic.Statistic.ToString(), result)}";
+            return $"{GetRollMessage(character.Name, stat.ToString(), result)}";
         }
 
-        public string GetRollMessage(string charName, string roll, double percent)
+        public string GetRollMessage(string charName, string roll, int[] result)
         {
-            var result = new StringBuilder();
+            var message = new StringBuilder($"{charName} rolls {roll}:\n\n");
 
-            if (percent >= 0)
-            {
-                if (percent >= 95)
-                    result.Append($"**CRITICAL {roll.ToUpper()} SUCCESS!!!**");
-                else if (percent >= 80)
-                    result.Append($"__GREAT {roll.ToUpper()} SUCCESS__");
-                else if (percent >= 50)
-                    result.Append($"*Very good {roll} success*");
-                else if (percent >= 25)
-                    result.Append($"*Good {roll} success*");
-                else if (percent >= 10)
-                    result.Append($"*Above average {roll} success*");
-                else
-                    result.Append($"__***CLOSE CALL! {roll} success***__");
+            foreach (var dice in result)
+                message.Append($"[{dice}] ");
 
-                result.Append($" for {charName}: did **{percent}%** better than needed!");
-            }
+            int successes = result.Count(x => x >= SUCCESS_ROLL);
+
+            if (successes > 7)
+                message.Append($"**AMAZING SUCCESS: {successes}!!**");
             else
-            {
-                if (percent <= -125)
-                    result.Append($"**CRITICAL {roll.ToUpper()} FAILURE!!!**");
-                else if (percent <= -80)
-                    result.Append($"__TERRIBLE {roll.ToUpper()} FAILURE__");
-                else if (percent <= -50)
-                    result.Append($"*Pretty bad {roll} failure*");
-                else if (percent <= -25)
-                    result.Append($"*Bad {roll} failure*");
-                else if (percent <= -10)
-                    result.Append($"*Above average {roll} failure*");
-                else
-                    result.Append($"__***Heartbreaking {roll} failure***__");
-
-                result.Append($" for {charName}: did **{percent*-1}%** worse than needed!");
-            }
+                message.Append($"*Successes: {successes}*");
 
             return result.ToString();
         }
