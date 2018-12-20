@@ -15,18 +15,18 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class SpecialService
     {
-        public static int SPECIAL_POINTS = 29;
+        public static int STARTING_SPECIAL_POINTS = 29;
 
-        public const int SPECIAL_MAX = 10;
-        private const int SPECIAL_MAX_CHARGEN = 8;
-        private const int SPECIAL_MAX_CHARGEN_QUANTITY = 2;
-        private const int SPECIAL_MIN = 1;
+        public static int SPECIAL_MAX = 10;
+        public static int SPECIAL_MAX_CHARGEN = 8;
+        public static int SPECIAL_MAX_CHARGEN_QUANTITY = 2;
+        public static int SPECIAL_MIN = 1;
 
         private readonly CharacterService _charService;
         private readonly StatisticsService _statService;
         private readonly IConfiguration _config;
 
-        public IReadOnlyCollection<Special> Specials { get => (ReadOnlyCollection<Special>)_statService.Statistics.OfType<Special>(); }
+        public IReadOnlyCollection<Special> Specials { get => _statService.Statistics.OfType<Special>().ToList().AsReadOnly(); }
         private IReadOnlyDictionary<int, int> _specialPrices;
 
         public SpecialService(CharacterService charService,
@@ -51,7 +51,12 @@ namespace FalloutRPG.Services.Roleplay
 
                 _specialPrices = temp;
 
-                SPECIAL_POINTS = _config.GetValue<int>("roleplay:starting-special-points");
+                SPECIAL_MAX = _config.GetValue<int>("roleplay:special-max");
+
+                STARTING_SPECIAL_POINTS = _config.GetValue<int>("roleplay:chargen:special-points");
+
+                SPECIAL_MAX_CHARGEN = _config.GetValue<int>("roleplay:chargen:special-level-limit");
+                SPECIAL_MAX_CHARGEN_QUANTITY = _config.GetValue<int>("roleplay:specials-at-limit");
             }
             catch (Exception)
             {
@@ -68,7 +73,7 @@ namespace FalloutRPG.Services.Roleplay
             if (character == null) throw new ArgumentNullException("character");
 
             if (!IsSpecialInRange(character.Skills, points))
-                throw new ArgumentException(Exceptions.CHAR_TAGS_OUT_OF_RANGE);
+                throw new ArgumentException(Exceptions.CHAR_SPECIAL_NOT_IN_RANGE);
 
             // Refund special points used if overwriting the same skill
             character.SpecialPoints += _statService.GetStatistic(character, special);
@@ -117,7 +122,7 @@ namespace FalloutRPG.Services.Roleplay
             var special = stats.Where(x => x.Statistic is Special);
 
             if (special.Count() != Specials.Count) return false;
-            if (special.Sum(x => x.Value) != SPECIAL_POINTS) return false;
+            if (special.Sum(x => x.Value) != STARTING_SPECIAL_POINTS) return false;
 
             foreach (var sp in special)
                 if (sp.Value < SPECIAL_MIN || sp.Value > SPECIAL_MAX)
@@ -133,7 +138,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             if (character == null || character.Statistics == null) return false;
             if (character.SpecialPoints > 0) return false;
-            if (character.Special.Sum(x => x.Value) < SPECIAL_POINTS) return false;
+            if (character.Special.Sum(x => x.Value) < STARTING_SPECIAL_POINTS) return false;
             
             return true;
         }

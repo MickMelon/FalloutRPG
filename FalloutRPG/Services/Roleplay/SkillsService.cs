@@ -16,7 +16,7 @@ namespace FalloutRPG.Services.Roleplay
         public static int TAG_MAX_QUANTITY = 2;
         public static int TAG_POINTS = 36;
 
-        public const int MAX_SKILL_LEVEL = 12;
+        public static int MAX_SKILL_LEVEL = 12;
 
         private readonly CharacterService _charService;
         private readonly SpecialService _specService;
@@ -24,7 +24,7 @@ namespace FalloutRPG.Services.Roleplay
 
         private readonly IConfiguration _config;
         
-        public IReadOnlyCollection<Skill> Skills { get => (ReadOnlyCollection<Skill>)_statService.Statistics.OfType<Skill>(); }
+        public IReadOnlyCollection<Skill> Skills { get => _statService.Statistics.OfType<Skill>().ToList().AsReadOnly(); }
         private IReadOnlyDictionary<int, int> _skillPrices;
 
         public SkillsService(
@@ -53,9 +53,11 @@ namespace FalloutRPG.Services.Roleplay
 
                 _skillPrices = temp;
 
-                TAG_POINTS = _config.GetValue<int>("roleplay:starting-skill-points");
-                TAG_MAX = _config.GetValue<int>("roleplay:starting-skill-max-level");
-                TAG_MAX_QUANTITY = _config.GetValue<int>("roleplay:starting-skills-at-max-level");
+                TAG_POINTS = _config.GetValue<int>("roleplay:chargen:skill-points");
+                TAG_MAX = _config.GetValue<int>("roleplay:chargen:skill-level-limit");
+                TAG_MAX_QUANTITY = _config.GetValue<int>("roleplay:chargen:skills-at-limit");
+
+                MAX_SKILL_LEVEL = _config.GetValue<int>("roleplay:skill-max");
             }
             catch (Exception)
             {

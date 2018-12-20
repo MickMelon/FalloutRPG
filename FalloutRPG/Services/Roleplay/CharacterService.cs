@@ -15,10 +15,14 @@ namespace FalloutRPG.Services.Roleplay
     {
         private const int MAX_CHARACTERS = 25;
 
+        private readonly StatisticsService _statsService;
+
         private readonly IRepository<Character> _charRepository;
 
-        public CharacterService(IRepository<Character> charRepository)
+        public CharacterService(StatisticsService statsService, IRepository<Character> charRepository)
         {
+            _statsService = statsService;
+
             _charRepository = charRepository;
         }
 
@@ -78,12 +82,14 @@ namespace FalloutRPG.Services.Roleplay
                 Story = "",
                 Experience = 0,
                 ExperiencePoints = 0,
-                SpecialPoints = SpecialService.SPECIAL_POINTS,
+                SpecialPoints = SpecialService.STARTING_SPECIAL_POINTS,
                 TagPoints = SkillsService.TAG_POINTS,
                 Money = 1000,
                 Statistics = new List<StatisticValue>(),
                 EffectCharacters = new List<EffectCharacter>()
             };
+
+            _statsService.InitializeStatistics(character.Statistics);
 
             if (characters.Count == 0)
                 character.Active = true;

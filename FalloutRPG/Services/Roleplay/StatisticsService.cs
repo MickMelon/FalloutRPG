@@ -14,16 +14,15 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class StatisticsService
     {
-        private readonly CharacterService _charService;
-
         private readonly IRepository<Statistic> _statRepo;
 
         public ReadOnlyCollection<Statistic> Statistics { get; private set; }
 
-        public StatisticsService(CharacterService charService, IRepository<Statistic> statRepo)
+        public StatisticsService(IRepository<Statistic> statRepo)
         {
-            _charService = charService;
             _statRepo = statRepo;
+
+            Statistics = (_statRepo.FetchAll()).AsReadOnly();
         }
 
         public async Task AddStatisticAsync(Statistic statistic)
@@ -103,11 +102,15 @@ namespace FalloutRPG.Services.Roleplay
             {
                 if (!statValues.Select(x => x.Statistic).Contains(stat))
                 {
+                    int value = 0;
+
+                    if (stat is Special) value = SpecialService.SPECIAL_MIN;
+
                     statValues.Add(
                         new StatisticValue
                         {
                             Statistic = stat,
-                            Value = 0
+                            Value = value
                         }
                     );
                 }

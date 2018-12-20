@@ -193,19 +193,19 @@ namespace FalloutRPG.Services.Roleplay
             try
             {
                 experienceEnabledChannels = _config
-                    .GetSection("roleplay:exp-channels")
+                    .GetSection("roleplay:experience:exp-channels")
                     .GetChildren()
                     .Select(x => UInt64.Parse(x.Value))
                     .ToList();
 
                 intelligenceEnabled = _config
-                    .GetValue<bool>("roleplay:intelligence-based-exp-gain:enabled");
+                    .GetValue<bool>("roleplay:experience:intelligence-based-exp-gain:enabled");
 
                 intelligenceBaseline = _config
-                    .GetValue<int>("roleplay:intelligence-based-exp-gain:baseline");
+                    .GetValue<int>("roleplay:experience:intelligence-based-exp-gain:baseline");
                 
                 intelligenceMultiplier = _config
-                    .GetValue<double>("roleplay:intelligence-based-exp-gain:multiplier");
+                    .GetValue<double>("roleplay:experience:intelligence-based-exp-gain:multiplier");
             }
             catch (Exception)
             {

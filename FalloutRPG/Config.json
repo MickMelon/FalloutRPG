@@ -9,15 +9,28 @@
     "maximum-bet": 1000
   },
   "roleplay": {
-    "exp-channels": [ "" ],
-    "intelligence-based-exp-gain": {
-      "enabled": true,
-      "baseline": 3,
-      "multiplier": 0.01
+    "skill-max": 12,
+    "special-max": 10,
+
+    "experience": {
+      "exp-channels": [ "" ],
+      "intelligence-based-exp-gain": {
+        "enabled": true,
+        "baseline": 3,
+        "multiplier": 0.01
+      }
     },
-    "starting-skill-points": 36,
-    "starting-skill-max-level": 6,
-    "starting-skills-at-max-level": 2,
+
+    "chargen": {
+      "skill-points": 36,
+      "skill-level-limit": 6,
+      "skills-at-limit": 2,
+
+      "special-points": 29,
+      "special-level-limit": 8,
+      "specials-at-limit": 2
+    },
+
     "skill-prices": {
       "1": 150,
       "2": 200,
@@ -32,7 +45,6 @@
       "11": 1350,
       "12": 1500
     },
-    "starting-special-points": 29,
     "special-prices": {
       "1": 400,
       "2": 450,
