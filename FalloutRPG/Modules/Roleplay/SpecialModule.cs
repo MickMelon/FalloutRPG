@@ -56,12 +56,12 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                if (!_specService.IsSpecialSet(character))
-                {
-                    await ReplyAsync(
-                        string.Format(Messages.ERR_SPECIAL_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                //if (!_specService.IsSpecialSet(character))
+                //{
+                //    await ReplyAsync(
+                //        string.Format(Messages.ERR_SPECIAL_NOT_FOUND, userInfo.Mention));
+                //    return;
+                //}
 
                 var stats = character.Statistics;
                 if (useEffects)
