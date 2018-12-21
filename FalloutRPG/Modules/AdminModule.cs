@@ -113,7 +113,7 @@ namespace FalloutRPG.Modules
         [Command("clearaliases")]
         public async Task<RuntimeResult> ClearAliasesAsync(Statistic stat, string alias)
         {
-            stat.Aliases = "";
+            stat.Aliases = stat.Name;
 
             await _statService.SaveStatisticAsync(stat);
 
