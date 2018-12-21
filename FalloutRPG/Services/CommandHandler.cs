@@ -68,13 +68,13 @@ namespace FalloutRPG.Services
 
             if (!String.IsNullOrEmpty(message) && result is RuntimeResult)
                 await context.Channel.SendMessageAsync(message);
-            else if (result.IsSuccess)
-                if (command.IsSpecified)
-                    await context.Channel.SendMessageAsync($"{Messages.SUCCESS_EMOJI} `{command.Value.Name}` executed successfully.");
-                else
-                    await context.Channel.SendMessageAsync($"{Messages.SUCCESS_EMOJI} Command executed successfully.");
+                
             else if (result.Error == CommandError.UnknownCommand)
                 await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
+
+            else if (result.Error == CommandError.ParseFailed)
+                await context.Channel.SendMessageAsync(Messages.FAILURE_EMOJI + result.ErrorReason + context.User.Mention);
+
             else if (result.Error is CommandError)
                 await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_USAGE, context.User.Mention));
         }
