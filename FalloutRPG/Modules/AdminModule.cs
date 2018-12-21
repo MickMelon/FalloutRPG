@@ -45,6 +45,18 @@ namespace FalloutRPG.Modules
             await _helpService.ShowAdminHelpAsync(Context);
         }
 
+        [Command("init")]
+        public async Task<RuntimeResult> InitializeStatisticsAsync(IUser user)
+        {
+            var character = await _charService.GetCharacterAsync(user.Id);
+            if (character == null) return CharacterResult.CharacterNotFound();
+
+            _statService.InitializeStatistics(character.Statistics);
+            await _charService.SaveCharacterAsync(character);
+
+            return GenericResult.FromSuccess("Character stats initialized successfully.");
+        }
+
         [Command("addskill")]
         public async Task<RuntimeResult> AddSkillAsync(string name, Special special)
         {
