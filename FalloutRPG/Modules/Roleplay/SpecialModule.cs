@@ -56,21 +56,17 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                //if (!_specService.IsSpecialSet(character))
-                //{
-                //    await ReplyAsync(
-                //        string.Format(Messages.ERR_SPECIAL_NOT_FOUND, userInfo.Mention));
-                //    return;
-                //}
-
                 var stats = character.Statistics;
                 if (useEffects)
                     stats = _effectsService.GetEffectiveStatistics(character);
 
                 StringBuilder message = new StringBuilder($"**Name:** {character.Name}\n");
 
-                foreach (var special in stats.Where(x => x.Statistic is Special))
+                foreach (var special in stats.Where(x => x.Statistic is Special).OrderBy(x => x.Statistic.Id))
                     message.Append($"**{special.Statistic.Name}:** {special.Value}\n");
+
+                if (!_specService.IsSpecialSet(character))
+                    message.Append($"*You have {character.SpecialPoints} S.P.E.C.I.A.L. points left to spend!*");
 
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $special", message.ToString());
 
