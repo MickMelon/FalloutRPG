@@ -14,7 +14,6 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class ExperienceService
     {
-        private Dictionary<ulong, Timer> cooldownTimers;
         private List<ulong> experienceEnabledChannels;
         private Random _random;
 
@@ -25,8 +24,7 @@ namespace FalloutRPG.Services.Roleplay
         private const int DEFAULT_EXP_GAIN = 100;
         private const int DEFAULT_EXP_RANGE_FROM = 10;
         private const int DEFAULT_EXP_RANGE_TO = 50;
-        private const int COOLDOWN_INTERVAL = 15000;
-        private const int ALLOWED_CONSECUTIVE_MESSAGES = 5;
+        private const int ALLOWED_CONSECUTIVE_MESSAGES = 3;
 
         private readonly CharacterService _charService;
         private readonly SkillsService _skillsService;
@@ -44,8 +42,7 @@ namespace FalloutRPG.Services.Roleplay
             _skillsService = skillsService;
             _client = client;
             _config = config;
-
-            cooldownTimers = new Dictionary<ulong, Timer>();
+            
             LoadExperienceConfig();
             _random = random;
         }
@@ -68,7 +65,7 @@ namespace FalloutRPG.Services.Roleplay
                 .Where(x => !x.Author.Equals(context.Client.CurrentUser));
             if (cache.All(x => x.Author.Equals(context.User))) return;
 
-            var expToGive = GetRandomExperience();
+            var expToGive = GetExperienceFromMessage(character, context.Message.Content.Where(x => !Char.IsWhiteSpace(x)).Count());
 
             if (await GiveExperienceAsync(character, expToGive))
             {
@@ -84,7 +81,6 @@ namespace FalloutRPG.Services.Roleplay
         public async Task<bool> GiveExperienceAsync(Character character, int experience = DEFAULT_EXP_GAIN)
         {
             if (character == null) return false;
-            if (cooldownTimers.ContainsKey(character.DiscordId)) return false;
 
             var initialLevel = character.Level;
 
@@ -100,8 +96,6 @@ namespace FalloutRPG.Services.Roleplay
                 await OnLevelUpAsync(character, difference);
                 levelUp = true;
             }
-
-            AddToCooldown(character.DiscordId);
             
             return levelUp;
         }
@@ -232,31 +226,6 @@ namespace FalloutRPG.Services.Roleplay
             var user = _client.GetUser(character.DiscordId);
 
             await user.SendMessageAsync(string.Format(Messages.SKILLS_LEVEL_UP, user.Mention, character.ExperiencePoints));
-        }
-
-        /// <summary>
-        /// Adds a user's Discord ID to the cooldowns.
-        /// </summary>
-        private void AddToCooldown(ulong discordId)
-        {
-            var timer = new Timer();
-            timer.Elapsed += (sender, e) => OnCooldownElapsed(sender, e, discordId);
-            timer.Interval = COOLDOWN_INTERVAL;
-            timer.Enabled = true;
-
-            cooldownTimers.Add(discordId, timer);
-        }
-
-        /// <summary>
-        /// Called when a cooldown has finished.
-        /// </summary>
-        private void OnCooldownElapsed(object sender, ElapsedEventArgs e, ulong discordId)
-        {
-            var timer = cooldownTimers[discordId];
-            timer.Enabled = false;
-            timer.Dispose();
-
-            cooldownTimers.Remove(discordId);
         }
     }
 }
