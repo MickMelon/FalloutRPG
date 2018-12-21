@@ -56,7 +56,7 @@ namespace FalloutRPG.Services.Roleplay
                 STARTING_SPECIAL_POINTS = _config.GetValue<int>("roleplay:chargen:special-points");
 
                 SPECIAL_MAX_CHARGEN = _config.GetValue<int>("roleplay:chargen:special-level-limit");
-                SPECIAL_MAX_CHARGEN_QUANTITY = _config.GetValue<int>("roleplay:specials-at-limit");
+                SPECIAL_MAX_CHARGEN_QUANTITY = _config.GetValue<int>("roleplay:chargen:specials-at-limit");
             }
             catch (Exception)
             {
