@@ -54,6 +54,7 @@ namespace FalloutRPG.Services.Roleplay
                 SPECIAL_MAX = _config.GetValue<int>("roleplay:special-max");
 
                 STARTING_SPECIAL_POINTS = _config.GetValue<int>("roleplay:chargen:special-points");
+                STARTING_SPECIAL_POINTS -= Specials.Count * SPECIAL_MIN;
 
                 SPECIAL_MAX_CHARGEN = _config.GetValue<int>("roleplay:chargen:special-level-limit");
                 SPECIAL_MAX_CHARGEN_QUANTITY = _config.GetValue<int>("roleplay:chargen:specials-at-limit");
@@ -72,7 +73,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             if (character == null) throw new ArgumentNullException("character");
 
-            if (!IsSpecialInRange(character.Skills, points))
+            if (!IsSpecialInRange(character.Special, points))
                 throw new ArgumentException(Exceptions.CHAR_SPECIAL_NOT_IN_RANGE);
 
             // Refund special points used if overwriting the same skill
