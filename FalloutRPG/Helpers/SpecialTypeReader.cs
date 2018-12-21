@@ -19,7 +19,7 @@ namespace FalloutRPG.Helpers
             if (match is Special s)
                 return Task.FromResult(TypeReaderResult.FromSuccess(s));
 
-            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as a Special."));
+            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Special not found."));
         }
     }
 }

@@ -16,7 +16,7 @@ namespace FalloutRPG.Helpers
             if (Enum.TryParse(input, true, out Globals.StatisticFlag result))
                 return Task.FromResult(TypeReaderResult.FromSuccess(result));
 
-            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as a Statistic Flag."));
+            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Statistic Flag not found."));
         }
     }
 }
