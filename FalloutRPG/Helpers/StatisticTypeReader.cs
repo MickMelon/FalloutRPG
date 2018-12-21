@@ -15,7 +15,7 @@ namespace FalloutRPG.Helpers
         {
             var statService = (StatisticsService)services.GetService(typeof(StatisticsService));
             
-            var match = statService.Statistics.FirstOrDefault(x => x.AliasesArray.Contains(input));
+            var match = statService.Statistics.FirstOrDefault(x => x.AliasesArray.Contains(input, StringComparer.OrdinalIgnoreCase));
 
             if (match is Statistic s)
                 return Task.FromResult(TypeReaderResult.FromSuccess(s));
