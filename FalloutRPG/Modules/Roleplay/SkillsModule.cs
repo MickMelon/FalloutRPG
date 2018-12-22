@@ -25,6 +25,7 @@ namespace FalloutRPG.Modules.Roleplay
             private readonly CharacterService _charService;
             private readonly EffectsService _effectsService;
             private readonly SkillsService _skillsService;
+            private readonly SpecialService _specService;
             private readonly StatisticsService _statsService;
             private readonly HelpService _helpService;
 
@@ -32,12 +33,14 @@ namespace FalloutRPG.Modules.Roleplay
                 CharacterService charService,
                 EffectsService effectsService,
                 SkillsService skillsService,
+                SpecialService specService,
                 StatisticsService statsService,
                 HelpService helpService)
             {
                 _charService = charService;
                 _effectsService = effectsService;
                 _skillsService = skillsService;
+                _specService = specService;
                 _statsService = statsService;
                 _helpService = helpService;
             }
@@ -66,23 +69,36 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                if (!_skillsService.AreSkillsSet(character))
-                {
-                    await ReplyAsync(
-                        string.Format(Messages.ERR_SKILLS_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
-
                 var stats = character.Statistics;
                 if (useEffects)
                     stats = _effectsService.GetEffectiveStatistics(character);
 
                 StringBuilder message = new StringBuilder($"**Name:** {character.Name}\n");
 
-                foreach (var skill in stats.Where(x => x.Statistic is Skill))
-                    message.Append($"**{skill.Statistic.Name}:** {skill.Value}\n");
+                foreach (var special in _specService.Specials.OrderBy(x => x.Id))
+                {
+                    message.Append($"**{special.Name}:**\n");
+                    foreach (var skill in character.Skills.Where(x => ((Skill)x.Statistic).Special.Equals(special)))
+                    {
+                        if (skill.Value <= 0) continue;
 
-                message.Append($"*You have {character.ExperiencePoints}XP left to spend! ($char skills spend)*");
+                        message.Append($"{skill.Statistic.Name}: {skill.Value}\n");
+                    }
+
+                    message.Append($"\n");
+                }
+
+                if (_skillsService.AreSkillsSet(character))
+                {
+                    if (character.ExperiencePoints > 0)
+                    {
+                        message.Append($"*You have {character.ExperiencePoints}XP left to spend! ($char skills spend)*");
+                    }
+                }
+                else
+                {
+                    message.Append($"*You have {character.TagPoints} Tag points left to spend!*");
+                }
 
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $skills", message.ToString());
 
