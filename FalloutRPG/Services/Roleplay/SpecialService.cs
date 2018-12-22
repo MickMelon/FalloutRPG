@@ -26,7 +26,7 @@ namespace FalloutRPG.Services.Roleplay
         private readonly StatisticsService _statService;
         private readonly IConfiguration _config;
 
-        public IReadOnlyCollection<Special> Specials { get => _statService.Statistics.OfType<Special>().ToList().AsReadOnly(); }
+        public static IReadOnlyCollection<Special> Specials { get => StatisticsService.Statistics.OfType<Special>().ToList().AsReadOnly(); }
         private IReadOnlyDictionary<int, int> _specialPrices;
 
         public SpecialService(CharacterService charService,
@@ -110,7 +110,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         private bool IsValidSpecialName(string special)
         {
-            return _statService.Statistics.OfType<Special>().Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
+            return StatisticsService.Statistics.OfType<Special>().Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
         }
 
         /// <summary>

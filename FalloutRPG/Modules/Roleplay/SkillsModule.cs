@@ -75,7 +75,7 @@ namespace FalloutRPG.Modules.Roleplay
 
                 StringBuilder message = new StringBuilder($"**Name:** {character.Name}\n");
 
-                foreach (var special in _specService.Specials.OrderBy(x => x.Id))
+                foreach (var special in SpecialService.Specials.OrderBy(x => x.Id))
                 {
                     message.Append($"**{special.Name}:**\n");
                     foreach (var skill in character.Skills.Where(x => ((Skill)x.Statistic).Special.Equals(special)))

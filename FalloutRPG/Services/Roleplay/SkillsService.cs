@@ -24,7 +24,7 @@ namespace FalloutRPG.Services.Roleplay
 
         private readonly IConfiguration _config;
         
-        public IReadOnlyCollection<Skill> Skills { get => _statService.Statistics.OfType<Skill>().ToList().AsReadOnly(); }
+        public static IReadOnlyCollection<Skill> Skills { get => StatisticsService.Statistics.OfType<Skill>().ToList().AsReadOnly(); }
         private IReadOnlyDictionary<int, int> _skillPrices;
 
         public SkillsService(

@@ -16,7 +16,7 @@ namespace FalloutRPG.Services.Roleplay
     {
         private readonly IRepository<Statistic> _statRepo;
 
-        public ReadOnlyCollection<Statistic> Statistics { get; private set; }
+        public static ReadOnlyCollection<Statistic> Statistics { get; private set; }
 
         public StatisticsService(IRepository<Statistic> statRepo)
         {

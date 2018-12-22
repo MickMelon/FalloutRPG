@@ -125,10 +125,10 @@ namespace FalloutRPG.Services
             var userInfo = context.User;
             var message = new StringBuilder();
 
-            foreach (var special in _specialService.Specials.OrderBy(x => x.Id))
+            foreach (var special in SpecialService.Specials.OrderBy(x => x.Id))
             {
                 message.Append($"**{special.Name}:**\n");
-                foreach (var skill in _skillsService.Skills.Where(x => x.Special.Equals(special)))
+                foreach (var skill in SkillsService.Skills.Where(x => x.Special.Equals(special)))
                 {
                     message.Append($"{skill.Name}\n");
                 }
@@ -169,7 +169,7 @@ namespace FalloutRPG.Services
             var userInfo = context.User;
             var message = new StringBuilder();
 
-            foreach (var spec in _specialService.Specials.OrderBy(x => x.Id).Select(x => x.Name))
+            foreach (var spec in SpecialService.Specials.OrderBy(x => x.Id).Select(x => x.Name))
                 message.Append($"{spec}\n");
 
             var embed = EmbedHelper.BuildBasicEmbed("Command: $help skills", message.ToString());
