@@ -30,108 +30,98 @@ namespace FalloutRPG.Modules.Roleplay
         {
             await _helpService.ShowRollHelpAsync(Context);
         }
+    }
 
-        public class RollPlayerModule : RollModule
+    public class RollPlayerModule : ModuleBase<SocketCommandContext>
+    {
+        private readonly CharacterService _characterService;
+        private readonly EffectsService _effectsService;
+        private readonly RollService _rollService;
+        private readonly SpecialService _specialService;
+
+        public RollPlayerModule(
+            CharacterService characterService,
+            EffectsService effectsService,
+            RollService rollService,
+            SpecialService specialService)
         {
-            private readonly CharacterService _characterService;
-            private readonly EffectsService _effectsService;
-            private readonly SkillsService _skillsService;
-            private readonly SpecialService _specialService;
-
-            public RollPlayerModule(
-                CharacterService characterService,
-                EffectsService effectsService,
-                SkillsService skillsService,
-                SpecialService specialService,
-                RollService rollService,
-                HelpService helpService) : base(rollService, helpService)
-            {
-                _characterService = characterService;
-                _effectsService = effectsService;
-                _skillsService = skillsService;
-                _specialService = specialService;
-            }
-
-            [Command("roll")]
-            [Alias("r")]
-            public async Task<RuntimeResult> RollStatAsync(Statistic statToRoll) =>
-                await RollPlayerAsync(statToRoll, false);
-
-            [Command("broll")]
-            [Alias("br")]
-            public async Task<RuntimeResult> RollStatBuffedAsync(Statistic statToRoll) =>
-                await RollPlayerAsync(statToRoll, true);
-
-            private async Task<RuntimeResult> RollPlayerAsync(Statistic stat, bool useEffects)
-            {
-                var character = await _characterService.GetCharacterAsync(Context.User.Id);
-
-                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
-
-                if (!_specialService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet(Context.User.Mention);
-                if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet(Context.User.Mention);
-
-                var stats = character.Statistics;
-                // TODO: maybe add a method like _effectsService.GetEffectiveStatistic(character, Statistic)
-                if (useEffects) stats = _effectsService.GetEffectiveStatistics(character);
-
-                string result = _rollService.RollStatistic(character, stat);
-                return GenericResult.FromSuccess($"{result} ({Context.User.Mention})");
-            }
+            _characterService = characterService;
+            _effectsService = effectsService;
+            _rollService = rollService;
+            _specialService = specialService;
         }
 
-        [Group("npc")]
-        public class RollNpcModule : RollModule
+        [Command("roll")]
+        [Alias("r")]
+        public async Task<RuntimeResult> RollStatAsync(Statistic statToRoll) =>
+            await RollPlayerAsync(statToRoll, false);
+
+        [Command("broll")]
+        [Alias("br")]
+        public async Task<RuntimeResult> RollStatBuffedAsync(Statistic statToRoll) =>
+            await RollPlayerAsync(statToRoll, true);
+
+        private async Task<RuntimeResult> RollPlayerAsync(Statistic stat, bool useEffects)
         {
-            private readonly EffectsService _effectsService;
-            private readonly SkillsService _skillsService;
-            private readonly SpecialService _specialService;
-            private readonly NpcService _npcService;
+            var character = await _characterService.GetCharacterAsync(Context.User.Id);
 
-            public RollNpcModule(
-                EffectsService effectsService,
-                NpcService npcService,
-                SkillsService skillsService,
-                SpecialService specialService,
-                RollService rollService,
-                HelpService helpService) : base(rollService, helpService)
-            {
-                _effectsService = effectsService;
-                _skillsService = skillsService;
-                _specialService = specialService;
-                _npcService = npcService;
-            }
+            if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
 
-            [Command("roll")]
-            [Alias("r")]
-            public RuntimeResult RollSkill(string name, Statistic statToRoll) =>
-                RollNpcAsync(name, statToRoll, false);
+            if (!_specialService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet(Context.User.Mention);
 
-            [Command("broll")]
-            [Alias("br")]
-            public RuntimeResult RollSkillBuffed(string name, Statistic statToRoll) =>
-                RollNpcAsync(name, statToRoll, true);
+            var stats = character.Statistics;
+            if (useEffects) stats = _effectsService.GetEffectiveStatistics(character);
 
-            private RuntimeResult RollNpcAsync(string name, Statistic stat, bool useEffects)
-            {
-                var character = _npcService.FindNpc(name);
+            string result = _rollService.RollStatistic(character, stat);
+            return GenericResult.FromSuccess($"{result} ({Context.User.Mention})");
+        }
+    }
 
-                if (character == null) return CharacterResult.NpcNotFound(Context.User.Mention);
+    [Group("npc")]
+    public class RollNpcModule : ModuleBase<SocketCommandContext>
+    {
+        private readonly EffectsService _effectsService;
+        private readonly NpcService _npcService;
+        private readonly RollService _rollService;
 
-                var stats = character?.Statistics;
-                // TODO: maybe add a method like _effectsService.GetEffectiveStatistic(character, Statistic)
-                if (useEffects) stats = _effectsService.GetEffectiveStatistics(character);
+        public RollNpcModule(
+            EffectsService effectsService,
+            NpcService npcService,
+            RollService rollService)
+        {
+            _effectsService = effectsService;
+            _npcService = npcService;
+            _rollService = rollService;
+        }
 
-                var statValue = stats.FirstOrDefault(x => x.Statistic.Equals(stat));
-                
-                if (statValue == null)
-                    return GenericResult.FromError(String.Format(Messages.NPC_CANT_USE_STAT, character.Name));
+        [Command("roll")]
+        [Alias("r")]
+        public RuntimeResult RollSkill(string name, Statistic statToRoll) =>
+            RollNpcAsync(name, statToRoll, false);
 
-                _npcService.ResetNpcTimer(character);
+        [Command("broll")]
+        [Alias("br")]
+        public RuntimeResult RollSkillBuffed(string name, Statistic statToRoll) =>
+            RollNpcAsync(name, statToRoll, true);
 
-                string result = _rollService.RollStatistic(character, stat);
-                return GenericResult.FromSuccess($"{result} ({Context.User.Mention}) {Messages.NPC_SUFFIX}");
-            }
+        private RuntimeResult RollNpcAsync(string name, Statistic stat, bool useEffects)
+        {
+            var character = _npcService.FindNpc(name);
+
+            if (character == null) return CharacterResult.NpcNotFound(Context.User.Mention);
+
+            var stats = character?.Statistics;
+            if (useEffects) stats = _effectsService.GetEffectiveStatistics(character);
+
+            var statValue = stats.FirstOrDefault(x => x.Statistic.Equals(stat));
+
+            if (statValue == null)
+                return GenericResult.FromError(String.Format(Messages.NPC_CANT_USE_STAT, character.Name));
+
+            _npcService.ResetNpcTimer(character);
+
+            string result = _rollService.RollStatistic(character, stat);
+            return GenericResult.FromSuccess($"{result} ({Context.User.Mention}) {Messages.NPC_SUFFIX}");
         }
     }
 }
