@@ -14,7 +14,7 @@ namespace FalloutRPG.Helpers
         {
             var skillService = (SkillsService)services.GetService(typeof(SkillsService));
             
-            var match = skillService.Skills.FirstOrDefault(x => x.AliasesArray.Contains(input));
+            var match = skillService.Skills.FirstOrDefault(x => x.AliasesArray.Contains(input, StringComparer.OrdinalIgnoreCase));
 
             if (match is Skill s)
                 return Task.FromResult(TypeReaderResult.FromSuccess(s));

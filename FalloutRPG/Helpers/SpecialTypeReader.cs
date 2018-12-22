@@ -14,7 +14,7 @@ namespace FalloutRPG.Helpers
         {
             var specService = (SpecialService)services.GetService(typeof(SpecialService));
             
-            var match = specService.Specials.FirstOrDefault(x => x.AliasesArray.Contains(input));
+            var match = specService.Specials.FirstOrDefault(x => x.AliasesArray.Contains(input, StringComparer.OrdinalIgnoreCase));
 
             if (match is Special s)
                 return Task.FromResult(TypeReaderResult.FromSuccess(s));
