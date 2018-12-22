@@ -12,9 +12,7 @@ namespace FalloutRPG.Helpers
     {
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
-            var skillService = (SkillsService)services.GetService(typeof(SkillsService));
-            
-            var match = skillService.Skills.FirstOrDefault(x => x.AliasesArray.Contains(input, StringComparer.OrdinalIgnoreCase));
+            var match = SkillsService.Skills.FirstOrDefault(x => x.AliasesArray.Contains(input, StringComparer.OrdinalIgnoreCase));
 
             if (match is Skill s)
                 return Task.FromResult(TypeReaderResult.FromSuccess(s));

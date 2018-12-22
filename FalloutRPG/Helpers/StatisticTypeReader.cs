@@ -13,9 +13,7 @@ namespace FalloutRPG.Helpers
     {
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
-            var statService = (StatisticsService)services.GetService(typeof(StatisticsService));
-            
-            var match = statService.Statistics.FirstOrDefault(x => x.AliasesArray.Contains(input, StringComparer.OrdinalIgnoreCase));
+            var match = StatisticsService.Statistics.FirstOrDefault(x => x.AliasesArray.Contains(input, StringComparer.OrdinalIgnoreCase));
 
             if (match is Statistic s)
                 return Task.FromResult(TypeReaderResult.FromSuccess(s));
