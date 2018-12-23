@@ -64,17 +64,12 @@ namespace FalloutRPG.Services.Roleplay
             {
                 foreach (var statEffect in effect.StatisticEffects)
                 {
-                    foreach (var stat in newStats)
-                    {
-                        if (stat.Value + statEffect.Value >= 1) 
-                        {
-                            stat.Value += statEffect.Value;
-                        }
-                        else
-                        {
-                            stat.Value = 1;
-                        }
-                    }
+                    var newValue = _statService.GetStatistic(newStats, statEffect.Statistic) + statEffect.Value;
+
+                    if (statEffect.Statistic is Special && newValue < 1)
+                        newValue = 1;
+                    
+                    _statService.SetStatistic(newStats, statEffect.Statistic, newValue);
                 }
             }
 
