@@ -66,13 +66,13 @@ namespace FalloutRPG.Services
         {
             string message = result.ToString();
 
-            if (!String.IsNullOrEmpty(message) && result is RuntimeResult)
+            if (result is RuntimeResult rr && !String.IsNullOrEmpty(rr.Reason))
                 await context.Channel.SendMessageAsync(message);
                 
             else if (result.Error == CommandError.UnknownCommand)
                 await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
 
-            else if (result.Error == CommandError.ParseFailed)
+            else if (result.Error == CommandError.ParseFailed || (result is TypeReaderResult t && !t.IsSuccess))
                 await context.Channel.SendMessageAsync(Messages.FAILURE_EMOJI + result.ErrorReason + context.User.Mention);
 
             else if (result.Error is CommandError)
