@@ -26,6 +26,27 @@ namespace FalloutRPG.Helpers
         }
 
         /// <summary>
+        /// Builds a simple Embed with a title, content and color.
+        /// </summary>
+        /// <remarks>
+        /// The embed description has a max of 2048 characters.
+        /// </remarks>
+        public static Embed BuildBasicEmbed(string title, string content, Color color)
+        {
+            content = StringHelper.Truncate(content, 2048);
+
+            var builder = new EmbedBuilder()
+                .WithDescription(content)
+                .WithColor(color)
+                .WithAuthor(author => {
+                    author
+                        .WithName(title);
+                });
+
+            return builder.Build();
+        }
+
+        /// <summary>
         /// Builds a simple Embed title, content and fields.
         /// </summary>
         /// <remarks>
