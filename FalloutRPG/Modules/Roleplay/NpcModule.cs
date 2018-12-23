@@ -27,14 +27,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("create")]
         [Alias("new")]
-        public async Task CreateNewNpcAsync(string type, string name)
-        {
-            await CreateNewNpcAsync(type, name, 1);
-        }
-
-        [Command("create")]
-        [Alias("new")]
-        public async Task CreateNewNpcAsync(string name, string type, int level)
+        public async Task CreateNewNpcAsync(string name, string type)
         {
             try
             {
@@ -46,7 +39,7 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                _npcService.CreateNpc(name, preset, level);
+                _npcService.CreateNpc(name, preset);
                 await ReplyAsync(String.Format(Messages.NPC_CREATED_SUCCESS, type, name));
             }
             catch (Exception e)

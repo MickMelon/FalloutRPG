@@ -19,11 +19,13 @@ namespace FalloutRPG.Modules.Roleplay
     {
         private readonly HelpService _helpService;
         private readonly NpcPresetService _presetService;
+        private readonly StatisticsService _statsService;
 
-        public NpcPresetModule(HelpService helpService, NpcPresetService presetService)
+        public NpcPresetModule(HelpService helpService, NpcPresetService presetService, StatisticsService statsService)
         {
             _helpService = helpService;
             _presetService = presetService;
+            _statsService = statsService;
         }
 
         [Command]
@@ -49,38 +51,28 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("edit")]
-        public async Task EditPresetSpecialAsync(string name, Special special, int newValue)
+        public async Task<RuntimeResult> EditPresetSpecialAsync(string name, Statistic stat, int newValue)
         {
             var preset = await _presetService.GetNpcPreset(name);
 
             if (preset == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+                return GenericResult.FromError(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
 
-            var match = preset.Statistics.Where(x => x.Equals(special)).FirstOrDefault();
-            if (match != null) match.Value = newValue;
+            var match = preset.Statistics.Where(x => x.Statistic.Equals(stat)).FirstOrDefault();
+
+            if (match != null)
+            {
+                match.Value = newValue;
+            }
+            else
+            {
+                _statsService.InitializeStatistics(preset.Statistics);
+                preset.Statistics.Where(x => x.Statistic.Equals(stat)).FirstOrDefault().Value = newValue;
+            }
 
             await _presetService.SaveNpcPreset(preset);
 
-            await ReplyAsync(String.Format(Messages.NPC_PRESET_EDIT_SPECIAL, preset.Name, Context.User.Mention));
-        }
-
-        [Command("edit")]
-        public async Task EditPresetTagsAsync(string name, Skill tag1, Skill tag2, Skill tag3)
-        {
-            var preset = await _presetService.GetNpcPreset(name);
-
-            if (preset == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
-                return;
-            }
-            
-            await _presetService.SaveNpcPreset(preset);
-
-            await ReplyAsync(String.Format(Messages.NPC_PRESET_EDIT_TAGS, preset.Name, Context.User.Mention));
+            return GenericResult.FromSuccess(String.Format(Messages.NPC_PRESET_EDIT_SPECIAL, preset.Name, Context.User.Mention));
         }
 
         [Command("toggle")]
