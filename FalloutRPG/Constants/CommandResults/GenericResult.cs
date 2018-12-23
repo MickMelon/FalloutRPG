@@ -14,5 +14,8 @@ namespace FalloutRPG.Constants
 
         public static GenericResult FromSuccess(string reason = null) =>
             new GenericResult(null, reason);
+
+        public static GenericResult FromSilentSuccess() =>
+            new GenericResult(null, null);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Discord;
+using Discord.Commands;
 using FalloutRPG.Constants;
+using FalloutRPG.Helpers;
 using FalloutRPG.Models;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -36,19 +38,18 @@ namespace FalloutRPG.Services.Roleplay
             _rand = rand;
         }
 
-        public int[] GetRollResult(Character character, Statistic stat, int extraDie = 0)
+        public int[] GetRollResult(IList<StatisticValue> stats, Statistic stat)
         {
-            int numOfDie = _statService.GetStatistic(character, stat) + extraDie;
+            var statValue = _statService.GetStatistic(stats, stat);
+
+            int numOfDie = statValue;
 
             if (stat is Skill skill)
             {
-                var specValue = _statService.GetStatistic(character, skill.Special);
+                var specValue = _statService.GetStatistic(stats, skill.Special);
 
-                // TODO: maybe should make GetStatistic return a Nullable?
-                if (specValue != -1)
-                    numOfDie += specValue;
+                numOfDie += specValue;
             }
-                
 
             int[] die = new int[numOfDie];
 
@@ -58,31 +59,82 @@ namespace FalloutRPG.Services.Roleplay
             return die;
         }
 
-        public string RollStatistic(Character character, Statistic stat)
+        public RuntimeResult RollStatistic(Character character, Statistic stat, bool useEffects = false)
         {
-            if (stat is Skill skill && _statService.GetStatistic(character, stat) < skill.MinimumValue)
-                return Messages.ERR_SKILLS_TOO_LOW;
+            var stats = character.Statistics;
 
-            var result = GetRollResult(character, stat);
+            if (useEffects)
+                stats = _effectsService.GetEffectiveStatistics(character);
 
-            return $"{GetRollMessage(character.Name, stat.ToString(), result)}";
+            if (stat is Skill skill && _statService.GetStatistic(stats, stat) < skill.MinimumValue)
+                return StatisticResult.SkillNotHighEnough();
+
+            var result = GetRollResult(stats, stat);
+            var successes = result.Count(x => x >= SUCCESS_ROLL);
+
+            var message = $"*{character.Name}* rolls `{stat.Name}`!\n" + GetRollMessage(character.Name, stat.Name, result);
+
+            Color color = new Color(200, 45, 0);
+
+            if (successes > 7) color = new Color(210, 170, 0);
+            else if (successes > 0) color = new Color(60, 210, 0);
+
+            if (useEffects)
+                return RollResult.FromSuccess(EmbedHelper.BuildBasicEmbed($"{Messages.MUSCLE_EMOJI}{stat.Name} Buffed Roll", message, color));
+
+            return RollResult.FromSuccess(EmbedHelper.BuildBasicEmbed($"{stat.Name} Roll", message, color));
         }
 
-        public string GetRollMessage(string charName, string roll, int[] result)
+        public RuntimeResult RollVsStatistic(Character character, Character character2, Statistic stat1, Statistic stat2, bool useEffects = false)
         {
-            var message = new StringBuilder($"{charName} rolls {roll}:\n\n");
+            var stats1 = character.Statistics;
+            var stats2 = character.Statistics;
 
-            foreach (var dice in result)
-                message.Append($"[{dice}] ");
+            if (useEffects)
+            {
+                stats1 = _effectsService.GetEffectiveStatistics(character);
+                stats2 = _effectsService.GetEffectiveStatistics(character2);
+            }
+
+            if ((stat1 is Skill skill1 && _statService.GetStatistic(stats1, stat1) < skill1.MinimumValue) ||
+                (stat2 is Skill skill2 && _statService.GetStatistic(stats2, stat2) < skill2.MinimumValue))
+                return StatisticResult.SkillNotHighEnough();
+
+            var result = GetRollResult(stats1, stat1);
+            var result2 = GetRollResult(stats2, stat2);
+
+            var message = $"*{character.Name}* rolls `{stat1.Name}` against *{character2.Name}'s* `{stat2.Name}`!\n\n" +
+                $"__{character.Name}__: {GetRollMessage(character.Name, stat1.Name, result)}\n\n" +
+                $"__{character2.Name}__: {GetRollMessage(character2.Name, stat2.Name, result2)}";
+
+            if (useEffects)
+                return RollResult.FromSuccess(EmbedHelper.BuildBasicEmbed($"{Messages.MUSCLE_EMOJI}{stat1.Name} Vs. {stat2.Name} Buffed Roll", message));
+
+            return RollResult.FromSuccess(EmbedHelper.BuildBasicEmbed($"{stat1.Name} Vs. {stat2.Name} Roll", message));
+        }
+
+        public string GetRollMessage(string charName, string statName, int[] result)
+        {
+            var message = new StringBuilder("**[");
+
+            // Prevents trailing comma ( [ 1, 2, 3, ] )
+            for (int dice = 0; dice < result.Length - 1; dice++)
+                message.Append($"{result[dice]}, ");
+
+            message.Append($"{result[result.Length - 1]}]**");
 
             int successes = result.Count(x => x >= SUCCESS_ROLL);
 
             if (successes > 7)
-                message.Append($"**AMAZING SUCCESS: {successes}!!**");
+            {
+                message.Append($"\n**AMAZING SUCCESS: {successes}!!**");
+            }
             else
-                message.Append($"*Successes: {successes}*");
+            {
+                message.Append($"\n*Successes: {successes}*");
+            }
 
-            return result.ToString();
+            return message.ToString();
         }
     }
 }
