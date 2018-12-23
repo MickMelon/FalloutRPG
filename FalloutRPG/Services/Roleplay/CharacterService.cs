@@ -84,7 +84,7 @@ namespace FalloutRPG.Services.Roleplay
                 Story = "",
                 Experience = 0,
                 ExperiencePoints = 0,
-                SpecialPoints = SpecialService.STARTING_SPECIAL_POINTS - SpecialService.SPECIAL_MIN * SpecialService.Specials.Count,
+                SpecialPoints = SpecialService.STARTING_SPECIAL_POINTS,
                 TagPoints = SkillsService.TAG_POINTS,
                 Money = 1000,
                 Statistics = new List<StatisticValue>(),
