@@ -98,6 +98,8 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public void InitializeStatistics(IList<StatisticValue> statValues)
         {
+            if (statValues == null) statValues = new List<StatisticValue>();
+
             foreach (var stat in Statistics)
             {
                 if (!statValues.Select(x => x.Statistic).Contains(stat))
