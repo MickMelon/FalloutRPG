@@ -36,7 +36,7 @@ namespace FalloutRPG.Services.Roleplay
             _rand = random;
         }
 
-        public Character CreateNpc(string name, NpcPreset preset, int level)
+        public Character CreateNpc(string name, NpcPreset preset)
         {
             if (FindNpc(name) != null)
                 throw new Exception(Exceptions.NPC_CHAR_EXISTS);
