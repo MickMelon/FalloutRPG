@@ -16,23 +16,28 @@ namespace FalloutRPG.Services.Roleplay
         private readonly IRepository<NpcPreset> _presetRepository;
 
         private readonly SkillsService _skillsService;
+        private readonly StatisticsService _statsService;
 
-        public NpcPresetService(SkillsService skillsService, IRepository<NpcPreset> presetRepository)
+        public NpcPresetService(SkillsService skillsService, StatisticsService statsService, IRepository<NpcPreset> presetRepository)
         {
             _presetRepository = presetRepository;
             _skillsService = skillsService;
+            _statsService = statsService;
         }
 
         public async Task<bool> CreateNpcPresetAsync(string name)
         {
             // NPC preset with name exists
             if (await GetNpcPreset(name) != null)
-                return false;
+                throw new Exception(Exceptions.NPC_PRESET_EXISTS);
 
             NpcPreset preset = new NpcPreset
             {
-                Name = name
+                Name = name,
+                Statistics = new List<StatisticValue>()
             };
+
+            _statsService.InitializeStatistics(preset.Statistics);
 
             await _presetRepository.AddAsync(preset);
             return true;
