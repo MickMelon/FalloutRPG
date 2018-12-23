@@ -52,13 +52,13 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Returns the value of the specified special.
         /// </summary>
-        /// <returns>Returns -1 if special values are null.</returns>
+        /// <returns>Returns 0 if special values are null.</returns>
         public int GetStatistic(IList<StatisticValue> statSheet, Statistic stat)
         {
             var match = statSheet.FirstOrDefault(x => x.Statistic.Equals(stat));
 
             if (match == null)
-                return -1;
+                return 0;
 
             return match.Value;
         }
@@ -66,7 +66,7 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Returns the value of the specified character's given special.
         /// </summary>
-        /// <returns>Returns -1 if character or special values are null.</returns>
+        /// <returns>Returns 0 if character or special values are null.</returns>
         public int GetStatistic(Character character, Statistic stat) =>
             GetStatistic(character?.Statistics, stat);
 
