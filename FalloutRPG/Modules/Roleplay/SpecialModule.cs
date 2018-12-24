@@ -73,6 +73,19 @@ namespace FalloutRPG.Modules.Roleplay
                 await ReplyAsync(userInfo.Mention, embed: embed);
             }
 
+            [Command("spend")]
+            [Alias("put", "upgrade")]
+            public async Task<RuntimeResult> UpgradeSpecialAsync(Special special)
+            {
+                var userInfo = Context.User;
+                var character = await _charService.GetCharacterAsync(userInfo.Id);
+
+                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet();
+
+                return _specService.UpgradeSpecial(character, special);
+            }
+
             [Command("set")]
             public async Task<RuntimeResult> SetSpecialAsync(Special special, int amount)
             {

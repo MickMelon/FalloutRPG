@@ -78,9 +78,9 @@ namespace FalloutRPG.Modules.Roleplay
                 foreach (var special in SpecialService.Specials.OrderBy(x => x.Id))
                 {
                     message.Append($"**{special.Name}:**\n");
-                    foreach (var skill in character.Skills.Where(x => ((Skill)x.Statistic).Special.Equals(special)))
+                    foreach (var skill in stats.Where(x => x.Statistic is Skill sk && sk.Special.Equals(special)))
                     {
-                        if (skill.Value <= 0) continue;
+                        if (skill.Value == 0) continue;
 
                         message.Append($"{skill.Statistic.Name}: {skill.Value}\n");
                     }
@@ -134,7 +134,7 @@ namespace FalloutRPG.Modules.Roleplay
             }
 
             [Command("spend")]
-            [Alias("put")]
+            [Alias("put", "upgrade")]
             public async Task<RuntimeResult> SpendSkillPointsAsync(Skill skill)
             {
                 var userInfo = Context.User;
@@ -143,15 +143,7 @@ namespace FalloutRPG.Modules.Roleplay
                 if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
                 if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
 
-                try
-                {
-                    _skillsService.UpgradeSkill(character, skill);
-                    return GenericResult.FromSuccess(String.Format(Messages.SKILLS_SPEND_POINTS_SUCCESS, userInfo.Mention));
-                }
-                catch (Exception e)
-                {
-                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
-                }
+                return _skillsService.UpgradeSkill(character, skill);
             }
 
             [Command("claim")]

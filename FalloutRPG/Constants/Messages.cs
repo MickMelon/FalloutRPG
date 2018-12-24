@@ -62,6 +62,8 @@
         // Stats Error Messages
         public const string ERR_SKILLS_NOT_FOUND = FAILURE_EMOJI + "Unable to find character skills. {0}";
         public const string ERR_SKILLS_ALREADY_SET = FAILURE_EMOJI + "Character skills are already set. {0}";
+        public const string ERR_SKILLS_NOT_ENOUGH_POINTS = "Character does not have enough skill points. Price: {0}XP.";
+        public const string ERR_SKILLS_POINTS_GOES_OVER_MAX = "Unable to add skill points because it will take the skill above the max level. {0}";
         public const string ERR_SPECIAL_ALREADY_SET = FAILURE_EMOJI + "Character SPECIAL is already set. {0}";
         public const string ERR_SKILLS_NONE_TO_CLAIM = FAILURE_EMOJI + "You don't have any skill points that you can claim. {0}";
         public const string ERR_SKILLS_POINTS_BELOW_ONE = FAILURE_EMOJI + "You cannot put less than one point in a skill. {0}";

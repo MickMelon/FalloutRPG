@@ -15,7 +15,8 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class SpecialService
     {
-        public static int STARTING_SPECIAL_POINTS = 29;
+        private static int CONFIGURED_SPECIAL_POINTS = 29;
+        public static int STARTING_SPECIAL_POINTS { get => CONFIGURED_SPECIAL_POINTS - Specials.Count * SPECIAL_MIN; }
 
         public static int SPECIAL_MAX = 10;
         public static int SPECIAL_MAX_CHARGEN = 8;
@@ -53,8 +54,7 @@ namespace FalloutRPG.Services.Roleplay
 
                 SPECIAL_MAX = _config.GetValue<int>("roleplay:special-max");
 
-                STARTING_SPECIAL_POINTS = _config.GetValue<int>("roleplay:chargen:special-points");
-                STARTING_SPECIAL_POINTS -= Specials.Count * SPECIAL_MIN;
+                CONFIGURED_SPECIAL_POINTS = _config.GetValue<int>("roleplay:chargen:special-points");
 
                 SPECIAL_MAX_CHARGEN = _config.GetValue<int>("roleplay:chargen:special-level-limit");
                 SPECIAL_MAX_CHARGEN_QUANTITY = _config.GetValue<int>("roleplay:chargen:specials-at-limit");
@@ -86,6 +86,40 @@ namespace FalloutRPG.Services.Roleplay
             character.SpecialPoints -= points;
 
             await _charService.SaveCharacterAsync(character);
+        }
+
+        /// <summary>
+        /// Puts one extra point in a specified skill.
+        /// </summary>
+        public RuntimeResult UpgradeSpecial(Character character, Special special)
+        {
+            if (character == null) throw new ArgumentNullException("character");
+
+            var specialVal = _statService.GetStatistic(character, special);
+
+            if (specialVal + 1 > SPECIAL_MAX)
+                return GenericResult.FromError(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
+
+            int price = CalculatePrice(_statService.GetStatistic(character, special), character.Level);
+
+            if (price > character.ExperiencePoints)
+                return GenericResult.FromError(String.Format(Messages.ERR_SKILLS_NOT_ENOUGH_POINTS, price));
+
+            _statService.SetStatistic(character, special, specialVal + 1);
+            character.ExperiencePoints -= price;
+
+            return GenericResult.FromSuccess(Messages.SKILLS_SPEND_POINTS_SUCCESS);
+        }
+
+        private int CalculatePrice(int skillLevel, int charLevel)
+        {
+            double multiplier = 1.0;
+
+            if (charLevel >= 10)
+                for (int i = 0; i < (charLevel - 5) / 5; i++)
+                    multiplier += .5;
+
+            return (int)(_specialPrices[skillLevel] * multiplier);
         }
 
         private bool IsSpecialInRange(IList<StatisticValue> stats, int points)

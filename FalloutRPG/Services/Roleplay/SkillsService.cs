@@ -1,3 +1,4 @@
+using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Models;
 using Microsoft.Extensions.Configuration;
@@ -130,22 +131,24 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Puts one extra point in a specified skill.
         /// </summary>
-        public void UpgradeSkill(Character character, Skill skill)
+        public RuntimeResult UpgradeSkill(Character character, Skill skill)
         {
             if (character == null) throw new ArgumentNullException("character");
 
             var skillVal = _statService.GetStatistic(character, skill);
 
             if (skillVal + 1 > MAX_SKILL_LEVEL)
-                throw new Exception(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
+                return GenericResult.FromError(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
 
             int price = CalculatePrice(_statService.GetStatistic(character, skill), character.Level);
 
             if (price > character.ExperiencePoints)
-                throw new Exception(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
+                return GenericResult.FromError(String.Format(Messages.ERR_SKILLS_NOT_ENOUGH_POINTS, price));
 
             _statService.SetStatistic(character, skill, skillVal + 1);
             character.ExperiencePoints -= price;
+
+            return GenericResult.FromSuccess(Messages.SKILLS_SPEND_POINTS_SUCCESS);
         }
 
         /// <summary>
