@@ -11,6 +11,7 @@
   "roleplay": {
     "skill-max": 12,
     "special-max": 10,
+    "use-percentage": false,
 
     "experience": {
       "exp-channels": [ "" ],

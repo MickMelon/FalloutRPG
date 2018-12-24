@@ -67,11 +67,21 @@ namespace FalloutRPG.Services
             string message = result.ToString();
 
             if (result is RuntimeResult rr && !String.IsNullOrEmpty(rr.Reason))
+            {
                 await context.Channel.SendMessageAsync(message);
+            }
+
+            else if (result is RollResult roll)
+            {
+                if (roll.RollEmbed != null) await context.Channel.SendMessageAsync(embed: roll.RollEmbed);
+                if (!String.IsNullOrEmpty(roll.OldMessage)) await context.Channel.SendMessageAsync($"{roll.OldMessage} ({context.User.Mention})");
+            }
 
             else if (!string.IsNullOrEmpty(result?.ErrorReason))
+            {
                 await context.Channel.SendMessageAsync(
                     $"{Messages.FAILURE_EMOJI} {result.ErrorReason} {context.User.Mention}");
+            }
         }
 
         /// <summary>

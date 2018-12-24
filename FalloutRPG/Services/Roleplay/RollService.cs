@@ -24,21 +24,26 @@ namespace FalloutRPG.Services.Roleplay
         private const int DICE_SIDES = 8;
         private const int SUCCESS_ROLL = 8;
 
+        private readonly bool usePercentage;
+
         public RollService(
             EffectsService effectsService,
             SpecialService specService,
             SkillsService skillsService,
             StatisticsService statService,
-            Random rand)
+            Random rand,
+            IConfiguration config)
         {
             _effectsService = effectsService;
             _specService = specService;
             _skillsService = skillsService;
             _statService = statService;
             _rand = rand;
+
+            usePercentage = config.GetValue<bool>("roleplay:use-percentage");
         }
 
-        public int[] GetRollResult(IList<StatisticValue> stats, Statistic stat)
+        private int GetNumberOfDice(IList<StatisticValue> stats, Statistic stat)
         {
             var statValue = _statService.GetStatistic(stats, stat);
 
@@ -51,12 +56,32 @@ namespace FalloutRPG.Services.Roleplay
                 numOfDie += specValue;
             }
 
+            return numOfDie;
+        }
+
+        public int[] GetRollResult(IList<StatisticValue> stats, Statistic stat)
+        {
+            int numOfDie = GetNumberOfDice(stats, stat);
+
             int[] die = new int[numOfDie];
 
             for (int dice = 0; dice < die.Length; dice++)
                 die[dice] = _rand.Next(1, DICE_SIDES + 1);
 
             return die;
+        }
+
+        public double GetOldRollResult(IList<StatisticValue> stats, Statistic stat)
+        {
+            double rng = _rand.Next(1, 101);
+
+            double maxSuccessRoll = CalculateProbability(DICE_SIDES, GetNumberOfDice(stats, stat)) * 100;
+
+            // compares your roll with your skills, and how much better you did than the bare minimum
+            double resultPercent = (maxSuccessRoll - rng) / maxSuccessRoll;
+            resultPercent = Math.Round(resultPercent * 100.0, 1);
+
+            return resultPercent;
         }
 
         public RuntimeResult RollStatistic(Character character, Statistic stat, bool useEffects = false)
@@ -69,20 +94,38 @@ namespace FalloutRPG.Services.Roleplay
             if (stat is Skill skill && _statService.GetStatistic(stats, stat) < skill.MinimumValue)
                 return StatisticResult.SkillNotHighEnough();
 
-            var result = GetRollResult(stats, stat);
-            var successes = result.Count(x => x >= SUCCESS_ROLL);
-
-            var message = $"*{character.Name}* rolls `{stat.Name}`!\n" + GetRollMessage(character.Name, stat.Name, result);
-
+            string message = "";
             Color color = new Color(200, 45, 0);
 
-            if (successes > 7) color = new Color(210, 170, 0);
-            else if (successes > 0) color = new Color(60, 210, 0);
+            if (usePercentage)
+            {
+                var result = GetOldRollResult(stats, stat);
 
-            if (useEffects)
-                return RollResult.FromSuccess(EmbedHelper.BuildBasicEmbed($"{Messages.MUSCLE_EMOJI}{stat.Name} Buffed Roll", message, color));
+                message = GetOldRollMessage(character.Name, stat.Name, result);
 
-            return RollResult.FromSuccess(EmbedHelper.BuildBasicEmbed($"{stat.Name} Roll", message, color));
+                if (result >= 95) color = new Color(210, 170, 0);
+                else if (result >= 0) color = new Color(60, 210, 0);
+
+                if (useEffects)
+                    message = Messages.MUSCLE_EMOJI + message;
+
+                return RollResult.PercentageRoll(message);
+            }
+            else
+            {
+                var result = GetRollResult(stats, stat);
+                var successes = result.Count(x => x >= SUCCESS_ROLL);
+
+                message = $"*{character.Name}* rolls `{stat.Name}`!\n" + GetRollMessage(character.Name, stat.Name, result);
+
+                if (successes > 7) color = new Color(210, 170, 0);
+                else if (successes > 0) color = new Color(60, 210, 0);
+
+                if (useEffects)
+                    return RollResult.DiceRoll(EmbedHelper.BuildBasicEmbed($"{Messages.MUSCLE_EMOJI}{stat.Name} Buffed Roll", message, color));
+
+                return RollResult.DiceRoll(EmbedHelper.BuildBasicEmbed($"{stat.Name} Roll", message, color));
+            }   
         }
 
         public RuntimeResult RollVsStatistic(Character character, Character character2, Statistic stat1, Statistic stat2, bool useEffects = false)
@@ -108,9 +151,9 @@ namespace FalloutRPG.Services.Roleplay
                 $"__{character2.Name}__: {GetRollMessage(character2.Name, stat2.Name, result2)}";
 
             if (useEffects)
-                return RollResult.FromSuccess(EmbedHelper.BuildBasicEmbed($"{Messages.MUSCLE_EMOJI}{stat1.Name} Vs. {stat2.Name} Buffed Roll", message));
+                return RollResult.DiceRoll(EmbedHelper.BuildBasicEmbed($"{Messages.MUSCLE_EMOJI}{stat1.Name} Vs. {stat2.Name} Buffed Roll", message));
 
-            return RollResult.FromSuccess(EmbedHelper.BuildBasicEmbed($"{stat1.Name} Vs. {stat2.Name} Roll", message));
+            return RollResult.DiceRoll(EmbedHelper.BuildBasicEmbed($"{stat1.Name} Vs. {stat2.Name} Roll", message));
         }
 
         public string GetRollMessage(string charName, string statName, int[] result)
@@ -135,6 +178,58 @@ namespace FalloutRPG.Services.Roleplay
             }
 
             return message.ToString();
+        }
+
+        public string GetOldRollMessage(string charName, string roll, double percent)
+        {
+            var result = new StringBuilder();
+
+            if (percent >= 0)
+            {
+                if (percent >= 95)
+                    result.Append($"**CRITICAL {roll.ToUpper()} SUCCESS!!!**");
+                else if (percent >= 80)
+                    result.Append($"__GREAT {roll.ToUpper()} SUCCESS__");
+                else if (percent >= 50)
+                    result.Append($"*Very good {roll} success*");
+                else if (percent >= 25)
+                    result.Append($"*Good {roll} success*");
+                else if (percent >= 10)
+                    result.Append($"*Above average {roll} success*");
+                else
+                    result.Append($"__***CLOSE CALL! {roll} success***__");
+
+                result.Append($" for {charName}: did **{percent}%** better than needed!");
+            }
+            else
+            {
+                if (percent <= -125)
+                    result.Append($"**CRITICAL {roll.ToUpper()} FAILURE!!!**");
+                else if (percent <= -80)
+                    result.Append($"__TERRIBLE {roll.ToUpper()} FAILURE__");
+                else if (percent <= -50)
+                    result.Append($"*Pretty bad {roll} failure*");
+                else if (percent <= -25)
+                    result.Append($"*Bad {roll} failure*");
+                else if (percent <= -10)
+                    result.Append($"*Above average {roll} failure*");
+                else
+                    result.Append($"__***Heartbreaking {roll} failure***__");
+
+                result.Append($" for {charName}: did **{percent * -1}%** worse than needed!");
+            }
+
+            return result.ToString();
+        }
+
+        static double CalculateProbability(int diceSides, int diceAmount)
+        {
+            double result = (diceSides - 1.0) / diceSides;
+
+            for (int i = 1; i < diceAmount; i++)
+                result *= (diceSides - 1.0) / diceSides;
+
+            return 1 - result;
         }
     }
 }
