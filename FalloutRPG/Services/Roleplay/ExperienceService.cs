@@ -113,7 +113,7 @@ namespace FalloutRPG.Services.Roleplay
 
         public int GetExperienceFromMessage(Character character, int messageLength)
         {
-            int expValue = messageLength / 100;
+            double expValue = Math.Round(Math.Max(1, messageLength / 100.0));
 
             if (intelligenceEnabled)
             {
@@ -123,7 +123,7 @@ namespace FalloutRPG.Services.Roleplay
                     expValue *= (int)(1 + (intStat.Value - intelligenceBaseline) * intelligenceMultiplier);
             }
 
-            return expValue;
+            return (int)Math.Round(expValue);
         }
 
         /// <summary>
