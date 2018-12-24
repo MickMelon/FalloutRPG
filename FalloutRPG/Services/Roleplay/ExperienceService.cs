@@ -15,16 +15,16 @@ namespace FalloutRPG.Services.Roleplay
     public class ExperienceService
     {
         private List<ulong> experienceEnabledChannels;
-        private Random _random;
+        private readonly Random _random;
 
         private bool intelligenceEnabled;
         private int intelligenceBaseline;
         private double intelligenceMultiplier;
 
+        private double messageLengthDivisor;
+        private int allowedConsecutiveMessages;
+
         private const int DEFAULT_EXP_GAIN = 100;
-        private const int DEFAULT_EXP_RANGE_FROM = 10;
-        private const int DEFAULT_EXP_RANGE_TO = 50;
-        private const int ALLOWED_CONSECUTIVE_MESSAGES = 3;
 
         private readonly CharacterService _charService;
         private readonly SkillsService _skillsService;
@@ -61,7 +61,7 @@ namespace FalloutRPG.Services.Roleplay
             if (character == null || context.Message.ToString().StartsWith("(")) return;
 
             // filter out users abusing monologues for exp
-            var cache = context.Channel.GetCachedMessages(ALLOWED_CONSECUTIVE_MESSAGES)
+            var cache = context.Channel.GetCachedMessages(allowedConsecutiveMessages)
                 .Where(x => !x.Author.Equals(context.Client.CurrentUser));
             if (cache.All(x => x.Author.Equals(context.User))) return;
 
@@ -100,20 +100,9 @@ namespace FalloutRPG.Services.Roleplay
             return levelUp;
         }
 
-        /// <summary>
-        /// Gets a random amount of experience to give
-        /// between a range of two numbers.
-        /// </summary>
-        public int GetRandomExperience(
-            int rangeFrom = DEFAULT_EXP_RANGE_FROM,
-            int rangeTo = DEFAULT_EXP_RANGE_TO)
-        {
-            return _random.Next(rangeFrom, rangeTo);
-        }
-
         public int GetExperienceFromMessage(Character character, int messageLength)
         {
-            double expValue = Math.Round(Math.Max(1, messageLength / 100.0));
+            double expValue = Math.Round(Math.Max(1, messageLength / messageLengthDivisor));
 
             if (intelligenceEnabled)
             {
@@ -200,6 +189,12 @@ namespace FalloutRPG.Services.Roleplay
                 
                 intelligenceMultiplier = _config
                     .GetValue<double>("roleplay:experience:intelligence-based-exp-gain:multiplier");
+
+                allowedConsecutiveMessages = _config
+                    .GetValue<int>("roleplay:experience:allowed-consecutive-messages");
+
+                messageLengthDivisor = _config
+                    .GetValue<double>("roleplay:experience:message-length-divisor");
             }
             catch (Exception)
             {

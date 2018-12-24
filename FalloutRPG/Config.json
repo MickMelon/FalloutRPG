@@ -14,6 +14,8 @@
 
     "experience": {
       "exp-channels": [ "" ],
+      "allowed-consecutive-messages": 100,
+      "message-length-divisor": 1,
       "intelligence-based-exp-gain": {
         "enabled": true,
         "baseline": 3,
