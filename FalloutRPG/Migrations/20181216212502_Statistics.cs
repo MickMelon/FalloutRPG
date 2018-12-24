@@ -6,35 +6,6 @@ namespace FalloutRPG.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "EffectSkill");
-
-            migrationBuilder.DropTable(
-                name: "EffectSpecial");
-
-            migrationBuilder.DropTable(
-                name: "NpcPresets");
-
-            migrationBuilder.DropTable(
-                name: "SkillSheet");
-
-            migrationBuilder.DropTable(
-                name: "Special");
-
-            migrationBuilder.CreateTable(
-                name: "NpcPresets",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: true),
-                    Enabled = table.Column<bool>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_NpcPresets", x => x.Id);
-                });
-
             // Drop and add new columns to Character
             migrationBuilder.Sql(@"
                 PRAGMA foreign_keys = 0;
@@ -90,6 +61,39 @@ namespace FalloutRPG.Migrations
                 DROP TABLE sqlitestudio_temp_table;
                 
                 PRAGMA foreign_keys = 1;");
+
+            migrationBuilder.Sql(@"UPDATE Characters SET ExperiencePoints = Experience;");
+            migrationBuilder.Sql(@"UPDATE Characters SET SpecialPoints = 0;");
+            migrationBuilder.Sql(@"UPDATE Characters SET TagPoints = 0;");
+
+            migrationBuilder.DropTable(
+                name: "EffectSkill");
+
+            migrationBuilder.DropTable(
+                name: "EffectSpecial");
+
+            migrationBuilder.DropTable(
+                name: "NpcPresets");
+
+            migrationBuilder.DropTable(
+                name: "SkillSheet");
+
+            migrationBuilder.DropTable(
+                name: "Special");
+
+            migrationBuilder.CreateTable(
+                name: "NpcPresets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(nullable: true),
+                    Enabled = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NpcPresets", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Statistic",
