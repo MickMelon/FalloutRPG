@@ -103,7 +103,7 @@ namespace FalloutRPG.Addons
             }
             else
             {
-                return Task.FromResult(PreconditionResult.FromError("You are currently in Timeout."));
+                return Task.FromResult(PreconditionResult.FromError($"The command `${command.Aliases[0]}` is currently on cooldown."));
             }
         }
 
