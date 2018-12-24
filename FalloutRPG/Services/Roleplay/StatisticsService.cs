@@ -49,6 +49,9 @@ namespace FalloutRPG.Services.Roleplay
         public bool NameExists(string name) =>
             Statistics.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
+        public bool NameOrAliasExists(string name) =>
+            Statistics.Any(x => x.AliasesArray.Contains(name, StringComparer.OrdinalIgnoreCase));
+
         /// <summary>
         /// Returns the value of the specified special.
         /// </summary>

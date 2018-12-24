@@ -32,6 +32,7 @@
         public const string SKILLS_REMOVED = SUCCESS_EMOJI + "Skill successfully removed.";
         public const string SPECIAL_ADDED = SUCCESS_EMOJI + "Special successfully added.";
         public const string SPECIAL_REMOVED = SUCCESS_EMOJI + "Special successfully removed.";
+        public const string STAT_RENAMED = SUCCESS_EMOJI + "Statisitc renamed successfully.";
 
         // Money Messages
         public const string PAY_SUCCESS = SUCCESS_EMOJI + "You gave {0} {1} caps. {2}";

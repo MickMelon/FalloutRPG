@@ -100,9 +100,24 @@ namespace FalloutRPG.Modules
             return GenericResult.FromSuccess(Messages.SKILLS_REMOVED);
         }
 
+        [Command("renamestat")]
+        public async Task<RuntimeResult> RenameStatAsync(Statistic stat, string newName)
+        {
+            if (_statService.NameExists(newName))
+                return StatisticResult.StatisticAlreadyExists();
+
+            stat.Name = newName;
+            await _statService.SaveStatisticAsync(stat);
+
+            return GenericResult.FromSuccess(Messages.SKILLS_REMOVED);
+        }
+
         [Command("addalias")]
         public async Task<RuntimeResult> AddAliasAsync(Statistic stat, string alias)
         {
+            if (_statService.NameOrAliasExists(alias))
+                return StatisticResult.StatisticAlreadyExists();
+
             stat.Aliases += alias + "/";
 
             await _statService.SaveStatisticAsync(stat);
@@ -113,7 +128,7 @@ namespace FalloutRPG.Modules
         [Command("clearaliases")]
         public async Task<RuntimeResult> ClearAliasesAsync(Statistic stat, string alias)
         {
-            stat.Aliases = stat.Name;
+            stat.Aliases = stat.Name + "/";
 
             await _statService.SaveStatisticAsync(stat);
 
