@@ -69,11 +69,9 @@ namespace FalloutRPG.Services
             if (result is RuntimeResult rr && !String.IsNullOrEmpty(rr.Reason))
                 await context.Channel.SendMessageAsync(message);
 
-            if (!string.IsNullOrEmpty(result?.ErrorReason))
-            {
+            else if (!string.IsNullOrEmpty(result?.ErrorReason))
                 await context.Channel.SendMessageAsync(
                     $"{Messages.FAILURE_EMOJI} {result.ErrorReason} {context.User.Mention}");
-            }
         }
 
         /// <summary>
