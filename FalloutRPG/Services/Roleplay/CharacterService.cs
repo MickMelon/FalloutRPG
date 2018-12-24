@@ -133,6 +133,12 @@ namespace FalloutRPG.Services.Roleplay
         public async Task ResetCharacterAsync(Character character)
         {
             character.Statistics = new List<StatisticValue>();
+            _statsService.InitializeStatistics(character.Statistics);
+
+            character.SpecialPoints = SpecialService.STARTING_SPECIAL_POINTS;
+            character.TagPoints = SkillsService.TAG_POINTS;
+            character.ExperiencePoints = character.Experience;
+
             character.IsReset = true;
             await SaveCharacterAsync(character);
         }

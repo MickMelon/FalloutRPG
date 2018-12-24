@@ -72,24 +72,28 @@ namespace FalloutRPG.Services.Roleplay
 
         /// <summary>
         /// Sets the value of the specified character's given special.
+        /// If the stat does not exist in the Statistics list, the list is initialized first.
         /// </summary>
         /// <returns>Returns false if special is null.</returns>
-        public bool SetStatistic(IList<StatisticValue> statSheet, Statistic stat, int newValue)
+        public void SetStatistic(IList<StatisticValue> statSheet, Statistic stat, int newValue)
         {
             var match = statSheet.FirstOrDefault(x => x.Statistic.Equals(stat));
 
             if (match == null)
-                return false;
+            {
+                InitializeStatistics(statSheet);
+
+                match = statSheet.FirstOrDefault(x => x.Statistic.Equals(stat));
+            }
 
             match.Value = newValue;
-            return true;
         }
 
         /// <summary>
         /// Sets the value of the specified character's given special.
+        /// If the stat does not exist in the character's Statistics list, the list is initialized first.
         /// </summary>
-        /// <returns>Returns false if character or special are null.</returns>
-        public bool SetStatistic(Character character, Statistic stat, int newValue) =>
+        public void SetStatistic(Character character, Statistic stat, int newValue) =>
             SetStatistic(character?.Statistics, stat, newValue);
 
         /// <summary>

@@ -145,25 +145,6 @@ namespace FalloutRPG.Modules.Roleplay
 
                 return _skillsService.UpgradeSkill(character, skill);
             }
-
-            [Command("claim")]
-            public async Task<RuntimeResult> ClaimSkillPointsAsync()
-            {
-                var userInfo = Context.User;
-                var character = await _charService.GetCharacterAsync(userInfo.Id);
-
-                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
-                if (!character.IsReset) return GenericResult.FromError(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
-                if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
-
-                _statsService.InitializeStatistics(character.Statistics);
-                character.TagPoints = SkillsService.TAG_POINTS;
-                character.ExperiencePoints = character.Experience;
-                character.IsReset = false;
-                await _charService.SaveCharacterAsync(character);
-
-                return GenericResult.FromSuccess(string.Format(Messages.SKILLS_POINTS_CLAIMED, character.ExperiencePoints, userInfo.Mention));
-            }
         }
     }
 }
