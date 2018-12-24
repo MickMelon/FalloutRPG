@@ -92,9 +92,9 @@ namespace FalloutRPG.Services.Roleplay
                 foreach (var entry in specEffects)
                 {
                     if (entry.Value > 0)
-                        sb.Append($"{entry.Statistic.ToString()}: +{entry.Value} ");
+                        sb.Append($"{entry.Statistic.Name}: +{entry.Value} ");
                     else
-                        sb.Append($"{entry.Statistic.ToString()}: {entry.Value} ");
+                        sb.Append($"{entry.Statistic.Name}: {entry.Value} ");
                 }
             }
 
@@ -106,9 +106,9 @@ namespace FalloutRPG.Services.Roleplay
                 foreach (var entry in skillEffects)
                 {
                     if (entry.Value > 0)
-                        sb.Append($"{entry.Statistic.ToString()}: +{entry.Value} ");
+                        sb.Append($"{entry.Statistic.Name}: +{entry.Value} ");
                     else
-                        sb.Append($"{entry.Statistic.ToString()}: {entry.Value} ");
+                        sb.Append($"{entry.Statistic.Name}: {entry.Value} ");
                 }
             }
 
