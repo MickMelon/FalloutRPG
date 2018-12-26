@@ -63,13 +63,14 @@
         // Stats Error Messages
         public const string ERR_SKILLS_NOT_FOUND = FAILURE_EMOJI + "Unable to find character skills. {0}";
         public const string ERR_SKILLS_ALREADY_SET = FAILURE_EMOJI + "Character skills are already set. {0}";
-        public const string ERR_SKILLS_NOT_ENOUGH_POINTS = "Character does not have enough skill points. Price: {0}XP.";
         public const string ERR_SKILLS_POINTS_GOES_OVER_MAX = "Unable to add skill points because it will take the skill above the max level. {0}";
         public const string ERR_SPECIAL_ALREADY_SET = FAILURE_EMOJI + "Character SPECIAL is already set. {0}";
         public const string ERR_SKILLS_NONE_TO_CLAIM = FAILURE_EMOJI + "You don't have any skill points that you can claim. {0}";
         public const string ERR_SKILLS_POINTS_BELOW_ONE = FAILURE_EMOJI + "You cannot put less than one point in a skill. {0}";
         public const string ERR_SKILLS_TOO_LOW = FAILURE_EMOJI + "The skill's level was too low to use. {0}";
         public const string ERR_STAT_ALREADY_EXISTS = FAILURE_EMOJI + "A statistic with the given name already exists. {0}";
+        public const string ERR_STAT_NOT_ENOUGH_POINTS = "Character does not have enough experience points. Price: {0}XP.";
+        public const string ERR_STAT_PRICE_NOT_SET = "Upgrade price not set.";
 
         // Gambling Messages
         public const string BET_PLACED = SUCCESS_EMOJI + "{0}, bet placed!";

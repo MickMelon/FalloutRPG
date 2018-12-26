@@ -24,22 +24,24 @@ namespace FalloutRPG.Services.Roleplay
         private double messageLengthDivisor;
         private int allowedConsecutiveMessages;
 
+        private bool priceIncreaseEnabled;
+        private double priceIncreaseMultiplierAddition;
+        private int priceIncreaseStartingLevel;
+        private int priceIncreaseEveryXLevels;
+
         private const int DEFAULT_EXP_GAIN = 100;
 
         private readonly CharacterService _charService;
-        private readonly SkillsService _skillsService;
         private readonly DiscordSocketClient _client;
         private readonly IConfiguration _config;
 
         public ExperienceService(
             CharacterService charService,
-            SkillsService skillsService,
             DiscordSocketClient client,
             IConfiguration config,
             Random random)
         {
             _charService = charService;
-            _skillsService = skillsService;
             _client = client;
             _config = config;
             
@@ -167,6 +169,21 @@ namespace FalloutRPG.Services.Roleplay
             return false;
         }
 
+        public double GetPriceMultiplier(int level)
+        {
+            double multiplier = 1.0;
+
+            if (priceIncreaseEnabled)
+            {
+                level -= priceIncreaseStartingLevel;
+
+                for (int i = 0; i <= level; i += priceIncreaseEveryXLevels)
+                    multiplier += priceIncreaseMultiplierAddition;
+            }
+
+            return multiplier;
+        }
+
         /// <summary>
         /// Loads the experience enabled channels from the
         /// configuration file.
@@ -195,6 +212,18 @@ namespace FalloutRPG.Services.Roleplay
 
                 messageLengthDivisor = _config
                     .GetValue<double>("roleplay:experience:message-length-divisor");
+
+                priceIncreaseEnabled = _config
+                    .GetValue<bool>("roleplay:experience:price-increase:enabled");
+
+                priceIncreaseStartingLevel = _config
+                    .GetValue<int>("roleplay:experience:price-increase:starting-level");
+
+                priceIncreaseEveryXLevels = _config
+                    .GetValue<int>("roleplay:experience:price-increase:increase-every");
+
+                priceIncreaseMultiplierAddition = _config
+                    .GetValue<double>("roleplay:experience:price-increase:multiplier-addition");
             }
             catch (Exception)
             {

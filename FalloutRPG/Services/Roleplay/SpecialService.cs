@@ -24,6 +24,7 @@ namespace FalloutRPG.Services.Roleplay
         public static int SPECIAL_MIN = 1;
 
         private readonly CharacterService _charService;
+        private readonly ExperienceService _expService;
         private readonly StatisticsService _statService;
         private readonly IConfiguration _config;
 
@@ -31,10 +32,12 @@ namespace FalloutRPG.Services.Roleplay
         private IReadOnlyDictionary<int, int> _specialPrices;
 
         public SpecialService(CharacterService charService,
-            IConfiguration config,
-            StatisticsService statService)
+            ExperienceService expService,
+            StatisticsService statService,
+            IConfiguration config)
         {
             _charService = charService;
+            _expService = expService;
             _statService = statService;
             _config = config;
 
@@ -103,7 +106,10 @@ namespace FalloutRPG.Services.Roleplay
             int price = CalculatePrice(_statService.GetStatistic(character, special), character.Level);
 
             if (price > character.ExperiencePoints)
-                return GenericResult.FromError(String.Format(Messages.ERR_SKILLS_NOT_ENOUGH_POINTS, price));
+                return GenericResult.FromError(String.Format(Messages.ERR_STAT_NOT_ENOUGH_POINTS, price));
+
+            if (price < 0)
+                return GenericResult.FromError(Messages.ERR_STAT_PRICE_NOT_SET);
 
             _statService.SetStatistic(character, special, specialVal + 1);
             character.ExperiencePoints -= price;
@@ -113,13 +119,14 @@ namespace FalloutRPG.Services.Roleplay
 
         private int CalculatePrice(int skillLevel, int charLevel)
         {
-            double multiplier = 1.0;
+            double multiplier = _expService.GetPriceMultiplier(charLevel);
 
-            if (charLevel >= 10)
-                for (int i = 0; i < (charLevel - 5) / 5; i++)
-                    multiplier += .5;
+            if (_specialPrices.TryGetValue(skillLevel, out int basePrice))
+            {
+                return (int)(_specialPrices[skillLevel] * multiplier);
+            }
 
-            return (int)(_specialPrices[skillLevel] * multiplier);
+            return -1;
         }
 
         private bool IsSpecialInRange(IList<StatisticValue> stats, int points)

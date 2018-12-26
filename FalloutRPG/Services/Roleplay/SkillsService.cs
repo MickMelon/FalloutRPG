@@ -20,6 +20,7 @@ namespace FalloutRPG.Services.Roleplay
         public static int MAX_SKILL_LEVEL = 12;
 
         private readonly CharacterService _charService;
+        private readonly ExperienceService _expService;
         private readonly SpecialService _specService;
         private readonly StatisticsService _statService;
 
@@ -29,12 +30,14 @@ namespace FalloutRPG.Services.Roleplay
         private IReadOnlyDictionary<int, int> _skillPrices;
 
         public SkillsService(
-            CharacterService charService, 
+            CharacterService charService,
+            ExperienceService expService,
             SpecialService specService,
             StatisticsService statService,
             IConfiguration config)
         {
             _charService = charService;
+            _expService = expService;
             _specService = specService;
             _statService = statService;
 
@@ -143,7 +146,10 @@ namespace FalloutRPG.Services.Roleplay
             int price = CalculatePrice(_statService.GetStatistic(character, skill), character.Level);
 
             if (price > character.ExperiencePoints)
-                return GenericResult.FromError(String.Format(Messages.ERR_SKILLS_NOT_ENOUGH_POINTS, price));
+                return GenericResult.FromError(String.Format(Messages.ERR_STAT_NOT_ENOUGH_POINTS, price));
+
+            if (price < 0)
+                return GenericResult.FromError(Messages.ERR_STAT_PRICE_NOT_SET);
 
             _statService.SetStatistic(character, skill, skillVal + 1);
             character.ExperiencePoints -= price;
@@ -161,13 +167,14 @@ namespace FalloutRPG.Services.Roleplay
 
         private int CalculatePrice(int skillLevel, int charLevel)
         {
-            double multiplier = 1.0;
+            double multiplier = _expService.GetPriceMultiplier(charLevel);
 
-            if (charLevel >= 10)
-                for (int i = 0; i < (charLevel - 5) / 5; i++)
-                    multiplier += .5;
+            if (_skillPrices.TryGetValue(skillLevel, out int basePrice))
+            {
+                return (int)(_skillPrices[skillLevel] * multiplier);
+            }
 
-            return (int)(_skillPrices[skillLevel] * multiplier);
+            return -1;
         }
 
         /// <summary>

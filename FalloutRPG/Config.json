@@ -15,8 +15,17 @@
 
     "experience": {
       "exp-channels": [ "" ],
+
       "allowed-consecutive-messages": 100,
       "message-length-divisor": 1,
+
+      "price-increase": {
+        "enabled": true,
+        "starting-level": 10,
+        "increase-every": 5,
+        "multiplier-addition": 0.5
+      },
+
       "intelligence-based-exp-gain": {
         "enabled": true,
         "baseline": 3,
