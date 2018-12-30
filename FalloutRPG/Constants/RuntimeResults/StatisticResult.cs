@@ -9,6 +9,12 @@ namespace FalloutRPG.Constants
         {
         }
 
+        public static StatisticResult NotUsingNewVegasRules() =>
+            new StatisticResult(CommandError.Unsuccessful, String.Format(Messages.ERR_STAT_NOT_USING_NEW_VEGAS_RULES));
+
+        public static StatisticResult NotUsingOldProgression() =>
+            new StatisticResult(CommandError.Unsuccessful, String.Format(Messages.ERR_STAT_NOT_USING_OLD_PROGRESSION));
+
         public static StatisticResult SkillNotHighEnough(string mention = "") =>
             new StatisticResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_SKILLS_TOO_LOW, mention));
 
