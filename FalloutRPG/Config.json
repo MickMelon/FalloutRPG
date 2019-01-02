@@ -9,18 +9,24 @@
     "maximum-bet": 1000
   },
   "roleplay": {
-    "skill-max": 12,
+    "skill-max": 200,
     "special-max": 10,
     "use-percentage": false,
 
     "experience": {
       "exp-channels": [ "" ],
 
-      "allowed-consecutive-messages": 100,
-      "message-length-divisor": 1,
+      "allowed-consecutive-messages": 3,
+      "message-length-divisor": 30,
+
+      "old-progression-system": {
+        "enabled": true,
+        "skill-points-on-level-up": 10,
+        "use-new-vegas-rules": true
+      },
 
       "price-increase": {
-        "enabled": true,
+        "enabled": false,
         "starting-level": 10,
         "increase-every": 5,
         "multiplier-addition": 0.5
@@ -28,46 +34,24 @@
 
       "intelligence-based-exp-gain": {
         "enabled": true,
-        "baseline": 3,
+        "baseline": 5,
         "multiplier": 0.01
       }
     },
 
     "chargen": {
-      "skill-points": 36,
-      "skill-level-limit": 6,
-      "skills-at-limit": 2,
+      "skill-points": 0,
+      "skill-level-limit": 0,
+      "skills-at-limit": 0,
 
-      "special-points": 29,
-      "special-level-limit": 8,
-      "specials-at-limit": 2
+      "special-points": 40,
+      "special-level-limit": 10,
+      "specials-at-limit": 7
     },
 
     "skill-prices": {
-      "1": 150,
-      "2": 200,
-      "3": 250,
-      "4": 325,
-      "5": 450,
-      "6": 575,
-      "7": 700,
-      "8": 850,
-      "9": 1050,
-      "10": 1200,
-      "11": 1350,
-      "12": 1500
     },
     "special-prices": {
-      "1": 400,
-      "2": 450,
-      "3": 600,
-      "4": 750,
-      "5": 850,
-      "6": 1050,
-      "7": 1200,
-      "8": 1350,
-      "9": 1500,
-      "10": 2000
     }
   }
 }
