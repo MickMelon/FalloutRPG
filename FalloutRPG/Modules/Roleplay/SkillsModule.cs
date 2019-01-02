@@ -24,6 +24,7 @@ namespace FalloutRPG.Modules.Roleplay
         {
             private readonly CharacterService _charService;
             private readonly EffectsService _effectsService;
+            private readonly ExperienceService _expService;
             private readonly SkillsService _skillsService;
             private readonly SpecialService _specService;
             private readonly StatisticsService _statsService;
@@ -32,6 +33,7 @@ namespace FalloutRPG.Modules.Roleplay
             public CharacterSkillsModule(
                 CharacterService charService,
                 EffectsService effectsService,
+                ExperienceService expService,
                 SkillsService skillsService,
                 SpecialService specService,
                 StatisticsService statsService,
@@ -39,6 +41,7 @@ namespace FalloutRPG.Modules.Roleplay
             {
                 _charService = charService;
                 _effectsService = effectsService;
+                _expService = expService;
                 _skillsService = skillsService;
                 _specService = specService;
                 _statsService = statsService;
@@ -77,12 +80,12 @@ namespace FalloutRPG.Modules.Roleplay
 
                 foreach (var special in SpecialService.Specials.OrderBy(x => x.Id))
                 {
-                    message.Append($"**{special.Name}:**\n");
+                    message.Append($"__**{special.Name}:**__\n");
                     foreach (var skill in stats.Where(x => x.Statistic is Skill sk && sk.Special.Equals(special)))
                     {
                         if (skill.Value == 0) continue;
 
-                        message.Append($"{skill.Statistic.Name}: {skill.Value}\n");
+                        message.Append($"**{skill.Statistic.Name}:** {skill.Value}\n");
                     }
 
                     message.Append($"\n");
@@ -112,15 +115,40 @@ namespace FalloutRPG.Modules.Roleplay
                 await _helpService.ShowSkillsHelpAsync(Context);
             }
 
+            [Command("tag")]
+            public async Task<RuntimeResult> TagSkillsAsync(Skill tag1, Skill tag2, Skill tag3)
+            {
+                if (!_expService.UseNewVegasRules) return StatisticResult.NotUsingNewVegasRules();
+
+                var userInfo = Context.User;
+                var character = await _charService.GetCharacterAsync(userInfo.Id);
+
+                if (character == null) return CharacterResult.CharacterNotFound();
+
+                if (_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsAlreadyTagged();
+
+                try
+                {
+                    await _skillsService.TagSkills(character, tag1, tag2, tag3);
+                    return GenericResult.FromSuccess(string.Format(Messages.SKILLS_SET_SUCCESS, userInfo.Mention));
+                }
+                catch (Exception e)
+                {
+                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
+                }
+            }
+
             [Command("set")]
             [Alias("tag")]
             public async Task<RuntimeResult> SetSkillsAsync(Skill tag, int points)
             {
+                if (ExperienceService.UseOldProgression) return StatisticResult.UsingOldProgression();
+
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
                 if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
-                if (_skillsService.AreSkillsTagged(character)) return StatisticResult.SkillsAlreadyTagged(Context.User.Mention);
+                if (_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsAlreadyTagged(Context.User.Mention);
 
                 try
                 {
@@ -137,6 +165,8 @@ namespace FalloutRPG.Modules.Roleplay
             [Alias("put", "upgrade")]
             public async Task<RuntimeResult> SpendSkillPointsAsync(Skill skill)
             {
+                if (ExperienceService.UseOldProgression) return StatisticResult.UsingOldProgression();
+
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
@@ -144,6 +174,66 @@ namespace FalloutRPG.Modules.Roleplay
                 if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
 
                 return _skillsService.UpgradeSkill(character, skill);
+            }
+
+            [Command("spend")]
+            [Alias("put", "upgrade")]
+            public async Task<RuntimeResult> SpendSkillPointsAsync(Skill skill, int points)
+            {
+                if (!ExperienceService.UseOldProgression) return StatisticResult.NotUsingOldProgression();
+
+                var userInfo = Context.User;
+                var character = await _charService.GetCharacterAsync(userInfo.Id);
+
+                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+
+                if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
+
+                if (points < 1) return GenericResult.FromError(String.Format(Messages.ERR_SKILLS_POINTS_BELOW_ONE, userInfo.Mention));
+
+                if (points > character.ExperiencePoints)
+                    return GenericResult.FromError(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
+
+                var skillVal = _statsService.GetStatistic(character, skill);
+
+                if ((skillVal + points) > SkillsService.MAX_SKILL_LEVEL)
+                    return GenericResult.FromError(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
+
+                _statsService.SetStatistic(character, skill, skillVal + points);
+                character.ExperiencePoints -= points;
+
+                await _charService.SaveCharacterAsync(character);
+
+                return GenericResult.FromSuccess(Messages.SKILLS_SPEND_POINTS_SUCCESS);
+            }
+
+            [Command("claim")]
+            public async Task<RuntimeResult> ClaimSkillPointsAsync()
+            {
+                if (!ExperienceService.UseOldProgression) return StatisticResult.NotUsingOldProgression();
+
+                var userInfo = Context.User;
+                var character = await _charService.GetCharacterAsync(userInfo.Id);
+
+                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+                if (!character.IsReset) return GenericResult.FromError(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
+                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet();
+
+                _statsService.InitializeStatistics(character.Statistics);
+
+                if (_expService.UseNewVegasRules)
+                    _skillsService.InitializeSkills(character);
+
+                character.ExperiencePoints = 0;
+                var intelligence = _statsService.GetStatistic(character, Globals.StatisticFlag.Intelligence);
+
+                for (int level = 1; level <= character.Level; level++)
+                    character.ExperiencePoints += _expService.CalculateSkillPoints(level, intelligence);
+
+                character.IsReset = false;
+                await _charService.SaveCharacterAsync(character);
+
+                return GenericResult.FromSuccess(string.Format(Messages.SKILLS_POINTS_CLAIMED, character.ExperiencePoints, userInfo.Mention));
             }
         }
     }

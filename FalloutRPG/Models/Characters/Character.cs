@@ -1,5 +1,6 @@
 ﻿using FalloutRPG.Constants;
 using FalloutRPG.Models.Effects;
+using FalloutRPG.Services.Roleplay;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,6 +24,11 @@ namespace FalloutRPG.Models
         {
             get
             {
+                if (ExperienceService.UseOldProgression)
+                {
+                    if (Experience == 0) return 1;
+                    return Convert.ToInt32((Math.Sqrt(Experience + 125) / (10 * Math.Sqrt(5))));
+                }
                 return Experience / 1000 + 1;
             }
 

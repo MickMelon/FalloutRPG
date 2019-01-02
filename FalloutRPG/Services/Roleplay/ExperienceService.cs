@@ -29,19 +29,27 @@ namespace FalloutRPG.Services.Roleplay
         private int priceIncreaseStartingLevel;
         private int priceIncreaseEveryXLevels;
 
+        public static bool UseOldProgression { get; private set; } = false;
+        public int DefaultSkillPoints { get; private set; } = 10;
+        public bool UseNewVegasRules { get; private set; } = false;
+
         private const int DEFAULT_EXP_GAIN = 100;
 
         private readonly CharacterService _charService;
+        private readonly StatisticsService _statService;
         private readonly DiscordSocketClient _client;
         private readonly IConfiguration _config;
 
         public ExperienceService(
             CharacterService charService,
+            StatisticsService statService,
             DiscordSocketClient client,
             IConfiguration config,
             Random random)
         {
             _charService = charService;
+            _statService = statService;
+
             _client = client;
             _config = config;
             
@@ -87,7 +95,9 @@ namespace FalloutRPG.Services.Roleplay
             var initialLevel = character.Level;
 
             character.Experience += experience;
-            character.ExperiencePoints += experience;
+            if (!UseOldProgression)
+                character.ExperiencePoints += experience;
+
             await _charService.SaveCharacterAsync(character);
 
             var levelUp = false;
@@ -108,10 +118,10 @@ namespace FalloutRPG.Services.Roleplay
 
             if (intelligenceEnabled)
             {
-                var intStat = character.Statistics.Where(x => x.Statistic.StatisticFlag == Globals.StatisticFlag.Intelligence).FirstOrDefault();
+                int intStat = _statService.GetStatistic(character, Globals.StatisticFlag.Intelligence);
 
-                if (intStat != null)
-                    expValue *= (int)(1 + (intStat.Value - intelligenceBaseline) * intelligenceMultiplier);
+                if (intStat > 0)
+                    expValue *= (int)(1 + (intStat - intelligenceBaseline) * intelligenceMultiplier);
             }
 
             return (int)Math.Round(expValue);
@@ -184,6 +194,27 @@ namespace FalloutRPG.Services.Roleplay
             return multiplier;
         }
 
+        public int CalculateSkillPoints(int level, int intelligence)
+        {
+            int extraPoints = 0;
+
+            if (UseNewVegasRules)
+            {
+                extraPoints = intelligence / 2;
+
+                // When leveling up, the character distributes 10 + half Intelligence skill points.
+                // (For odd intelligence scores, the "extra" skill point is given on even levels,
+                // so a character with 1 intelligence will gain 11 skill points at level 2, then 10 at level 3, etc.)
+                // http://fallout.wikia.com/wiki/Fallout:_New_Vegas_skills - 12/26/2018
+                if (intelligence % 2 != 0 && level % 2 == 0)
+                {
+                    extraPoints += 1;
+                }
+            }
+
+            return DefaultSkillPoints + extraPoints;
+        }
+
         /// <summary>
         /// Loads the experience enabled channels from the
         /// configuration file.
@@ -197,6 +228,15 @@ namespace FalloutRPG.Services.Roleplay
                     .GetChildren()
                     .Select(x => UInt64.Parse(x.Value))
                     .ToList();
+
+                UseOldProgression = _config
+                    .GetValue<bool>("roleplay:experience:old-progression-system:enabled");
+
+                DefaultSkillPoints = _config
+                    .GetValue<int>("roleplay:experience:old-progression-system:skill-points-on-level-up");
+
+                UseNewVegasRules = _config
+                    .GetValue<bool>("roleplay:experience:old-progression-system:use-new-vegas-rules");
 
                 intelligenceEnabled = _config
                     .GetValue<bool>("roleplay:experience:intelligence-based-exp-gain:enabled");
@@ -248,6 +288,18 @@ namespace FalloutRPG.Services.Roleplay
         {
             if (character == null) throw new ArgumentNullException("character");
             var user = _client.GetUser(character.DiscordId);
+
+            if (UseOldProgression)
+            {
+                int originalLevel = character.Level - times;
+
+                var intelligence = _statService.GetStatistic(character, Globals.StatisticFlag.Intelligence);
+
+                for (int i = 1; i <= times; i++)
+                    character.ExperiencePoints += CalculateSkillPoints(originalLevel + i, intelligence);
+
+                await _charService.SaveCharacterAsync(character);
+            }
 
             await user.SendMessageAsync(string.Format(Messages.SKILLS_LEVEL_UP, user.Mention, character.ExperiencePoints));
         }

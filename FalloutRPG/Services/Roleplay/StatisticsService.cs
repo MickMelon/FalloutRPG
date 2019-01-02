@@ -55,7 +55,7 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Returns the value of the specified special.
         /// </summary>
-        /// <returns>Returns 0 if special values are null.</returns>
+        /// <returns>Returns 0 if stat values are null.</returns>
         public int GetStatistic(IList<StatisticValue> statSheet, Statistic stat)
         {
             var match = statSheet.FirstOrDefault(x => x.Statistic.Equals(stat));
@@ -67,11 +67,32 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
-        /// Returns the value of the specified character's given special.
+        /// Returns the value of the specified character's statistic matching the given Statistic Flag.
         /// </summary>
-        /// <returns>Returns 0 if character or special values are null.</returns>
+        /// <returns>Returns 0 if a matching statistic flag is not found.</returns>
+        public int GetStatistic(IList<StatisticValue> statSheet, Globals.StatisticFlag flag)
+        {
+            var match = statSheet.FirstOrDefault(x => x.Statistic.StatisticFlag.Equals(flag));
+
+            if (match == null)
+                return 0;
+
+            return match.Value;
+        }
+
+        /// <summary>
+        /// Returns the value of the specified character's given stat.
+        /// </summary>
+        /// <returns>Returns 0 if character or stat values are null.</returns>
         public int GetStatistic(Character character, Statistic stat) =>
             GetStatistic(character?.Statistics, stat);
+
+        /// <summary>
+        /// Returns the value of the specified character's statistic matching the given Statistic Flag.
+        /// </summary>
+        /// <returns>Returns 0 if a matching statistic flag is not found.</returns>
+        public int GetStatistic(Character character, Globals.StatisticFlag flag) =>
+            GetStatistic(character?.Statistics, flag);
 
         /// <summary>
         /// Sets the value of the specified character's given special.

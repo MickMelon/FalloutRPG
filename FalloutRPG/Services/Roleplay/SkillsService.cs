@@ -43,10 +43,10 @@ namespace FalloutRPG.Services.Roleplay
 
             _config = config;
 
-            LoadSkilLConfig();
+            LoadSkillConfig();
         }
 
-        void LoadSkilLConfig()
+        void LoadSkillConfig()
         {
             try
             {
@@ -97,6 +97,26 @@ namespace FalloutRPG.Services.Roleplay
             return character.TagPoints;
         }
 
+        public async Task TagSkills(Character character, Skill tag1, Skill tag2, Skill tag3)
+        {
+            if (character == null) throw new ArgumentNullException("character");
+
+            if (!_specService.IsSpecialSet(character))
+                throw new Exception(Exceptions.CHAR_SPECIAL_NOT_FOUND);
+
+            if (!AreUniqueTags(tag1, tag2, tag3))
+                throw new ArgumentException(Exceptions.CHAR_TAGS_NOT_UNIQUE);
+
+            _statService.InitializeStatistics(character.Statistics);
+            InitializeSkills(character);
+
+            _statService.SetStatistic(character, tag1, _statService.GetStatistic(character, tag1) + 15);
+            _statService.SetStatistic(character, tag2, _statService.GetStatistic(character, tag2) + 15);
+            _statService.SetStatistic(character, tag3, _statService.GetStatistic(character, tag3) + 15);
+
+            await _charService.SaveCharacterAsync(character);
+        }
+
         private bool IsTagInRange(IList<StatisticValue> skills, int points)
         {
             if (points < TAG_MIN || points > TAG_MAX)
@@ -115,10 +135,19 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Checks if character's skills are tagged.
         /// </summary>
-        public bool AreSkillsTagged(IList<StatisticValue> skillSheet)
+        public bool AreSkillsSet(IList<StatisticValue> skillSheet)
         {
             if (skillSheet == null)
                 return false;
+
+            if (_expService.UseNewVegasRules)
+            {
+                if (skillSheet.Count <= 0) return false;
+                // This works because all SPECIAL and Skills should be set by now
+                return skillSheet.All(x => x.Value > 0);
+            }
+
+            // Character has used all tag points
             if (skillSheet.Where(x => x.Statistic is Skill).Sum(x => x.Value) >= TAG_POINTS)
                 return true;
 
@@ -128,8 +157,8 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Checks if character's skills are tagged.
         /// </summary>
-        public bool AreSkillsTagged(Character character) =>
-            AreSkillsTagged(character?.Skills);
+        public bool AreSkillsSet(Character character) =>
+            AreSkillsSet(character?.Skills);
 
         /// <summary>
         /// Puts one extra point in a specified skill.
@@ -158,6 +187,14 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
+        /// Checks if all the tags are unique.
+        /// </summary>
+        private bool AreUniqueTags(Skill tag1, Skill tag2, Skill tag3)
+        {
+            return !(tag1.Equals(tag2) || tag1.Equals(tag3) || tag2.Equals(tag3));
+        }
+
+        /// <summary>
         /// Checks if the special name is valid.
         /// </summary>
         private bool IsValidSkillName(string skill)
@@ -177,16 +214,15 @@ namespace FalloutRPG.Services.Roleplay
             return -1;
         }
 
-        /// <summary>
-        /// Checks if a character's special has been set.
-        /// </summary>
-        public bool AreSkillsSet(Character character)
+        public void InitializeSkills(Character character)
         {
-            if (character == null || character.Statistics == null) return false;
-            if (character.TagPoints > 0) return false;
-            if (character.Skills.Sum(x => x.Value) < TAG_POINTS) return false;
+            foreach (var skill in character.Skills)
+            {
+                var specialValue = _statService.GetStatistic(character, ((Skill)skill.Statistic).Special);
+                var luck = _statService.GetStatistic(character, Globals.StatisticFlag.Luck);
 
-            return true;
+                skill.Value = 2 + (2 * specialValue) + (luck / 2);
+            }
         }
     }
 }

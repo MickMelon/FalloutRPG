@@ -23,8 +23,8 @@
 
         // Stats Messages
         public const string EXP_LEVEL_UP = "Congratulations {0}, you have just advanced to level {1}!";
-        public const string SKILLS_LEVEL_UP = "Hey, {0}! You have {1} unspent skill points. Spend them with *!char skills spend [skill] [points]*";
-        public const string SKILLS_SPEND_POINTS_SUCCESS = SUCCESS_EMOJI + "Skill points added successfully. {0}";
+        public const string SKILLS_LEVEL_UP = "Hey, {0}! You have {1} unspent skill points. Spend them with *$char skills spend [skill] [points]*";
+        public const string SKILLS_SPEND_POINTS_SUCCESS = SUCCESS_EMOJI + "Skill points added successfully.";
         public const string SKILLS_SET_SUCCESS = SUCCESS_EMOJI + "Character skills set successfully. {0}";
         public const string SPECIAL_SET_SUCCESS = SUCCESS_EMOJI + "Character SPECIAL set successfully. {0}";
         public const string SKILLS_POINTS_CLAIMED = SUCCESS_EMOJI + "{0} skill points were successfully claimed! {1}";
@@ -71,6 +71,9 @@
         public const string ERR_STAT_ALREADY_EXISTS = FAILURE_EMOJI + "A statistic with the given name already exists. {0}";
         public const string ERR_STAT_NOT_ENOUGH_POINTS = "Character does not have enough experience points. Price: {0}XP.";
         public const string ERR_STAT_PRICE_NOT_SET = "Upgrade price not set.";
+        public const string ERR_STAT_USING_OLD_PROGRESSION = "Configuration is set to use old progresion system.";
+        public const string ERR_STAT_NOT_USING_OLD_PROGRESSION = "Configuration is not set to use old progresion system.";
+        public const string ERR_STAT_NOT_USING_NEW_VEGAS_RULES = "Configuration is not set to use the Fallout: New Vegas ruleset.";
 
         // Gambling Messages
         public const string BET_PLACED = SUCCESS_EMOJI + "{0}, bet placed!";

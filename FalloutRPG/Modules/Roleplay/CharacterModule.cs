@@ -48,6 +48,8 @@ namespace FalloutRPG.Modules.Roleplay
 
             var level = _expService.CalculateLevelForExperience(character.Experience);
             var expToNextLevel = _expService.CalculateRemainingExperienceToNextLevel(character.Experience);
+            if (!ExperienceService.UseOldProgression)
+                expToNextLevel = (level + 1) * 1000 - character.Experience;
 
             var description = string.IsNullOrEmpty(character.Description) ? "No description." : character.Description;
             var story = string.IsNullOrEmpty(character.Story) ? "No story." : character.Story;
