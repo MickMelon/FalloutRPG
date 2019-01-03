@@ -43,7 +43,10 @@ namespace FalloutRPG.Modules.Roleplay
                 result = _rollService.RollAttribute(character, special, useEffects);
             }
 
-            await ReplyAsync($"{result} ({Context.User.Mention})");
+            if (useEffects)
+                await ReplyAsync($"{Messages.MUSCLE_EMOJI}{result} ({Context.User.Mention})");
+            else
+                await ReplyAsync($"{result} ({Context.User.Mention})");
         }
 
         public class RollPlayerModule : RollModule
