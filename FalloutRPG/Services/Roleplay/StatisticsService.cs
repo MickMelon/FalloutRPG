@@ -18,6 +18,8 @@ namespace FalloutRPG.Services.Roleplay
 
         public static ReadOnlyCollection<Statistic> Statistics { get; private set; }
 
+        public event EventHandler StatisticsUpdated;
+
         public StatisticsService(IRepository<Statistic> statRepo)
         {
             _statRepo = statRepo;
@@ -25,22 +27,28 @@ namespace FalloutRPG.Services.Roleplay
             Statistics = (_statRepo.FetchAll()).AsReadOnly();
         }
 
+        protected async virtual void OnStatisticsUpdated()
+        {
+            await ReloadStatisticsAsync();
+            StatisticsUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
         public async Task AddStatisticAsync(Statistic statistic)
         {
             await _statRepo.AddAsync(statistic);
-            await ReloadStatisticsAsync();
+            OnStatisticsUpdated();
         }
 
         public async Task DeleteStatisticAsync(Statistic stat)
         {
             await _statRepo.DeleteAsync(stat);
-            await ReloadStatisticsAsync();
+            OnStatisticsUpdated();
         }
 
         public async Task SaveStatisticAsync(Statistic stat)
         {
             await _statRepo.SaveAsync(stat);
-            await ReloadStatisticsAsync();
+            OnStatisticsUpdated();
         }
 
         private async Task ReloadStatisticsAsync() =>

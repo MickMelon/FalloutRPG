@@ -23,6 +23,8 @@ namespace FalloutRPG.Services.Roleplay
         {
             _statsService = statsService;
 
+            _statsService.StatisticsUpdated += OnStatisticsUpdated;
+
             _charRepository = charRepository;
         }
 
@@ -136,13 +138,31 @@ namespace FalloutRPG.Services.Roleplay
             _statsService.InitializeStatistics(character.Statistics);
 
             character.SpecialPoints = SpecialService.STARTING_SPECIAL_POINTS;
-            character.TagPoints = SkillsService.TAG_POINTS;
-            character.ExperiencePoints = character.Experience;
-
-            character.IsReset = true;
+            
+            if (ExperienceService.UseOldProgression)
+            {
+                if (character.Level > 1)
+                    character.IsReset = true;
+            }
+            else
+            {
+                character.TagPoints = SkillsService.TAG_POINTS;
+                character.ExperiencePoints = character.Experience;
+            }
+            
             await SaveCharacterAsync(character);
         }
-        
+
+        private async void OnStatisticsUpdated(object sender, EventArgs e)
+        {
+            var list = await _charRepository.Query.Where(x => x.Level == 1).ToListAsync();
+
+            foreach (var character in list)
+            {
+                await ResetCharacterAsync(character);
+            }
+        }
+
         /// <summary>
         /// Get the total number of characters in the database.
         /// </summary>
