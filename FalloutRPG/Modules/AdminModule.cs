@@ -107,6 +107,8 @@ namespace FalloutRPG.Modules
                 return StatisticResult.StatisticAlreadyExists();
 
             stat.Name = newName;
+            stat.Aliases = newName + "/";
+
             await _statService.SaveStatisticAsync(stat);
 
             return GenericResult.FromSuccess(Messages.SKILLS_REMOVED);
