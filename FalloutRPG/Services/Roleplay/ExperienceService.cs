@@ -121,7 +121,7 @@ namespace FalloutRPG.Services.Roleplay
                 int intStat = _statService.GetStatistic(character, Globals.StatisticFlag.Intelligence);
 
                 if (intStat > 0)
-                    expValue *= (int)(1 + (intStat - intelligenceBaseline) * intelligenceMultiplier);
+                    expValue *= 1 + (intStat - intelligenceBaseline) * intelligenceMultiplier;
             }
 
             return (int)Math.Round(expValue);
