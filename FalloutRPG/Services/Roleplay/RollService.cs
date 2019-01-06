@@ -152,10 +152,17 @@ namespace FalloutRPG.Services.Roleplay
 
                 message = $"*{character1.Name}* rolls `{stat1.Name}` against *{character2.Name}'s* `{stat2.Name}`!\n\n" +
                     $"{GetOldRollMessage(character1.Name, stat1.Name, result1)}\n" +
-                    $"{GetOldRollMessage(character2.Name, stat2.Name, result1)}\n\n";
+                    $"{GetOldRollMessage(character2.Name, stat2.Name, result2)}\n\n";
 
-                if (result1 > result2) message += $"{character1.Name} wins!";
-                else message += $"{character2.Name} wins!";
+                if (result1 < 0 && result2 < 0)
+                {
+                    message += "Nobody wins!";
+                }
+                else
+                {
+                    if (result1 > result2) message += $"{character1.Name} wins!";
+                    else message += $"{character2.Name} wins!";
+                }
 
                 if (useEffects)
                     message = Messages.MUSCLE_EMOJI + message;
@@ -164,11 +171,11 @@ namespace FalloutRPG.Services.Roleplay
             }
             else
             {
-                var result = GetRollResult(stats1, stat1);
+                var result1 = GetRollResult(stats1, stat1);
                 var result2 = GetRollResult(stats2, stat2);
 
                 message = $"*{character1.Name}* rolls `{stat1.Name}` against *{character2.Name}'s* `{stat2.Name}`!\n\n" +
-                    $"__{character1.Name}__: {GetRollMessage(character1.Name, stat1.Name, result)}\n\n" +
+                    $"__{character1.Name}__: {GetRollMessage(character1.Name, stat1.Name, result1)}\n\n" +
                     $"__{character2.Name}__: {GetRollMessage(character2.Name, stat2.Name, result2)}";
 
                 if (useEffects)
