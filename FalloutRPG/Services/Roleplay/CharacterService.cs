@@ -153,13 +153,16 @@ namespace FalloutRPG.Services.Roleplay
             await SaveCharacterAsync(character);
         }
 
-        private async void OnStatisticsUpdated(object sender, EventArgs e)
+        private async void OnStatisticsUpdated(object sender, StatisticsUpdatedEventArgs e)
         {
-            var list = await _charRepository.Query.Where(x => x.Level == 1).ToListAsync();
-
-            foreach (var character in list)
+            if (e.Operation == StatisticOperation.Added || e.Operation == StatisticOperation.Deleted)
             {
-                await ResetCharacterAsync(character);
+                var list = await _charRepository.Query.Where(x => x.Level == 1).ToListAsync();
+
+                foreach (var character in list)
+                {
+                    await ResetCharacterAsync(character);
+                }
             }
         }
 

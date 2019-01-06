@@ -1,6 +1,7 @@
 using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Data.Repositories;
+using FalloutRPG.Helpers;
 using FalloutRPG.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,43 +17,54 @@ namespace FalloutRPG.Services.Roleplay
     {
         private readonly IRepository<Statistic> _statRepo;
 
-        public static ReadOnlyCollection<Statistic> Statistics { get; private set; }
+        private static List<Statistic> _statistics = new List<Statistic>();
+        public static ReadOnlyCollection<Statistic> Statistics => _statistics.AsReadOnly();
 
-        public event EventHandler StatisticsUpdated;
+        public event EventHandler<StatisticsUpdatedEventArgs> StatisticsUpdated;
 
         public StatisticsService(IRepository<Statistic> statRepo)
         {
             _statRepo = statRepo;
 
-            Statistics = (_statRepo.FetchAll()).AsReadOnly();
+            _statistics = _statRepo.FetchAll();
         }
 
-        protected async virtual void OnStatisticsUpdated()
+        protected virtual void OnStatisticsUpdated(StatisticOperation operation, Statistic stat)
         {
-            await ReloadStatisticsAsync();
-            StatisticsUpdated?.Invoke(this, EventArgs.Empty);
+            ReloadStatistics(operation, stat);
+            StatisticsUpdated?.Invoke(this, new StatisticsUpdatedEventArgs(operation, stat));
         }
 
         public async Task AddStatisticAsync(Statistic statistic)
         {
             await _statRepo.AddAsync(statistic);
-            OnStatisticsUpdated();
+            OnStatisticsUpdated(StatisticOperation.Added, statistic);
         }
 
         public async Task DeleteStatisticAsync(Statistic stat)
         {
             await _statRepo.DeleteAsync(stat);
-            OnStatisticsUpdated();
+            OnStatisticsUpdated(StatisticOperation.Deleted, stat);
         }
 
         public async Task SaveStatisticAsync(Statistic stat)
         {
             await _statRepo.SaveAsync(stat);
-            OnStatisticsUpdated();
+            OnStatisticsUpdated(StatisticOperation.Overwritten, stat);
         }
 
-        private async Task ReloadStatisticsAsync() =>
-            Statistics = (await _statRepo.FetchAllAsync()).AsReadOnly();
+        private void ReloadStatistics(StatisticOperation operation, Statistic stat)
+        {
+            switch (operation)
+            {
+                case StatisticOperation.Added:
+                        _statistics.Add(stat);
+                    break;
+                case StatisticOperation.Deleted:
+                        _statistics.Remove(stat);
+                    break;
+            }
+        }
 
         public bool NameExists(string name) =>
             Statistics.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
