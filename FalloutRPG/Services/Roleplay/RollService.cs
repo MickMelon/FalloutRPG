@@ -128,14 +128,14 @@ namespace FalloutRPG.Services.Roleplay
             }   
         }
 
-        public RuntimeResult RollVsStatistic(Character character, Character character2, Statistic stat1, Statistic stat2, bool useEffects = false)
+        public RuntimeResult RollVsStatistic(Character character1, Character character2, Statistic stat1, Statistic stat2, bool useEffects = false)
         {
-            var stats1 = character.Statistics;
-            var stats2 = character.Statistics;
+            var stats1 = character1.Statistics;
+            var stats2 = character1.Statistics;
 
             if (useEffects)
             {
-                stats1 = _effectsService.GetEffectiveStatistics(character);
+                stats1 = _effectsService.GetEffectiveStatistics(character1);
                 stats2 = _effectsService.GetEffectiveStatistics(character2);
             }
 
@@ -143,17 +143,39 @@ namespace FalloutRPG.Services.Roleplay
                 (stat2 is Skill skill2 && _statService.GetStatistic(stats2, stat2) < skill2.MinimumValue))
                 return StatisticResult.SkillNotHighEnough();
 
-            var result = GetRollResult(stats1, stat1);
-            var result2 = GetRollResult(stats2, stat2);
+            string message = "";
 
-            var message = $"*{character.Name}* rolls `{stat1.Name}` against *{character2.Name}'s* `{stat2.Name}`!\n\n" +
-                $"__{character.Name}__: {GetRollMessage(character.Name, stat1.Name, result)}\n\n" +
-                $"__{character2.Name}__: {GetRollMessage(character2.Name, stat2.Name, result2)}";
+            if (usePercentage)
+            {
+                var result1 = GetOldRollResult(stats1, stat1);
+                var result2 = GetOldRollResult(stats2, stat2);
 
-            if (useEffects)
-                return RollResult.DiceRoll(EmbedHelper.BuildBasicEmbed($"{Messages.MUSCLE_EMOJI}{stat1.Name} Vs. {stat2.Name} Buffed Roll", message));
+                message = $"*{character1.Name}* rolls `{stat1.Name}` against *{character2.Name}'s* `{stat2.Name}`!\n\n" +
+                    $"{GetOldRollMessage(character1.Name, stat1.Name, result1)}\n" +
+                    $"{GetOldRollMessage(character2.Name, stat2.Name, result1)}\n\n";
 
-            return RollResult.DiceRoll(EmbedHelper.BuildBasicEmbed($"{stat1.Name} Vs. {stat2.Name} Roll", message));
+                if (result1 > result2) message += $"{character1.Name} wins!";
+                else message += $"{character2.Name} wins!";
+
+                if (useEffects)
+                    message = Messages.MUSCLE_EMOJI + message;
+
+                return RollResult.PercentageRoll(message);
+            }
+            else
+            {
+                var result = GetRollResult(stats1, stat1);
+                var result2 = GetRollResult(stats2, stat2);
+
+                message = $"*{character1.Name}* rolls `{stat1.Name}` against *{character2.Name}'s* `{stat2.Name}`!\n\n" +
+                    $"__{character1.Name}__: {GetRollMessage(character1.Name, stat1.Name, result)}\n\n" +
+                    $"__{character2.Name}__: {GetRollMessage(character2.Name, stat2.Name, result2)}";
+
+                if (useEffects)
+                    return RollResult.DiceRoll(EmbedHelper.BuildBasicEmbed($"{Messages.MUSCLE_EMOJI}{stat1.Name} Vs. {stat2.Name} Buffed Roll", message));
+
+                return RollResult.DiceRoll(EmbedHelper.BuildBasicEmbed($"{stat1.Name} Vs. {stat2.Name} Roll", message));
+            }
         }
 
         public string GetRollMessage(string charName, string statName, int[] result)
