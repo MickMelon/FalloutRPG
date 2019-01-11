@@ -12,56 +12,96 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
 {
     public class CharacterServiceTests
     {
-        private RpgContext _context;
-
-        public CharacterServiceTests()
-        {
-            InitContext();
-        }
-
-        private void InitContext()
-        {
-            var options = new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: "CharacterService")
-                .Options;
-
-            var context = new RpgContext(options);
-            
-            // Add all required test data here
-            var characters = Enumerable.Range(1, 10)
-                .Select(i => new Character()
-                {
-                    Id = i,
-                    DiscordId = (ulong)i,
-                    Name = $"Mock{i}",
-                    Experience = i,
-                    ExperiencePoints = i,
-                    SpecialPoints = i,
-                    TagPoints = i,
-                    IsReset = false,
-                    Money = i,
-                    Statistics = new List<StatisticValue>(),
-                    Active = true
-                });
-            context.Characters.AddRange(characters);
-            context.SaveChanges();
-            _context = context;
-        }
-
         [Fact]
-        public async Task GetCharacter_ExistingId_ShouldReturnCharacter()
+        public async Task GetCharacter_ExistingDiscordIdAndActiveCharacter_ShouldReturnCharacter()
         {
             // Arrange
-            var statsRepository = new EfSqliteRepository<Statistic>(_context);
-            var charRepository = new EfSqliteRepository<Character>(_context);
+            var options = new DbContextOptionsBuilder<RpgContext>()
+                .UseInMemoryDatabase(databaseName: "ExistingDiscordIdAndActiveCharacter_ShouldReturnCharacter")
+                .Options;
+            var context = new RpgContext(options);
+            context.Characters.Add(new Character() { DiscordId = (ulong)1, Active = true });
+            await context.SaveChangesAsync();
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
             var charService = new CharacterService(statsService, charRepository);
 
             // Act
-            var account = await charService.GetCharacterAsync(1);
+            var character = await charService.GetCharacterAsync(1);
 
             // Assert
-            Assert.NotNull(account);
+            Assert.NotNull(character);
+        }
+
+        [Fact]
+        public async Task GetCharacter_ExistingDiscordIdAndNoActiveCharacter_ShouldReturnNull()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<RpgContext>()
+                .UseInMemoryDatabase(databaseName: "ExistingDiscordIdAndNoActiveCharacter_ShouldReturnNull")
+                .Options;
+            var context = new RpgContext(options);
+            context.Add(new Character() 
+            {
+                DiscordId = (ulong)1,
+                Active = false // Set active to false
+            }); 
+            await context.SaveChangesAsync();
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository);
+
+            // Act
+            var character = await charService.GetCharacterAsync(1);
+
+            // Assert
+            Assert.Null(character);
+        }
+
+        [Fact]
+        public async Task GetCharacter_NonExistingDiscordId_ShouldReturnNull()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<RpgContext>()
+                .UseInMemoryDatabase(databaseName: "NonExistingDiscordId_ShouldReturnNull")
+                .Options;
+            var context = new RpgContext(options);
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository);
+
+            // Act
+            var character = await charService.GetCharacterAsync(1);
+
+            // Assert
+            Assert.Null(character);
+        }
+
+        [Fact]
+        public async Task GetAllCharacters_ExistingDiscordIdExistingCharacters_ShouldReturnAllCharacters()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<RpgContext>()
+                .UseInMemoryDatabase(databaseName: "ExistingDiscordIdExistingCharacters_ShouldReturnAllCharacters")
+                .Options;
+            var context = new RpgContext(options);
+            context.Add(new Character() { DiscordId = (ulong)1 }); 
+            context.Add(new Character() { DiscordId = (ulong)1 });
+            context.Add(new Character() { DiscordId = (ulong)1 });
+            await context.SaveChangesAsync();
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository);
+
+            // Act
+            var characters = await charService.GetAllCharactersAsync(1);
+
+            // Assert
+            Assert.True(characters != null && characters.Count == 3);
         }
     }
 }
