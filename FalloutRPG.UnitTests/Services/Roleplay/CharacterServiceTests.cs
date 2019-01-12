@@ -53,7 +53,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
             var statsService = new StatisticsService(statsRepository);
             var charService = new CharacterService(statsService, charRepository);
 
-            // Act
+            // Act 
             var character = await charService.GetCharacterAsync(1);
 
             // Assert
