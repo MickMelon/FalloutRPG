@@ -3,9 +3,8 @@ mono: none
 dotnet: 2.1.502
 
 install:
-  - nuget restore FalloutRPG.sln
-  - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
-  
+  - dotnet restore
+
 script:
   - dotnet build
   - dotnet test ./FalloutRPG.UnitTests/FalloutRPG.UnitTests.csproj
