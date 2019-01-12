@@ -334,5 +334,61 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
             Assert.Equal(value, total);
         }
         #endregion
+
+        #region HasDuplicateName() Tests
+        [Fact]
+        public async Task HasDuplicateName_DuplicateName_True()
+        {
+            // Arrange
+            var context = TestHelper.SetupTestRpgContext();
+            context.Add(new Character() { DiscordId = 1, Name = "Foo"});
+            await context.SaveChangesAsync();
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository); 
+
+            // Act
+            bool duplicate = await charService.HasDuplicateName(1, "Foo");
+
+            // Assert
+            Assert.True(duplicate);
+        }
+
+        [Fact]
+        public async Task HasDuplicateName_NoDuplicateName_False()
+        {
+            // Arrange
+            var context = TestHelper.SetupTestRpgContext();
+            context.Add(new Character() { DiscordId = 1, Name = "Foo"});
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository); 
+
+            // Act
+            bool duplicate = await charService.HasDuplicateName(1, "Bar");
+
+            // Assert
+            Assert.False(duplicate);
+        }
+
+        [Fact]
+        public async Task HasDuplicateName_InvalidDiscordId_False()
+        {
+            // Arrange
+            var context = TestHelper.SetupTestRpgContext();
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository); 
+
+            // Act
+            bool duplicate = await charService.HasDuplicateName(1, "Foo");
+
+            // Assert
+            Assert.False(duplicate);
+        }
+        #endregion
     }
 }
