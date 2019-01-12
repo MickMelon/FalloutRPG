@@ -17,7 +17,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var options = new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: "ExistingDiscordIdAndActiveCharacter_ShouldReturnCharacter")
+                .UseInMemoryDatabase(databaseName: "ValidDiscordIdActiveCharacter_ReturnCharacter")
                 .Options;
             var context = new RpgContext(options);
             context.Characters.Add(new Character() { DiscordId = (ulong)1, Active = true });
@@ -39,7 +39,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var options = new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: "ExistingDiscordIdAndNoActiveCharacter_ShouldReturnNull")
+                .UseInMemoryDatabase(databaseName: "ValidDiscordIdNoActiveCharacter_ReturnNull")
                 .Options;
             var context = new RpgContext(options);
             context.Add(new Character() 
@@ -65,7 +65,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var options = new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: "NonExistingDiscordId_ShouldReturnNull")
+                .UseInMemoryDatabase(databaseName: "InvalidDiscordId_ReturnNull")
                 .Options;
             var context = new RpgContext(options);
             var statsRepository = new EfSqliteRepository<Statistic>(context);
@@ -85,7 +85,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var options = new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: "ExistingDiscordIdExistingCharacters_ShouldReturnAllCharacters")
+                .UseInMemoryDatabase(databaseName: "ValidDiscordIdValidCharacters_ReturnAllCharacters")
                 .Options;
             var context = new RpgContext(options);
             context.Add(new Character() { DiscordId = (ulong)1 }); 
