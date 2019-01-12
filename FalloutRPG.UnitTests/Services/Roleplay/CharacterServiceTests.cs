@@ -13,7 +13,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
     public class CharacterServiceTests
     {
         [Fact]
-        public async Task GetCharacter_ExistingDiscordIdAndActiveCharacter_ShouldReturnCharacter()
+        public async Task GetCharacter_ValidDiscordIdActiveCharacter_ReturnCharacter()
         {
             // Arrange
             var options = new DbContextOptionsBuilder<RpgContext>()
@@ -35,7 +35,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         }
 
         [Fact]
-        public async Task GetCharacter_ExistingDiscordIdAndNoActiveCharacter_ShouldReturnNull()
+        public async Task GetCharacter_ValidDiscordIdNoActiveCharacter_ReturnNull()
         {
             // Arrange
             var options = new DbContextOptionsBuilder<RpgContext>()
@@ -61,7 +61,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         }
 
         [Fact]
-        public async Task GetCharacter_NonExistingDiscordId_ShouldReturnNull()
+        public async Task GetCharacter_InvalidDiscordId_ReturnNull()
         {
             // Arrange
             var options = new DbContextOptionsBuilder<RpgContext>()
@@ -81,7 +81,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         }
 
         [Fact]
-        public async Task GetAllCharacters_ExistingDiscordIdExistingCharacters_ShouldReturnAllCharacters()
+        public async Task GetAllCharacters_ValidDiscordIdValidCharacters_ReturnAllCharacters()
         {
             // Arrange
             var options = new DbContextOptionsBuilder<RpgContext>()
