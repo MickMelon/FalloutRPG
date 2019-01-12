@@ -116,6 +116,12 @@ namespace FalloutRPG.Services.Roleplay
         public async Task DeleteCharacterAsync(Character character)
         {
             if (character == null) throw new ArgumentNullException("character");
+            
+            // Make sure the character exists in database before trying to delete 
+            // or else an exception will be thrown.
+            var dbCharacter = await _charRepository.Query.Where(c => c.Id == character.Id).FirstOrDefaultAsync();
+            if (dbCharacter == null) return;
+
             await _charRepository.DeleteAsync(character);
         }
 
