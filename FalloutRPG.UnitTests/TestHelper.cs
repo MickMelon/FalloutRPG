@@ -7,9 +7,9 @@ namespace FalloutRPG.UnitTests
 {
     public class TestHelper
     {
-        public static RpgContext SetupTestRpgContext([CallerMemberName] string callerName = "")
+        public static RpgContext SetupTestRpgContext(string extName = "", [CallerMemberName] string callerName = "")
             => new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: callerName)
+                .UseInMemoryDatabase(databaseName: $"{callerName}_{extName}")
                 .Options);
     }
 }

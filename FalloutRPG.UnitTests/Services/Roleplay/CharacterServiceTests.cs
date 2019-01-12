@@ -42,7 +42,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
             context.Add(new Character() 
             {
                 DiscordId = (ulong)1,
-                Active = false // Set active to false
+                Active = false
             }); 
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
@@ -246,6 +246,93 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
             Assert.Equal(character, characterDb);
         }
 
+        [Theory]
+        [InlineData("A")]
+        [InlineData("Abcdefghijklmnopqrstuvwxy")] // Length: 25
+        [InlineData("@@")]
+        [InlineData("123")]
+        [InlineData("Abc123")]
+        public async Task CreateCharacter_InvalidName_ThrowException(string value)
+        {
+            // Arrange
+            var context = TestHelper.SetupTestRpgContext(value);
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository); 
+
+            /// Act
+            async Task act() => await charService.CreateCharacterAsync(1, value);
+
+            // Assert
+            await Assert.ThrowsAsync<Exception>(act);
+        }
+
+        [Fact]
+        public async Task CreateCharacter_DuplicateName_ThrowException()
+        {
+            // Arrange
+            var context = TestHelper.SetupTestRpgContext();
+            context.Characters.Add(new Character() { DiscordId = 1, Name = "Foo"});
+            await context.SaveChangesAsync();
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository); 
+
+            // Act
+            async Task act() => await charService.CreateCharacterAsync(1, "Foo");
+
+            // Assert
+            await Assert.ThrowsAsync<Exception>(act);
+        }
+
+        [Fact]
+        public async Task CreateCharacter_TooManyCharacters_ThrowException()
+        {
+            // Arrange
+            var context = TestHelper.SetupTestRpgContext();
+            var characters = Enumerable.Range(1, 25)
+                .Select(i => new Character() { Id = i, DiscordId = 1, Name = $"Mock{i}" });
+            await context.Characters.AddRangeAsync(characters);
+            await context.SaveChangesAsync();
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository); 
+
+            // Act
+            async Task act() => await charService.CreateCharacterAsync(1, "Foo");
+
+            // Assert
+            await Assert.ThrowsAsync<Exception>(act);
+        }
+        #endregion
+
+        #region GetTotalCharactersAsync() Tests
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(100)]
+        public async Task GetTotalCharacters_ReturnCorrectAmount(int value)
+        {
+            // Arrange
+            var context = TestHelper.SetupTestRpgContext(value.ToString());
+            for (int i = 0; i < value; i++)
+                await context.AddAsync(new Character() { DiscordId = (ulong)i, Name = $"Mock{i}" });
+            await context.SaveChangesAsync();
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository); 
+
+            // Act
+            int total = await charService.GetTotalCharactersAsync();
+
+            // Assert
+            Assert.Equal(value, total);
+        }
         #endregion
     }
 }
