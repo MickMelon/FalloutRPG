@@ -32,7 +32,7 @@ namespace FalloutRPG.Modules.Roleplay
             [Command]
             [Alias("show", "view")]
             public async Task ShowSpecialAsync(IUser targetUser = null) =>
-                await ShowSpecialAsync(targetUser);
+                await ShowSpecialAsync(targetUser, false);
 
             [Command("buffed")]
             [Alias("bshow", "bview")]

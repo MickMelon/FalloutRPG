@@ -38,7 +38,6 @@ namespace FalloutRPG
         public async Task MainAsync()
         {
             config = BuildConfig();
-            CheckConnectionString();
 
             var services = BuildServiceProvider();
 
@@ -80,6 +79,8 @@ namespace FalloutRPG
             .AddSingleton<CharacterService>()
             .AddSingleton<ExperienceService>()
             .AddSingleton<EffectsService>()
+            .AddSingleton<NpcPresetService>()
+            .AddSingleton<NpcService>()
 
             // Casino
             .AddSingleton<GamblingService>()
@@ -89,12 +90,12 @@ namespace FalloutRPG
             .AddSingleton<InteractiveService>()
 
             // Database
-            .AddDbContext<RpgContext>(options =>
-                options.UseSqlServer(config["sqlserver-connection-string"]))
-            .AddTransient<IRepository<Character>, EfRepository<Character>>()
-            .AddTransient<IRepository<SkillSheet>, EfRepository<SkillSheet>>()
-            .AddTransient<IRepository<Special>, EfRepository<Special>>()
-            .AddTransient<IRepository<Effect>, EfRepository<Effect>>()
+            .AddEntityFrameworkSqlite().AddDbContext<RpgContext>(optionsAction: options => options.UseSqlite("Filename=CharacterDB.db"))
+            .AddTransient<IRepository<Character>, EfSqliteRepository<Character>>()
+            .AddTransient<IRepository<SkillSheet>, EfSqliteRepository<SkillSheet>>()
+            .AddTransient<IRepository<Special>, EfSqliteRepository<Special>>()
+            .AddTransient<IRepository<Effect>, EfSqliteRepository<Effect>>()
+            .AddTransient<IRepository<NpcPreset>, EfSqliteRepository<NpcPreset>>()
             .BuildServiceProvider();
 
         /// <summary>
@@ -104,17 +105,5 @@ namespace FalloutRPG
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("Config.json")
             .Build();
-
-        /// <summary>
-        /// Sets the SQL Server connection string variable if it's valid.
-        /// </summary>
-        private bool CheckConnectionString()
-        {
-            var connectionString = config["sqlserver-connection-string"];
-            if (!string.IsNullOrEmpty(connectionString)) return true;
-
-            Console.WriteLine("You have an invalid SQL Server connection string set in Config.json");
-            return false;
-        }
     }
 }

@@ -13,7 +13,7 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class CharacterService
     {
-        private const int MAX_CHARACTERS = 5;
+        private const int MAX_CHARACTERS = 25;
 
         private readonly IRepository<Character> _charRepository;
         private readonly IRepository<SkillSheet> _skillRepository;

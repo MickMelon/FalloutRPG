@@ -6,6 +6,7 @@
         public const string SUCCESS_EMOJI = "✅ ";
         public const string STAR_EMOJI = "\u2B50 ";
         public const string ADM_EMOJI = "👮 ";
+        public const string NPC_SUFFIX = "(\uD83D\uDCBBNPC) ";
         public const string QUESTION_EMOJI = "❓ ";
         public const string MUSCLE_EMOJI = "\uD83D\uDCAA";
 
@@ -116,5 +117,25 @@
         public const string ERR_EFFECT_NAME_DUPLICATE = FAILURE_EMOJI + "An effect already exists with the given name. ({0})";
         public const string ERR_EFFECT_NAME_TOO_LONG = FAILURE_EMOJI + "The given effect name was too long. ({0})";
         public const string ERR_EFFECT_NOT_ALPHABETICAL = FAILURE_EMOJI + "The effect name must contain only letters. ({0})";
+        public const string ERR_EFFECT_ALREADY_APPLIED = FAILURE_EMOJI + "The specified effect is already applied. ({0})";
+
+        // NPC Messages
+        public const string NPC_CREATED_SUCCESS = SUCCESS_EMOJI + "NPC created with type: `{0}` and name: `{1}`.";
+        public const string NPC_CANT_USE_SKILL = FAILURE_EMOJI + "`{0}` can't use this skill! " + NPC_SUFFIX;
+        public const string NPC_CANT_USE_SPECIAL = FAILURE_EMOJI + "`{0}` can't use this S.P.E.C.I.A.L. stat! " + NPC_SUFFIX;
+        public const string NPC_CANT_USE_STAT = FAILURE_EMOJI + "`{0}` can't use this attribute! " + NPC_SUFFIX;
+        public const string NPC_PRESET_CREATE = SUCCESS_EMOJI + "NPC preset: `{0}` created successfully. ({1})";
+        public const string NPC_PRESET_TOGGLE = SUCCESS_EMOJI + "NPC preset: `{0}` is Enabled: `{1}`. ({2})";
+        public const string NPC_PRESET_EDIT_TAGS = SUCCESS_EMOJI + "NPC preset: `{0}` Tags sucessfully changed. ({1})";
+        public const string NPC_PRESET_EDIT_INVENTORY = SUCCESS_EMOJI + "NPC preset: `{0}` initial inventory changed. ({1})";
+        public const string NPC_PRESET_EDIT_SPECIAL = SUCCESS_EMOJI + "NPC preset: `{0}` S.P.E.C.I.A.L. values changed. ({1})";
+
+        // NPC Error Messages
+        public const string ERR_NPC_CHAR_NOT_FOUND = FAILURE_EMOJI + "An NPC with the given name could not be found.";
+        public const string ERR_NPC_PRESET_NOT_FOUND = FAILURE_EMOJI + "An NPC preset with the given name could not be found. ({0})";
+        public const string ERR_NPC_PRESET_CREATE = FAILURE_EMOJI + "NPC preset creation failed. ({0})";
+        public const string ERR_NPC_PRESET_ENABLE = FAILURE_EMOJI + "Failed to enable NPC preset: {0}. (Check for typos) ({1})";
+        public const string ERR_NPC_PRESET_DISABLE = FAILURE_EMOJI + "Failed to disable NPC preset: {0}. (Check for typos) ({1})";
+        public const string ERR_NPC_PRESET_EDIT = FAILURE_EMOJI + "Failed to modify NPC preset attribute. ({0})";
     }
 }
