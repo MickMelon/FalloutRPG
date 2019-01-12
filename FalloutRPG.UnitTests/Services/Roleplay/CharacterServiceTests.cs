@@ -247,5 +247,28 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
             await Assert.ThrowsAsync<ArgumentNullException>(act);
         }
         #endregion
+    
+        #region CreateCharacterAsync() Tests
+        [Fact]
+        public async Task CreateCharacter_ValidDetails_CharacterCreated()
+        {
+            // Arrange
+            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
+                .UseInMemoryDatabase(databaseName: "CreateCharacter_ValidDetails_CharacterCreated")
+                .Options);
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository); 
+
+            // Act
+            var character = await charService.CreateCharacterAsync(1, "Foo");
+
+            // Assert
+            var characterDb = await charRepository.Query.Where(c => c.Id == character.Id).FirstOrDefaultAsync();
+            Assert.Equal(character, characterDb);
+        }
+
+        #endregion
     }
 }
