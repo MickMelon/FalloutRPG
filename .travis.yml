@@ -1,13 +1,11 @@
 language: csharp
-solution: FalloutRPG.sln
-matrix:
-  - dotnet: 2.1.502
-    mono: none
-    env: DOTNETCORE=2
-  - mono: latest
+mono: none
+dotnet: 2.1.502
+
 install:
   - nuget restore FalloutRPG.sln
   - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
+  
 script:
-  - msbuild /p:Configuration=Release FalloutRPG.sln
-  - mono ./testrunner/xunit.runners.1.9.2/tools/xunit.console.clr4.exe ./FalloutRPG.UnitTests/bin/Release/netcoreapp2.1/FalloutRPG.UnitTests.dll
+  - dotnet build
+  - dotnet test ./FalloutRPG.UnitTests/FalloutRPG.UnitTests.csproj
