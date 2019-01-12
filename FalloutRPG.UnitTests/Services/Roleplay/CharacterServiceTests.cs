@@ -188,11 +188,11 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
     
         #region SaveCharacterAsync() Tests
         [Fact]
-        public async Task SaveCharacter_ExistingCharacter_SaveSuccessful()
+        public async Task SaveCharacter_ValidCharacter_SaveSuccessful()
         {
             // Arrange
             var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: "SaveCharacter_ExistingCharacter_SaveSuccessful")
+                .UseInMemoryDatabase(databaseName: "SaveCharacter_ValidCharacter_SaveSuccessful")
                 .Options);
             var character = new Character() { Id = 1, Money = 1000 };
             context.Add(character);
@@ -209,6 +209,42 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
             // Assert
             var characterDb = await charRepository.Query.Where(c => c.Id == character.Id).FirstOrDefaultAsync();
             Assert.Equal(character.Money, characterDb.Money);
+        }
+
+        [Fact]
+        public async Task SaveCharacter_InvalidCharacter_SaveUnsuccessful()
+        {
+            // Arrange
+            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
+                .UseInMemoryDatabase(databaseName: "SaveCharacter_ValidCharacter_SaveSuccessful")
+                .Options);
+            var character = new Character() { Id = 1 };
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository);   
+
+            // Act
+            await charService.SaveCharacterAsync(character);
+        }
+
+        [Fact]
+        public async Task SaveCharacter_NullCharacter_ThrowException()
+        {
+            // Arrange
+            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
+                .UseInMemoryDatabase(databaseName: "SaveCharacter_ValidCharacter_SaveSuccessful")
+                .Options);
+            var statsRepository = new EfSqliteRepository<Statistic>(context);
+            var charRepository = new EfSqliteRepository<Character>(context);
+            var statsService = new StatisticsService(statsRepository);
+            var charService = new CharacterService(statsService, charRepository);   
+
+            // Act
+            async Task act() => await charService.SaveCharacterAsync(null);
+
+            // Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(act);
         }
         #endregion
     }
