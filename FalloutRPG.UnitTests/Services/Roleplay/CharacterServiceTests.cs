@@ -19,9 +19,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task GetCharacter_ValidDiscordIdActiveCharacter_ReturnCharacter()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             context.Characters.Add(new Character() { DiscordId = (ulong)1, Active = true });
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
@@ -40,9 +38,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task GetCharacter_ValidDiscordIdNoActiveCharacter_ReturnNull()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             context.Add(new Character() 
             {
                 DiscordId = (ulong)1,
@@ -65,9 +61,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task GetCharacter_InvalidDiscordId_ReturnNull()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
@@ -86,9 +80,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task GetAllCharacters_ValidDiscordIdMultipleCharacters_ReturnAllCharacters()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             context.Add(new Character() { DiscordId = (ulong)1 }); 
             context.Add(new Character() { DiscordId = (ulong)1 });
             context.Add(new Character() { DiscordId = (ulong)1 });
@@ -109,9 +101,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task GetAllCharacters_InvalidDiscordId_ReturnNull()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
@@ -130,9 +120,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task DeleteCharacter_ValidCharacter_CharacterDeleted()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             var charToDelete = new Character() { Id = 1 };
             context.Add(charToDelete);
             await context.SaveChangesAsync();
@@ -153,9 +141,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task DeleteCharacter_InvalidCharacter_DoNothing()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             var nonExistingCharacter = new Character() { Id = 1 };
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -170,9 +156,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task DeleteCharacter_NullCharacter_ThrowException()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             var nonExistingCharacter = new Character() { Id = 1 };
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -192,9 +176,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task SaveCharacter_ValidCharacter_SaveSuccessful()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             var character = new Character() { Id = 1, Money = 1000 };
             context.Add(character);
             await context.SaveChangesAsync();
@@ -216,9 +198,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task SaveCharacter_InvalidCharacter_SaveUnsuccessful()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             var character = new Character() { Id = 1 };
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -233,9 +213,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task SaveCharacter_NullCharacter_ThrowException()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
@@ -254,9 +232,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         public async Task CreateCharacter_ValidDetails_CharacterCreated()
         {
             // Arrange
-            var context = new RpgContext(new DbContextOptionsBuilder<RpgContext>()
-                .UseInMemoryDatabase(databaseName: MethodHelper.GetCurrentMethod())
-                .Options);
+            var context = TestHelper.SetupTestRpgContext();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
