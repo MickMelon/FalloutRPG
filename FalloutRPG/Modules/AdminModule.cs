@@ -183,6 +183,7 @@ namespace FalloutRPG.Modules
         }
 
         [Command("giveskillpoints")]
+        [RequireOwner]
         public async Task GiveSkillPointsAsync(IUser user, int points)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
