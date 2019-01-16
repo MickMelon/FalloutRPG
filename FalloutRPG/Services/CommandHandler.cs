@@ -77,7 +77,7 @@ namespace FalloutRPG.Services
                 if (!String.IsNullOrEmpty(roll.OldMessage)) await context.Channel.SendMessageAsync($"{roll.OldMessage} ({context.User.Mention})");
             }
 
-            else
+            else if (!result.IsSuccess)
             {
                 switch (result.Error)
                 {
