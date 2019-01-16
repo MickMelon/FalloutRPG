@@ -222,6 +222,14 @@ namespace FalloutRPG.Modules
             await ReplyAsync(string.Format(Messages.ADM_RESET, Context.User.Mention));
         }
 
+        [Command("resetallcharacters")]
+        [RequireOwner]
+        public async Task ResetAllCharactersAsync()
+        {
+            await _charService.ResetAllCharactersAsync();
+            await ReplyAsync(string.Format(Messages.ADM_RESET, Context.User.Mention));
+        }
+
         [Command("delete")]
         [RequireOwner]
         public async Task DeleteCharacterAsync(IUser user)

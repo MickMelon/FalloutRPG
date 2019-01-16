@@ -153,6 +153,18 @@ namespace FalloutRPG.Services.Roleplay
             await SaveCharacterAsync(character);
         }
 
+        /// <summary>
+        /// Removes a character's skills and SPECIAL and marks them
+        /// as reset so they can claim skill points back but with every character.
+        /// </summary>
+        public async Task ResetAllCharactersAsync()
+        {
+            var allChars = await _charRepository.FetchAllAsync();
+
+            foreach (var character in allChars)
+                await ResetCharacterAsync(character);
+        }
+
         private async void OnStatisticsUpdated(object sender, StatisticsUpdatedEventArgs e)
         {
             if (e.Operation == StatisticOperation.Added || e.Operation == StatisticOperation.Deleted)
