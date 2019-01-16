@@ -222,9 +222,6 @@ namespace FalloutRPG.Modules.Roleplay
 
                 _statsService.InitializeStatistics(character.Statistics);
 
-                if (_expService.UseNewVegasRules)
-                    _skillsService.InitializeSkills(character);
-
                 character.ExperiencePoints = 0;
                 var intelligence = _statsService.GetStatistic(character, Globals.StatisticFlag.Intelligence);
 
