@@ -82,6 +82,7 @@ namespace FalloutRPG.Services
                 switch (result.Error)
                 {
                     // CommandError.BadArgCount was getting thrown way too much because of the parameterless help commands
+                    case CommandError.UnmetPrecondition: break;
                     case CommandError.UnknownCommand:
                         {
                             await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
