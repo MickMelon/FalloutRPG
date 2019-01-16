@@ -25,6 +25,7 @@ namespace FalloutRPG.Services.Roleplay
         private const int SUCCESS_ROLL = 8;
 
         private readonly bool usePercentage;
+        private readonly bool useOldProbability;
 
         public RollService(
             EffectsService effectsService,
@@ -41,6 +42,7 @@ namespace FalloutRPG.Services.Roleplay
             _rand = rand;
 
             usePercentage = config.GetValue<bool>("roleplay:use-percentage");
+            useOldProbability = config.GetValue<bool>("roleplay:use-old-probability");
         }
 
         private int GetNumberOfDice(IList<StatisticValue> stats, Statistic stat)
@@ -76,6 +78,16 @@ namespace FalloutRPG.Services.Roleplay
             double rng = _rand.Next(1, 101);
 
             double maxSuccessRoll = CalculateProbability(DICE_SIDES, GetNumberOfDice(stats, stat)) * 100;
+
+            if (useOldProbability)
+            {
+                var statValue = _statService.GetStatistic(stats, stat);
+
+                if (stat is Special)
+                    maxSuccessRoll = Math.Round(32.2 * Math.Sqrt(statValue) - 7);
+                else
+                    maxSuccessRoll = Math.Round(10 * Math.Sqrt(statValue) - 0.225 * statValue - 1);
+            }
 
             // compares your roll with your skills, and how much better you did than the bare minimum
             double resultPercent = (maxSuccessRoll - rng) / maxSuccessRoll;
