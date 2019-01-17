@@ -1,7 +1,9 @@
+using System;
 using System.Runtime.CompilerServices;
 using FalloutRPG.Data;
 using FalloutRPG.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace FalloutRPG.UnitTests
 {
@@ -23,5 +25,16 @@ namespace FalloutRPG.UnitTests
                 .UseInMemoryDatabase(databaseName: $"{callerName}_{extName}")
                 .Options);
         }
+
+        /// <summary>
+        /// Build the config file for testing. Just a copy of the one in FalloutRPG.Main
+        /// I would have just used that function but I didn't want to set it to public.
+        /// The test config can be kept separate.
+        /// </summary>
+        /// <returns>Config</returns>
+        public static IConfiguration BuildConfig() => new ConfigurationBuilder()
+            .SetBasePath(System.IO.Path.GetFullPath(@"../../../"))
+            .AddJsonFile("TestConfig.json")
+            .Build();
     }
 }
