@@ -1,16 +1,18 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
 using FalloutRPG.Services.Roleplay;
 using Xunit;
+using static FalloutRPG.Constants.Globals;
 
 namespace FalloutRPG.UnitTests.Services.Roleplay
 {
     public class ExperienceServiceTests
     {
         #region GiveExperienceAsync() Tests
-
-        /*[Theory]
+        /*
+        [Theory]
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(1)]
@@ -21,12 +23,18 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
-            context.Characters.Add(new Character() 
+            var intelligence = new Special() { StatisticFlag = StatisticFlag.Intelligence };
+            await context.Specials.AddAsync(intelligence);
+            await context.Characters.AddAsync(new Character() 
             { 
                 DiscordId = (ulong)1,
                 Active = true,
                 ExperiencePoints = 0,
-            });
+                Statistics = new List<StatisticValue>()
+                {
+                    new StatisticValue() { Statistic = intelligence,Value = 1 }
+                }
+            });            
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -41,8 +49,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
 
             // Assert
             Assert.Equal(initialExp + value, character.Experience);
-        }*/
-        
+        }       */ 
 
         // public async Task GiveExperience_EnoughToLevelUp_LevelUp()
         // public async Task GiveExperience_ExactlyEnoughToLevelUp_LevelUp()

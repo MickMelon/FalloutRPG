@@ -20,7 +20,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
-            context.Characters.Add(new Character() { DiscordId = (ulong)1, Active = true });
+            await context.Characters.AddAsync(new Character() { DiscordId = (ulong)1, Active = true });
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -39,11 +39,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
-            context.Add(new Character() 
-            {
-                DiscordId = (ulong)1,
-                Active = false
-            }); 
+            await context.AddAsync(new Character() { DiscordId = (ulong)1, Active = false }); 
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -81,9 +77,9 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
-            context.Add(new Character() { DiscordId = (ulong)1 }); 
-            context.Add(new Character() { DiscordId = (ulong)1 });
-            context.Add(new Character() { DiscordId = (ulong)1 });
+            await context.AddAsync(new Character() { DiscordId = (ulong)1 }); 
+            await context.AddAsync(new Character() { DiscordId = (ulong)1 });
+            await context.AddAsync(new Character() { DiscordId = (ulong)1 });
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -122,7 +118,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
             var charToDelete = new Character() { Id = 1 };
-            context.Add(charToDelete);
+            await context.AddAsync(charToDelete);
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -178,7 +174,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
             var character = new Character() { Id = 1, Money = 1000 };
-            context.Add(character);
+            await context.AddAsync(character);
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -273,7 +269,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
-            context.Characters.Add(new Character() { DiscordId = 1, Name = "Foo"});
+            await context.Characters.AddAsync(new Character() { DiscordId = 1, Name = "Foo"});
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -341,7 +337,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
-            context.Add(new Character() { DiscordId = 1, Name = "Foo"});
+            await context.AddAsync(new Character() { DiscordId = 1, Name = "Foo"});
             await context.SaveChangesAsync();
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
@@ -360,7 +356,7 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
-            context.Add(new Character() { DiscordId = 1, Name = "Foo"});
+            await context.AddAsync(new Character() { DiscordId = 1, Name = "Foo"});
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
