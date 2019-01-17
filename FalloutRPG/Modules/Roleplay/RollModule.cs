@@ -100,7 +100,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("rollvs")]
         [Alias("rv")]
-        public async Task<RuntimeResult> RollVsNpcAsync(string npcName, IUser user, Statistic stat1, Statistic stat2) =>
+        public async Task<RuntimeResult> RollVsNpcAsync(string npcName, Statistic stat1, IUser user, Statistic stat2) =>
             await RollVsPlayerAndNpc(user, npcName, stat1, stat2);
 
         [Command("rollvs")]
@@ -121,7 +121,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("brollvs")]
         [Alias("brv")]
-        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(string npcName, Statistic stat1, Statistic stat2) =>
+        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(Statistic stat1, string npcName, Statistic stat2) =>
             await RollVsPlayerAndNpc(Context.User, npcName, stat1, stat2, true);
 
         [Command("brollvs")]
@@ -131,7 +131,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("brollvs")]
         [Alias("brv")]
-        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(string npcName, IUser user, Statistic stat1, Statistic stat2) =>
+        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(string npcName, Statistic stat1, IUser user, Statistic stat2) =>
             await RollVsPlayerAndNpc(user, npcName, stat1, stat2, true);
 
         [Command("brollvs")]
