@@ -70,10 +70,19 @@ namespace FalloutRPG.Services.Roleplay
 
             if (character == null || context.Message.ToString().StartsWith("(")) return;
 
-            // filter out users abusing monologues for exp
-            var cache = context.Channel.GetCachedMessages(allowedConsecutiveMessages)
-                .Where(x => !x.Author.Equals(context.Client.CurrentUser));
-            if (cache.All(x => x.Author.Equals(context.User))) return;
+            // filter out messages sent by FRAGS
+            var cache = context.Channel.GetCachedMessages(Math.Max(100, allowedConsecutiveMessages))
+                .Where(x => !x.Author.ToString().Equals(context.Client.CurrentUser.ToString()))
+                .OfType<SocketUserMessage>();
+
+            // filter out messages trying to send commands
+            int argPos = 0;
+            cache = cache.Where(x => !(x.HasStringPrefix(_config["prefix"], ref argPos) ||
+                    x.HasMentionPrefix(_client.CurrentUser, ref argPos)));   
+
+            if (cache.Count() > allowedConsecutiveMessages &&
+                cache.Take(allowedConsecutiveMessages).All(x => x.Author.Equals(context.User)))
+                return;
 
             var expToGive = GetExperienceFromMessage(character, context.Message.Content.Where(x => !Char.IsWhiteSpace(x)).Count());
 
