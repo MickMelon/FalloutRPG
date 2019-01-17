@@ -6,5 +6,9 @@ install:
   - dotnet restore
 
 script:
+<<<<<<< HEAD
   - dotnet build
   - dotnet test ./FalloutRPG.Tests/FalloutRPG.Tests.csproj
+=======
+  - dotnet build
+>>>>>>> master

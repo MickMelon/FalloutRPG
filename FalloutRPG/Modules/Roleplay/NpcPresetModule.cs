@@ -51,25 +51,14 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("edit")]
-        public async Task<RuntimeResult> EditPresetSpecialAsync(string name, Statistic stat, int newValue)
+        public async Task<RuntimeResult> EditPresetStatisticAsync(string name, Statistic stat, int newValue)
         {
             var preset = await _presetService.GetNpcPreset(name);
 
             if (preset == null)
                 return GenericResult.FromError(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
 
-            var match = preset.Statistics.Where(x => x.Statistic.Equals(stat)).FirstOrDefault();
-
-            if (match != null)
-            {
-                match.Value = newValue;
-            }
-            else
-            {
-                _statsService.InitializeStatistics(preset.Statistics);
-                preset.Statistics.Where(x => x.Statistic.Equals(stat)).FirstOrDefault().Value = newValue;
-            }
-
+            _statsService.SetStatistic(preset.Statistics, stat, newValue);
             await _presetService.SaveNpcPreset(preset);
 
             return GenericResult.FromSuccess(String.Format(Messages.NPC_PRESET_EDIT_SPECIAL, preset.Name, Context.User.Mention));

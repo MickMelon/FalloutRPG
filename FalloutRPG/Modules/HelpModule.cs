@@ -78,6 +78,7 @@ namespace FalloutRPG.Modules
         }
 
         [Group("skills")]
+        [Alias("skill")]
         public class SkillsHelpModule : InteractiveBase<SocketCommandContext>
         {
             private readonly HelpService _helpService;
@@ -101,6 +102,7 @@ namespace FalloutRPG.Modules
         }
 
         [Group("special")]
+        [Alias("spec")]
         public class SpecialHelpModule : InteractiveBase<SocketCommandContext>
         {
             private readonly HelpService _helpService;

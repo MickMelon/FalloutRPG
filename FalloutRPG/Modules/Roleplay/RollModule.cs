@@ -37,7 +37,7 @@ namespace FalloutRPG.Modules.Roleplay
             _specialService = specialService;
         }
 
-        [Command("roll")]
+        [Command("roll"), Priority(2)]
         [Alias("r", "help")]
         public async Task ShowRollHelpAsync()
         {
@@ -50,30 +50,31 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task<RuntimeResult> RollSelfStatAsync(Statistic statToRoll) =>
             await RollPlayerAsync(statToRoll, Context.User);
 
-        [Command("broll")]
-        [Alias("br")]
-        public async Task<RuntimeResult> RollSelfStatBuffedAsync(Statistic statToRoll) =>
-            await RollPlayerAsync(statToRoll, Context.User, true);
-
         [Command("roll")]
         [Alias("r")]
         public async Task<RuntimeResult> RollOthersStatAsync(Statistic statToRoll, IUser user) =>
             await RollPlayerAsync(statToRoll, user);
+
+        [Command("roll")]
+        [Alias("r")]
+        public async Task<RuntimeResult> RollNpcStatAsync(Statistic statToRoll, string npcName) =>
+            await Task.FromResult(RollNpcAsync(statToRoll, npcName));
+
+        [Command("broll")]
+        [Alias("br")]
+        public async Task<RuntimeResult> RollSelfStatBuffedAsync(Statistic statToRoll) =>
+            await RollPlayerAsync(statToRoll, Context.User, true);
 
         [Command("broll")]
         [Alias("br")]
         public async Task<RuntimeResult> RollOthersStatBuffedAsync(Statistic statToRoll, IUser user) =>
             await RollPlayerAsync(statToRoll, user, true);
 
-        [Command("roll")]
-        [Alias("r")]
-        public RuntimeResult RollNpcStatAsync(Statistic statToRoll, string npcName) =>
-            RollNpcAsync(statToRoll, npcName);
-
         [Command("broll")]
         [Alias("br")]
-        public RuntimeResult RollNpcStatBuffedAsync(Statistic statToRoll, string npcName) =>
-            RollNpcAsync(statToRoll, npcName, true);
+        public async Task<RuntimeResult> RollNpcStatBuffedAsync(Statistic statToRoll, string npcName) =>
+            await Task.FromResult(RollNpcAsync(statToRoll, npcName, true));
+        
         #endregion
 
         #region Roll VS
@@ -89,7 +90,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("rollvs")]
         [Alias("rv")]
-        public async Task<RuntimeResult> RollVsNpcAsync(string npcName, Statistic stat1, Statistic stat2) =>
+        public async Task<RuntimeResult> RollVsNpcAsync(Statistic stat1, string npcName, Statistic stat2) =>
             await RollVsPlayerAndNpc(Context.User, npcName, stat1, stat2);
 
         [Command("rollvs")]
@@ -99,7 +100,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("rollvs")]
         [Alias("rv")]
-        public async Task<RuntimeResult> RollVsNpcAsync(string npcName, IUser user, Statistic stat1, Statistic stat2) =>
+        public async Task<RuntimeResult> RollVsNpcAsync(string npcName, Statistic stat1, IUser user, Statistic stat2) =>
             await RollVsPlayerAndNpc(user, npcName, stat1, stat2);
 
         [Command("rollvs")]
@@ -120,7 +121,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("brollvs")]
         [Alias("brv")]
-        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(string npcName, Statistic stat1, Statistic stat2) =>
+        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(Statistic stat1, string npcName, Statistic stat2) =>
             await RollVsPlayerAndNpc(Context.User, npcName, stat1, stat2, true);
 
         [Command("brollvs")]
@@ -130,7 +131,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("brollvs")]
         [Alias("brv")]
-        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(string npcName, IUser user, Statistic stat1, Statistic stat2) =>
+        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(string npcName, Statistic stat1, IUser user, Statistic stat2) =>
             await RollVsPlayerAndNpc(user, npcName, stat1, stat2, true);
 
         [Command("brollvs")]
@@ -144,7 +145,7 @@ namespace FalloutRPG.Modules.Roleplay
             var character = await _charService.GetCharacterAsync(user.Id);
             if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
 
-            return RollSingleAsync(character, statToRoll, useEffects);
+            return _rollService.RollStatistic(character, statToRoll, useEffects);
         }
 
         private RuntimeResult RollNpcAsync(Statistic statToRoll, string npcName, bool useEffects = false)
@@ -154,15 +155,7 @@ namespace FalloutRPG.Modules.Roleplay
 
             _npcService.ResetNpcTimer(npc);
 
-            return RollSingleAsync(npc, statToRoll, useEffects);
-        }
-
-        private RuntimeResult RollSingleAsync(Character character, Statistic stat, bool useEffects = false)
-        {
-            if (!_specialService.IsSpecialSet(character))
-                return StatisticResult.SpecialNotSet(Context.User.Mention);
-
-            return _rollService.RollStatistic(character, stat, useEffects);
+            return _rollService.RollStatistic(npc, statToRoll, useEffects);
         }
 
         private async Task<RuntimeResult> RollVsPlayers(IUser user1, IUser user2, Statistic stat1, Statistic stat2, bool useEffects = false)
@@ -172,7 +165,7 @@ namespace FalloutRPG.Modules.Roleplay
 
             if (char1 == null || char2 == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
 
-            return RollVsAsync(char1, char2, stat1, stat2, useEffects);
+            return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }
 
         private async Task<RuntimeResult> RollVsPlayerAndNpc(IUser user, string npcName, Statistic stat1, Statistic stat2, bool useEffects = false)
@@ -183,7 +176,7 @@ namespace FalloutRPG.Modules.Roleplay
             if (char1 == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
             if (char2 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
 
-            return RollVsAsync(char1, char2, stat1, stat2, useEffects);
+            return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }
 
         private RuntimeResult RollVsTwoNpcsAsync(string npcName1, string npcName2, Statistic stat1, Statistic stat2, bool useEffects = false)
@@ -194,15 +187,7 @@ namespace FalloutRPG.Modules.Roleplay
             if (char1 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
             if (char2 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
 
-            return RollVsAsync(char1, char2, stat1, stat2, useEffects);
-        }
-
-        private RuntimeResult RollVsAsync(Character char1, Character char2, Statistic stat1, Statistic stat2, bool useEffects)
-        {
-            if (!_specialService.IsSpecialSet(char1) || !_specialService.IsSpecialSet(char2))
-                return StatisticResult.SpecialNotSet();
-
-            return _rollService.RollVsStatistic(char1, char2, stat1, stat2);
+            return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }
     }
 }

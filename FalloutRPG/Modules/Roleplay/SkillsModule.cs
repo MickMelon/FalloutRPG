@@ -217,12 +217,10 @@ namespace FalloutRPG.Modules.Roleplay
 
                 if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
                 if (!character.IsReset) return GenericResult.FromError(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
-                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet();
+                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet(Context.User.Mention);
+                if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet(Context.User.Mention);
 
                 _statsService.InitializeStatistics(character.Statistics);
-
-                if (_expService.UseNewVegasRules)
-                    _skillsService.InitializeSkills(character);
 
                 character.ExperiencePoints = 0;
                 var intelligence = _statsService.GetStatistic(character, Globals.StatisticFlag.Intelligence);

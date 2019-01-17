@@ -144,8 +144,16 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public async Task ResetCharacterAsync(Character character)
         {
-            character.Statistics = new List<StatisticValue>();
-            _statsService.InitializeStatistics(character.Statistics);
+            // for whatever reason, initializeStatistics ain't cutting it...probably a race condition(?)
+            if (character.Statistics == null) character.Statistics = new List<StatisticValue>();
+
+            _statsService.InitializeStatistics(character.Statistics);            
+
+            foreach (var stat in character.Statistics)
+            {
+                if (stat.Statistic is Special) stat.Value = SpecialService.SPECIAL_MIN;
+                else stat.Value = 0;
+            }
 
             character.SpecialPoints = SpecialService.STARTING_SPECIAL_POINTS;
             
@@ -163,9 +171,21 @@ namespace FalloutRPG.Services.Roleplay
             await SaveCharacterAsync(character);
         }
 
+        /// <summary>
+        /// Removes a character's skills and SPECIAL and marks them
+        /// as reset so they can claim skill points back but with every character.
+        /// </summary>
+        public async Task ResetAllCharactersAsync()
+        {
+            var allChars = await _charRepository.FetchAllAsync();
+
+            foreach (var character in allChars)
+                await ResetCharacterAsync(character);
+        }
+
         private async void OnStatisticsUpdated(object sender, StatisticsUpdatedEventArgs e)
         {
-            if (e.Operation == StatisticOperation.Added || e.Operation == StatisticOperation.Deleted)
+            if (e.Operation == StatisticOperation.Added || e.Operation == StatisticOperation.Deleted && e.ChangedStatistic is Special)
             {
                 var list = await _charRepository.Query.Where(x => x.Level == 1).ToListAsync();
 

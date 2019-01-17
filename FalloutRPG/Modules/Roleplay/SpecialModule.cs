@@ -93,7 +93,7 @@ namespace FalloutRPG.Modules.Roleplay
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
                 if (character == null) return CharacterResult.CharacterNotFound();
-                if (character.Level > 1) return StatisticResult.SpecialAlreadySet();
+                if (character.Level > 1 && _specService.IsSpecialSet(character)) return StatisticResult.SpecialAlreadySet();
 
                 try
                 {

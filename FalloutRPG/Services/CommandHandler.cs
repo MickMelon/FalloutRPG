@@ -77,10 +77,23 @@ namespace FalloutRPG.Services
                 if (!String.IsNullOrEmpty(roll.OldMessage)) await context.Channel.SendMessageAsync($"{roll.OldMessage} ({context.User.Mention})");
             }
 
-            else if (!string.IsNullOrEmpty(result?.ErrorReason))
+            else if (!result.IsSuccess)
             {
-                await context.Channel.SendMessageAsync(
-                    $"{Messages.FAILURE_EMOJI} {result.ErrorReason} {context.User.Mention}");
+                switch (result.Error)
+                {
+                    // CommandError.BadArgCount was getting thrown way too much because of the parameterless help commands
+                    case CommandError.UnmetPrecondition: break;
+                    case CommandError.UnknownCommand:
+                        {
+                            await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
+                            break;
+                        }
+                    default:
+                        {
+                            await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_USAGE, context.User.Mention));
+                            break;
+                        }
+                }
             }
         }
 
