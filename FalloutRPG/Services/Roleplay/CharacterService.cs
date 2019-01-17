@@ -134,7 +134,11 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public async Task ResetCharacterAsync(Character character)
         {
-            _statsService.InitializeStatistics(character.Statistics);
+            // for whatever reason, initializeStatistics ain't cutting it...probably a race condition(?)
+            if (character.Statistics == null) character.Statistics = new List<StatisticValue>();
+
+            _statsService.InitializeStatistics(character.Statistics);            
+
             foreach (var stat in character.Statistics)
             {
                 if (stat.Statistic is Special) stat.Value = SpecialService.SPECIAL_MIN;
@@ -171,7 +175,7 @@ namespace FalloutRPG.Services.Roleplay
 
         private async void OnStatisticsUpdated(object sender, StatisticsUpdatedEventArgs e)
         {
-            if (e.Operation == StatisticOperation.Added || e.Operation == StatisticOperation.Deleted)
+            if (e.Operation == StatisticOperation.Added || e.Operation == StatisticOperation.Deleted && e.ChangedStatistic is Special)
             {
                 var list = await _charRepository.Query.Where(x => x.Level == 1).ToListAsync();
 
