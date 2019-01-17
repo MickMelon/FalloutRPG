@@ -158,6 +158,17 @@ namespace FalloutRPG.Modules
             return GenericResult.FromSuccess("Flag set successfully.");
         }
 
+        [Command("setminimum")]
+        [Alias("setmin")]
+        public async Task<RuntimeResult> SetSkillMinimumAsync(Skill skill, int min)
+        {
+            skill.MinimumValue = min;
+
+            await _statService.SaveStatisticAsync(skill);
+
+            return GenericResult.FromSuccess("Minimum set successfully.");
+        }
+
         [Command("givemoney")]
         public async Task GiveMoneyAsync(IUser user, int money)
         {
