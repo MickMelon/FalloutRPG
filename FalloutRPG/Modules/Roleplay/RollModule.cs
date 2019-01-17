@@ -50,12 +50,12 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task<RuntimeResult> RollSelfStatAsync(Statistic statToRoll) =>
             await RollPlayerAsync(statToRoll, Context.User);
 
-        [Command("roll"), Priority(0)]
+        [Command("roll")]
         [Alias("r")]
         public async Task<RuntimeResult> RollOthersStatAsync(Statistic statToRoll, IUser user) =>
             await RollPlayerAsync(statToRoll, user);
 
-        [Command("roll"), Priority(1)]
+        [Command("roll")]
         [Alias("r")]
         public async Task<RuntimeResult> RollNpcStatAsync(Statistic statToRoll, string npcName) =>
             await Task.FromResult(RollNpcAsync(statToRoll, npcName));
@@ -65,12 +65,12 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task<RuntimeResult> RollSelfStatBuffedAsync(Statistic statToRoll) =>
             await RollPlayerAsync(statToRoll, Context.User, true);
 
-        [Command("broll"), Priority(0)]
+        [Command("broll")]
         [Alias("br")]
         public async Task<RuntimeResult> RollOthersStatBuffedAsync(Statistic statToRoll, IUser user) =>
             await RollPlayerAsync(statToRoll, user, true);
 
-        [Command("broll"), Priority(1)]
+        [Command("broll")]
         [Alias("br")]
         public async Task<RuntimeResult> RollNpcStatBuffedAsync(Statistic statToRoll, string npcName) =>
             await Task.FromResult(RollNpcAsync(statToRoll, npcName, true));
