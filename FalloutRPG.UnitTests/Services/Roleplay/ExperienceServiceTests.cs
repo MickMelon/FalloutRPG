@@ -9,9 +9,8 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
     public class ExperienceServiceTests
     {
         #region GiveExperienceAsync() Tests
-        /*
-        need to add statistics to the db for this to work due to OnLevelUpAsync
-        [Theory]
+
+        /*[Theory]
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(1)]
@@ -42,8 +41,8 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
 
             // Assert
             Assert.Equal(initialExp + value, character.Experience);
-        }
-        */
+        }*/
+        
 
         // public async Task GiveExperience_EnoughToLevelUp_LevelUp()
         // public async Task GiveExperience_ExactlyEnoughToLevelUp_LevelUp()
@@ -58,31 +57,8 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
         #endregion
 
         #region CalculateExperienceForLevel() Tests
-        // Maybe there is a better way to do this rather than having all these
-        // InlineDatas. I'll look into it
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(3)]
-        [InlineData(4)]
-        [InlineData(5)]
-        [InlineData(6)]
-        [InlineData(7)]
-        [InlineData(8)]
-        [InlineData(9)]
-        [InlineData(10)]
-        [InlineData(11)]
-        [InlineData(12)]
-        [InlineData(13)]
-        [InlineData(14)]
-        [InlineData(15)]
-        [InlineData(16)]
-        [InlineData(17)]
-        [InlineData(18)]
-        [InlineData(19)]
-        [InlineData(20)]
-        [InlineData(21)]
-        public void CalculateExperienceForLevel_ValidLevels(int value)
+        [Fact]
+        public void CalculateExperienceForLevel_ValidLevels()
         {
             // Arrange
             var expService = new ExperienceService(null, null, null, TestHelper.BuildConfig(), new System.Random());
@@ -98,11 +74,15 @@ namespace FalloutRPG.UnitTests.Services.Roleplay
                 136000, 153000, 171000, 190000, 210000 
             }; 
 
-            // Act
-            int expForLevel = expService.CalculateExperienceForLevel(value);
+            // Alternative to using Theory with 21 InlineData tags
+            for (int i = 1; i < 22; i++)
+            {
+                // Act
+                int expForLevel = expService.CalculateExperienceForLevel(i);
 
-            // Assert
-            Assert.Equal(expForLevel, validExpLevels[value - 1]);
+                // Assert
+                Assert.Equal(expForLevel, validExpLevels[i - 1]);
+            }
         }
 
         [Theory]
