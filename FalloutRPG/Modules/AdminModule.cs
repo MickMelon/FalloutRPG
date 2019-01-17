@@ -111,7 +111,7 @@ namespace FalloutRPG.Modules
 
             await _statService.SaveStatisticAsync(stat);
 
-            return GenericResult.FromSuccess(Messages.SKILLS_REMOVED);
+            return GenericResult.FromSuccess("Statistic renamed successfully.");
         }
 
         [Command("addalias")]
