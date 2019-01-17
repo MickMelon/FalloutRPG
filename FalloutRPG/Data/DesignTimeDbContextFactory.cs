@@ -12,16 +12,9 @@ namespace FalloutRPG.Data
     {
         public RpgContext CreateDbContext(string[] args)
         {
-            IConfiguration configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("Config.json")
-                .Build();
-
             var builder = new DbContextOptionsBuilder<RpgContext>();
 
-            var connectionString = configuration["sqlserver-connection-string"];
-
-            builder.UseSqlServer(connectionString);
+            builder.UseSqlite("Filename=CharacterDB.db");
 
             return new RpgContext(builder.Options);
         }

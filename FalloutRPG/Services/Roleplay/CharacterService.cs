@@ -13,20 +13,19 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class CharacterService
     {
-        private const int MAX_CHARACTERS = 5;
+        private const int MAX_CHARACTERS = 25;
+
+        private readonly StatisticsService _statsService;
 
         private readonly IRepository<Character> _charRepository;
-        private readonly IRepository<SkillSheet> _skillRepository;
-        private readonly IRepository<Special> _specialRepository;
 
-        public CharacterService(
-            IRepository<Character> charRepository,
-            IRepository<SkillSheet> skillRepository,
-            IRepository<Special> specialRepository)
+        public CharacterService(StatisticsService statsService, IRepository<Character> charRepository)
         {
+            _statsService = statsService;
+
+            _statsService.StatisticsUpdated += OnStatisticsUpdated;
+
             _charRepository = charRepository;
-            _skillRepository = skillRepository;
-            _specialRepository = specialRepository;
         }
 
         /// <summary>
@@ -34,14 +33,11 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public async Task<Character> GetCharacterAsync(ulong discordId) =>
             await _charRepository.Query.Where(c => c.DiscordId == discordId && c.Active == true)
-            .Include(c => c.Special)
-            .Include(c => c.Skills)
+            .Include(c => c.Statistics)
+                .ThenInclude(b => b.Statistic)
             .Include(c => c.EffectCharacters)
                 .ThenInclude(x => x.Effect)
-                    .ThenInclude(x => x.SkillAdditions)
-            .Include(c => c.EffectCharacters)
-                .ThenInclude(x => x.Effect)
-                    .ThenInclude(x => x.SpecialAdditions)
+                    .ThenInclude(x => x.StatisticEffects)
             .FirstOrDefaultAsync();
 
         /// <summary>
@@ -51,14 +47,11 @@ namespace FalloutRPG.Services.Roleplay
         /// <returns></returns>
         public async Task<List<Character>> GetAllCharactersAsync(ulong discordId) =>
             await _charRepository.Query.Where(c => c.DiscordId == discordId)
-            .Include(c => c.Special)
-            .Include(c => c.Skills)
+            .Include(c => c.Statistics)
+                .ThenInclude(b => b.Statistic)
             .Include(c => c.EffectCharacters)
                 .ThenInclude(x => x.Effect)
-                    .ThenInclude(x => x.SkillAdditions)
-            .Include(c => c.EffectCharacters)
-                .ThenInclude(x => x.Effect)
-                    .ThenInclude(x => x.SpecialAdditions)
+                    .ThenInclude(x => x.StatisticEffects)
             .ToListAsync();
 
         /// <summary>
@@ -92,36 +85,15 @@ namespace FalloutRPG.Services.Roleplay
                 Description = "",
                 Story = "",
                 Experience = 0,
-                SkillPoints = 0,
+                ExperiencePoints = 0,
+                SpecialPoints = SpecialService.STARTING_SPECIAL_POINTS,
+                TagPoints = SkillsService.TAG_POINTS,
                 Money = 1000,
-                Special = new Special()
-                {
-                    Strength = 0,
-                    Perception = 0,
-                    Endurance = 0,
-                    Charisma = 0,
-                    Intelligence = 0,
-                    Agility = 0,
-                    Luck = 0
-                },
-                Skills = new SkillSheet()
-                {
-                    Barter = 0,
-                    EnergyWeapons = 0,
-                    Explosives = 0,
-                    Guns = 0,
-                    Lockpick = 0,
-                    Medicine = 0,
-                    MeleeWeapons = 0,
-                    Repair = 0,
-                    Science = 0,
-                    Sneak = 0,
-                    Speech = 0,
-                    Survival = 0,
-                    Unarmed = 0
-                },
+                Statistics = new List<StatisticValue>(),
                 EffectCharacters = new List<EffectCharacter>()
             };
+
+            _statsService.InitializeStatistics(character.Statistics);
 
             if (characters.Count == 0)
                 character.Active = true;
@@ -162,12 +134,58 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public async Task ResetCharacterAsync(Character character)
         {
-            await _skillRepository.DeleteAsync(character.Skills);
-            await _specialRepository.DeleteAsync(character.Special);
-            character.IsReset = true;
+            // for whatever reason, initializeStatistics ain't cutting it...probably a race condition(?)
+            if (character.Statistics == null) character.Statistics = new List<StatisticValue>();
+
+            _statsService.InitializeStatistics(character.Statistics);            
+
+            foreach (var stat in character.Statistics)
+            {
+                if (stat.Statistic is Special) stat.Value = SpecialService.SPECIAL_MIN;
+                else stat.Value = 0;
+            }
+
+            character.SpecialPoints = SpecialService.STARTING_SPECIAL_POINTS;
+            
+            if (ExperienceService.UseOldProgression)
+            {
+                if (character.Level > 1)
+                    character.IsReset = true;
+            }
+            else
+            {
+                character.TagPoints = SkillsService.TAG_POINTS;
+                character.ExperiencePoints = character.Experience;
+            }
+            
             await SaveCharacterAsync(character);
         }
-        
+
+        /// <summary>
+        /// Removes a character's skills and SPECIAL and marks them
+        /// as reset so they can claim skill points back but with every character.
+        /// </summary>
+        public async Task ResetAllCharactersAsync()
+        {
+            var allChars = await _charRepository.FetchAllAsync();
+
+            foreach (var character in allChars)
+                await ResetCharacterAsync(character);
+        }
+
+        private async void OnStatisticsUpdated(object sender, StatisticsUpdatedEventArgs e)
+        {
+            if (e.Operation == StatisticOperation.Added || e.Operation == StatisticOperation.Deleted && e.ChangedStatistic is Special)
+            {
+                var list = await _charRepository.Query.Where(x => x.Level == 1).ToListAsync();
+
+                foreach (var character in list)
+                {
+                    await ResetCharacterAsync(character);
+                }
+            }
+        }
+
         /// <summary>
         /// Get the total number of characters in the database.
         /// </summary>

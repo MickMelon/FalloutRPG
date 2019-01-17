@@ -14,34 +14,46 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class ExperienceService
     {
-        private Dictionary<ulong, Timer> cooldownTimers;
         private List<ulong> experienceEnabledChannels;
-        private Random _random;
+        private readonly Random _random;
+
+        private bool intelligenceEnabled;
+        private int intelligenceBaseline;
+        private double intelligenceMultiplier;
+
+        private double messageLengthDivisor;
+        private int allowedConsecutiveMessages;
+
+        private bool priceIncreaseEnabled;
+        private double priceIncreaseMultiplierAddition;
+        private int priceIncreaseStartingLevel;
+        private int priceIncreaseEveryXLevels;
+
+        public static bool UseOldProgression { get; private set; } = false;
+        public int DefaultSkillPoints { get; private set; } = 10;
+        public bool UseNewVegasRules { get; private set; } = false;
 
         private const int DEFAULT_EXP_GAIN = 100;
-        private const int DEFAULT_EXP_RANGE_FROM = 10;
-        private const int DEFAULT_EXP_RANGE_TO = 50;
-        private const int COOLDOWN_INTERVAL = 60000;
 
         private readonly CharacterService _charService;
-        private readonly SkillsService _skillsService;
+        private readonly StatisticsService _statService;
         private readonly DiscordSocketClient _client;
         private readonly IConfiguration _config;
 
         public ExperienceService(
             CharacterService charService,
-            SkillsService skillsService,
+            StatisticsService statService,
             DiscordSocketClient client,
             IConfiguration config,
             Random random)
         {
             _charService = charService;
-            _skillsService = skillsService;
+            _statService = statService;
+
             _client = client;
             _config = config;
-
-            cooldownTimers = new Dictionary<ulong, Timer>();
-            LoadExperienceEnabledChannels();
+            
+            LoadExperienceConfig();
             _random = random;
         }
 
@@ -58,7 +70,12 @@ namespace FalloutRPG.Services.Roleplay
 
             if (character == null || context.Message.ToString().StartsWith("(")) return;
 
-            var expToGive = GetRandomExperience();
+            // filter out users abusing monologues for exp
+            var cache = context.Channel.GetCachedMessages(allowedConsecutiveMessages)
+                .Where(x => !x.Author.Equals(context.Client.CurrentUser));
+            if (cache.All(x => x.Author.Equals(context.User))) return;
+
+            var expToGive = GetExperienceFromMessage(character, context.Message.Content.Where(x => !Char.IsWhiteSpace(x)).Count());
 
             if (await GiveExperienceAsync(character, expToGive))
             {
@@ -74,11 +91,13 @@ namespace FalloutRPG.Services.Roleplay
         public async Task<bool> GiveExperienceAsync(Character character, int experience = DEFAULT_EXP_GAIN)
         {
             if (character == null) return false;
-            if (cooldownTimers.ContainsKey(character.DiscordId)) return false;
 
             var initialLevel = character.Level;
 
             character.Experience += experience;
+            if (!UseOldProgression)
+                character.ExperiencePoints += experience;
+
             await _charService.SaveCharacterAsync(character);
 
             var levelUp = false;
@@ -89,21 +108,23 @@ namespace FalloutRPG.Services.Roleplay
                 await OnLevelUpAsync(character, difference);
                 levelUp = true;
             }
-
-            AddToCooldown(character.DiscordId);
             
             return levelUp;
         }
 
-        /// <summary>
-        /// Gets a random amount of experience to give
-        /// between a range of two numbers.
-        /// </summary>
-        public int GetRandomExperience(
-            int rangeFrom = DEFAULT_EXP_RANGE_FROM,
-            int rangeTo = DEFAULT_EXP_RANGE_TO)
+        public int GetExperienceFromMessage(Character character, int messageLength)
         {
-            return _random.Next(rangeFrom, rangeTo);
+            double expValue = Math.Round(Math.Max(1, messageLength / messageLengthDivisor));
+
+            if (intelligenceEnabled)
+            {
+                int intStat = _statService.GetStatistic(character, Globals.StatisticFlag.Intelligence);
+
+                if (intStat > 0)
+                    expValue *= 1 + (intStat - intelligenceBaseline) * intelligenceMultiplier;
+            }
+
+            return (int)Math.Round(expValue);
         }
 
         /// <summary>
@@ -158,23 +179,95 @@ namespace FalloutRPG.Services.Roleplay
             return false;
         }
 
+        public double GetPriceMultiplier(int level)
+        {
+            double multiplier = 1.0;
+
+            if (priceIncreaseEnabled)
+            {
+                level -= priceIncreaseStartingLevel;
+
+                for (int i = 0; i <= level; i += priceIncreaseEveryXLevels)
+                    multiplier += priceIncreaseMultiplierAddition;
+            }
+
+            return multiplier;
+        }
+
+        public int CalculateSkillPoints(int level, int intelligence)
+        {
+            int extraPoints = 0;
+
+            if (UseNewVegasRules)
+            {
+                extraPoints = intelligence / 2;
+
+                // When leveling up, the character distributes 10 + half Intelligence skill points.
+                // (For odd intelligence scores, the "extra" skill point is given on even levels,
+                // so a character with 1 intelligence will gain 11 skill points at level 2, then 10 at level 3, etc.)
+                // http://fallout.wikia.com/wiki/Fallout:_New_Vegas_skills - 12/26/2018
+                if (intelligence % 2 != 0 && level % 2 == 0)
+                {
+                    extraPoints += 1;
+                }
+            }
+
+            return DefaultSkillPoints + extraPoints;
+        }
+
         /// <summary>
         /// Loads the experience enabled channels from the
         /// configuration file.
         /// </summary>
-        private void LoadExperienceEnabledChannels()
+        private void LoadExperienceConfig()
         {
             try
             {
                 experienceEnabledChannels = _config
-                    .GetSection("roleplay:exp-channels")
+                    .GetSection("roleplay:experience:exp-channels")
                     .GetChildren()
                     .Select(x => UInt64.Parse(x.Value))
                     .ToList();
+
+                UseOldProgression = _config
+                    .GetValue<bool>("roleplay:experience:old-progression-system:enabled");
+
+                DefaultSkillPoints = _config
+                    .GetValue<int>("roleplay:experience:old-progression-system:skill-points-on-level-up");
+
+                UseNewVegasRules = _config
+                    .GetValue<bool>("roleplay:experience:old-progression-system:use-new-vegas-rules");
+
+                intelligenceEnabled = _config
+                    .GetValue<bool>("roleplay:experience:intelligence-based-exp-gain:enabled");
+
+                intelligenceBaseline = _config
+                    .GetValue<int>("roleplay:experience:intelligence-based-exp-gain:baseline");
+                
+                intelligenceMultiplier = _config
+                    .GetValue<double>("roleplay:experience:intelligence-based-exp-gain:multiplier");
+
+                allowedConsecutiveMessages = _config
+                    .GetValue<int>("roleplay:experience:allowed-consecutive-messages");
+
+                messageLengthDivisor = _config
+                    .GetValue<double>("roleplay:experience:message-length-divisor");
+
+                priceIncreaseEnabled = _config
+                    .GetValue<bool>("roleplay:experience:price-increase:enabled");
+
+                priceIncreaseStartingLevel = _config
+                    .GetValue<int>("roleplay:experience:price-increase:starting-level");
+
+                priceIncreaseEveryXLevels = _config
+                    .GetValue<int>("roleplay:experience:price-increase:increase-every");
+
+                priceIncreaseMultiplierAddition = _config
+                    .GetValue<double>("roleplay:experience:price-increase:multiplier-addition");
             }
             catch (Exception)
             {
-                Console.WriteLine("You have not specified any experience enabled channels in Config.json");
+                Console.WriteLine("Experience settings improperly configured, Config.json.");
             }
         }
 
@@ -196,35 +289,19 @@ namespace FalloutRPG.Services.Roleplay
             if (character == null) throw new ArgumentNullException("character");
             var user = _client.GetUser(character.DiscordId);
 
-            for (int i = 0; i < times; i++)
-                _skillsService.GiveSkillPoints(character);
+            if (UseOldProgression)
+            {
+                int originalLevel = character.Level - times;
 
-            await user.SendMessageAsync(string.Format(Messages.SKILLS_LEVEL_UP, user.Mention, character.SkillPoints));
-        }
+                var intelligence = _statService.GetStatistic(character, Globals.StatisticFlag.Intelligence);
 
-        /// <summary>
-        /// Adds a user's Discord ID to the cooldowns.
-        /// </summary>
-        private void AddToCooldown(ulong discordId)
-        {
-            var timer = new Timer();
-            timer.Elapsed += (sender, e) => OnCooldownElapsed(sender, e, discordId);
-            timer.Interval = COOLDOWN_INTERVAL;
-            timer.Enabled = true;
+                for (int i = 1; i <= times; i++)
+                    character.ExperiencePoints += CalculateSkillPoints(originalLevel + i, intelligence);
 
-            cooldownTimers.Add(discordId, timer);
-        }
+                await _charService.SaveCharacterAsync(character);
+            }
 
-        /// <summary>
-        /// Called when a cooldown has finished.
-        /// </summary>
-        private void OnCooldownElapsed(object sender, ElapsedEventArgs e, ulong discordId)
-        {
-            var timer = cooldownTimers[discordId];
-            timer.Enabled = false;
-            timer.Dispose();
-
-            cooldownTimers.Remove(discordId);
+            await user.SendMessageAsync(string.Format(Messages.SKILLS_LEVEL_UP, user.Mention, character.ExperiencePoints));
         }
     }
 }

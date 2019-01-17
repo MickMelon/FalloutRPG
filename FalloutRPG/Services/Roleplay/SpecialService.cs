@@ -1,6 +1,13 @@
-﻿using FalloutRPG.Constants;
+﻿using Discord.Commands;
+using FalloutRPG.Constants;
+using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,32 +15,135 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class SpecialService
     {
-        private const int DEFAULT_SPECIAL_POINTS = 40;
-        public const int MAX_SPECIAL = 10;
+        private static int CONFIGURED_SPECIAL_POINTS = 29;
+        public static int STARTING_SPECIAL_POINTS { get => CONFIGURED_SPECIAL_POINTS - Specials.Count * SPECIAL_MIN; }
+
+        public static int SPECIAL_MAX = 10;
+        public static int SPECIAL_MAX_CHARGEN = 8;
+        public static int SPECIAL_MAX_CHARGEN_QUANTITY = 2;
+        public static int SPECIAL_MIN = 1;
 
         private readonly CharacterService _charService;
+        private readonly ExperienceService _expService;
+        private readonly StatisticsService _statService;
+        private readonly IConfiguration _config;
 
-        public SpecialService(CharacterService charService)
+        public static IReadOnlyCollection<Special> Specials { get => StatisticsService.Statistics.OfType<Special>().ToList().AsReadOnly(); }
+        private IReadOnlyDictionary<int, int> _specialPrices;
+
+        public SpecialService(CharacterService charService,
+            ExperienceService expService,
+            StatisticsService statService,
+            IConfiguration config)
         {
             _charService = charService;
+            _expService = expService;
+            _statService = statService;
+            _config = config;
+
+            LoadSpecialConfig();
+        }
+
+        void LoadSpecialConfig()
+        {
+            try
+            {
+                var temp = new Dictionary<int, int>();
+
+                foreach (var item in _config.GetSection("roleplay:skill-prices").GetChildren())
+                    temp.Add(Int32.Parse(item.Key), Int32.Parse(item.Value));
+
+                _specialPrices = temp;
+
+                SPECIAL_MAX = _config.GetValue<int>("roleplay:special-max");
+
+                CONFIGURED_SPECIAL_POINTS = _config.GetValue<int>("roleplay:chargen:special-points");
+
+                SPECIAL_MAX_CHARGEN = _config.GetValue<int>("roleplay:chargen:special-level-limit");
+                SPECIAL_MAX_CHARGEN_QUANTITY = _config.GetValue<int>("roleplay:chargen:specials-at-limit");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Special settings improperly configured, check Config.json.");
+                throw;
+            }
         }
 
         /// <summary>
         /// Set character's special.
         /// </summary>
-        public async Task SetInitialSpecialAsync(Character character, int[] special)
+        public async Task SetInitialSpecialAsync(Character character, Special special, int points)
         {
             if (character == null) throw new ArgumentNullException("character");
 
-            if (!IsSpecialInRange(special))
+            if (!IsSpecialInRange(character.Special, points))
                 throw new ArgumentException(Exceptions.CHAR_SPECIAL_NOT_IN_RANGE);
 
-            if (special.Sum() != DEFAULT_SPECIAL_POINTS)
-                throw new ArgumentException(Exceptions.CHAR_SPECIAL_DOESNT_ADD_UP);
+            // Refund special points used if overwriting the same skill
+            character.SpecialPoints += _statService.GetStatistic(character, special);
 
-            InitializeSpecial(character, special);
+            if (character.SpecialPoints - points < 0)
+                throw new Exception(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
+
+            _statService.SetStatistic(character, special, points);
+            character.SpecialPoints -= points;
 
             await _charService.SaveCharacterAsync(character);
+        }
+
+        /// <summary>
+        /// Puts one extra point in a specified skill.
+        /// </summary>
+        public RuntimeResult UpgradeSpecial(Character character, Special special)
+        {
+            if (character == null) throw new ArgumentNullException("character");
+
+            var specialVal = _statService.GetStatistic(character, special);
+
+            if (specialVal + 1 > SPECIAL_MAX)
+                return GenericResult.FromError(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
+
+            int price = CalculatePrice(_statService.GetStatistic(character, special), character.Level);
+
+            if (price > character.ExperiencePoints)
+                return GenericResult.FromError(String.Format(Messages.ERR_STAT_NOT_ENOUGH_POINTS, price));
+
+            if (price < 0)
+                return GenericResult.FromError(Messages.ERR_STAT_PRICE_NOT_SET);
+
+            _statService.SetStatistic(character, special, specialVal + 1);
+            character.ExperiencePoints -= price;
+
+            return GenericResult.FromSuccess(Messages.SKILLS_SPEND_POINTS_SUCCESS);
+        }
+
+        private int CalculatePrice(int skillLevel, int charLevel)
+        {
+            double multiplier = _expService.GetPriceMultiplier(charLevel);
+
+            if (_specialPrices.TryGetValue(skillLevel, out int basePrice))
+            {
+                return (int)(_specialPrices[skillLevel] * multiplier);
+            }
+
+            return -1;
+        }
+
+        private bool IsSpecialInRange(IList<StatisticValue> stats, int points)
+        {
+            var special = stats.Where(x => x.Statistic is Special);
+
+            if (points < SPECIAL_MIN || points > SPECIAL_MAX_CHARGEN)
+                return false;
+
+            // Unique MUSH rules :/
+            if (special.Where(sp => sp.Value == SPECIAL_MAX_CHARGEN).Count() > SPECIAL_MAX_CHARGEN_QUANTITY)
+                return false;
+
+            if (points == SPECIAL_MAX_CHARGEN && special.Where(sp => sp.Value == SPECIAL_MAX_CHARGEN).Count() >= SPECIAL_MAX_CHARGEN_QUANTITY)
+                return false;
+
+            return true;
         }
 
         /// <summary>
@@ -41,95 +151,26 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         private bool IsValidSpecialName(string special)
         {
-            foreach (var name in Globals.SPECIAL_NAMES)
-                if (special.Equals(name, StringComparison.InvariantCultureIgnoreCase) ||
-                    special.Equals(name.Substring(0, 3), StringComparison.InvariantCultureIgnoreCase))
-                    return true;
-
-            return false;
-        }
-
-        public Special CloneSpecial(Special special)
-        {
-            var newSpecial = new Special();
-
-            foreach (var item in typeof(Special).GetProperties())
-                item.SetValue(newSpecial, item.GetValue(special));
-
-            newSpecial.Id = -1;
-
-            return newSpecial;
+            return StatisticsService.Statistics.OfType<Special>().Select(spec => spec.AliasesArray).Any(aliases => aliases.Contains(special));
         }
 
         /// <summary>
-        /// Returns the value of the specified special.
+        /// Checks if each number in SPECIAL is in valid range
+        /// and ensures that the given list's Count matches the
+        /// configured amount.
         /// </summary>
-        /// <returns>Returns 0 if special values are null.</returns>
-        public int GetSpecial(Special specialSheet, Globals.SpecialType special)
+        private bool IsSpecialInRange(IList<StatisticValue> stats)
         {
-            if (specialSheet == null)
-                return 0;
+            var special = stats.Where(x => x.Statistic is Special);
 
-            return (int)typeof(Special).GetProperty(special.ToString()).GetValue(specialSheet);
-        }
-
-        /// <summary>
-        /// Returns the value of the specified character's given special.
-        /// </summary>
-        /// <returns>Returns 0 if character or special values are null.</returns>
-        public int GetSpecial(Character character, Globals.SpecialType special) =>
-            GetSpecial(character?.Special, special);
-
-        /// <summary>
-        /// Sets the value of the specified character's given special.
-        /// </summary>
-        /// <returns>Returns false if special is null.</returns>
-        public bool SetSpecial(Special specialSheet, Globals.SpecialType special, int newValue)
-        {
-            if (specialSheet == null)
-                return false;
-
-            typeof(Special).GetProperty(special.ToString()).SetValue(specialSheet, newValue);
-            return true;
-        }
-
-        /// <summary>
-        /// Sets the value of the specified character's given special.
-        /// </summary>
-        /// <returns>Returns false if character or special are null.</returns>
-        public bool SetSpecial(Character character, Globals.SpecialType special, int newValue) =>
-            SetSpecial(character?.Special, special, newValue);
-
-        /// <summary>
-        /// Checks if each number in SPECIAL is between 1 and 10
-        /// and ensures there are 7 elements in the input array.
-        /// </summary>
-        private bool IsSpecialInRange(int[] special)
-        {
-            if (special.Length != 7) return false;
+            if (special.Count() != Specials.Count) return false;
+            if (special.Sum(x => x.Value) != STARTING_SPECIAL_POINTS) return false;
 
             foreach (var sp in special)
-                if (sp < 1 || sp > 10)
+                if (sp.Value < SPECIAL_MIN || sp.Value > SPECIAL_MAX)
                     return false;
 
             return true;
-        }
-
-        /// <summary>
-        /// Initializes character's special.
-        /// </summary>
-        private void InitializeSpecial(Character character, int[] special)
-        {
-            character.Special = new Special()
-            {
-                Strength = special[0],
-                Perception = special[1],
-                Endurance = special[2],
-                Charisma = special[3],
-                Intelligence = special[4],
-                Agility = special[5],
-                Luck = special[6]
-             };
         }
 
         /// <summary>
@@ -137,19 +178,10 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public bool IsSpecialSet(Character character)
         {
-            if (character == null || character.Special == null) return false;
-
-            var properties = character.Special.GetType().GetProperties();
-
-            foreach (var prop in properties)
-            {
-                if (prop.Name.Equals("CharacterId") || prop.Name.Equals("Id"))
-                    continue;
-
-                var value = Convert.ToInt32(prop.GetValue(character.Special));
-                if (value == 0) return false;
-            }
-
+            if (character == null || character.Statistics == null) return false;
+            if (character.SpecialPoints > 0) return false;
+            if (character.Special.Sum(x => x.Value) < STARTING_SPECIAL_POINTS) return false;
+            
             return true;
         }
     }

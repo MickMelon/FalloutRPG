@@ -3,6 +3,7 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using FalloutRPG.Addons;
 using FalloutRPG.Constants;
+using FalloutRPG.Models;
 using FalloutRPG.Services;
 using System.Threading.Tasks;
 
@@ -77,6 +78,7 @@ namespace FalloutRPG.Modules
         }
 
         [Group("skills")]
+        [Alias("skill")]
         public class SkillsHelpModule : InteractiveBase<SocketCommandContext>
         {
             private readonly HelpService _helpService;
@@ -90,6 +92,36 @@ namespace FalloutRPG.Modules
             public async Task ShowSkillsHelpAsync()
             {
                 await _helpService.ShowSkillsHelpAsync(Context);
+            }
+
+            [Command]
+            public async Task ShowSkillsHelpAsync(Skill skill)
+            {
+                await _helpService.ShowSkillsHelpAsync(Context, skill);
+            }
+        }
+
+        [Group("special")]
+        [Alias("spec")]
+        public class SpecialHelpModule : InteractiveBase<SocketCommandContext>
+        {
+            private readonly HelpService _helpService;
+
+            public SpecialHelpModule(HelpService helpService)
+            {
+                _helpService = helpService;
+            }
+
+            [Command]
+            public async Task ShowSkillsHelpAsync()
+            {
+                await _helpService.ShowSpecialHelpAsync(Context);
+            }
+
+            [Command]
+            public async Task ShowSkillsHelpAsync(Special spec)
+            {
+                await _helpService.ShowSpecialHelpAsync(Context, spec);
             }
         }
 

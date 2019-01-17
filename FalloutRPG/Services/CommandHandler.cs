@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using FalloutRPG.Constants;
 using FalloutRPG.Services.Roleplay;
@@ -40,37 +41,59 @@ namespace FalloutRPG.Services
         /// </summary>
         public async Task InstallCommandsAsync()
         {
-            _commands.AddTypeReader(typeof(Globals.SkillType), new Addons.SkillTypeReader());
-            _commands.AddTypeReader(typeof(Globals.SpecialType), new Addons.SpecialTypeReader());
+            _commands.AddTypeReader(typeof(Models.Statistic), new Helpers.StatisticTypeReader());
+            _commands.AddTypeReader(typeof(Globals.StatisticFlag), new Helpers.StatisticFlagTypeReader());
+            _commands.AddTypeReader(typeof(Models.Skill), new Helpers.SkillTypeReader());
+            _commands.AddTypeReader(typeof(Models.Special), new Helpers.SpecialTypeReader());
 
             await _commands.AddModulesAsync(
                 assembly: Assembly.GetEntryAssembly(),
                 services: _services);
-            _client.MessageReceived += HandleCommandAsync;
+
+            #pragma warning disable CS1998
+            _client.MessageReceived += async (message) =>
+            #pragma warning restore CS1998
+            {
+                #pragma warning disable CS4014
+                Task.Run(() => HandleCommandAsync(message));
+                #pragma warning restore CS4014
+            };
+
             _commands.CommandExecuted += OnCommandExecutedAsync;
         }
 
-        private async Task OnCommandExecutedAsync(CommandInfo command, ICommandContext context, IResult result)
+        private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            if (result is PreconditionResult preResult)
+            string message = result.ToString();
+
+            if (result is RuntimeResult rr && !String.IsNullOrEmpty(rr.Reason))
             {
-                await context.Channel.SendMessageAsync(preResult.ErrorReason);
+                await context.Channel.SendMessageAsync(message);
             }
-            else if (!string.IsNullOrEmpty(result?.ErrorReason))
+
+            else if (result is RollResult roll)
             {
-                if (result.Error.Value.ToString().Equals("ObjectNotFound") ||
-                     result.Error.Value.ToString().Equals("BadArgCount"))
+                if (roll.RollEmbed != null) await context.Channel.SendMessageAsync(embed: roll.RollEmbed);
+                if (!String.IsNullOrEmpty(roll.OldMessage)) await context.Channel.SendMessageAsync($"{roll.OldMessage} ({context.User.Mention})");
+            }
+
+            else if (!result.IsSuccess)
+            {
+                switch (result.Error)
                 {
-                    await context.Channel.SendMessageAsync(string.Format(Messages.ERR_CMD_USAGE, context.User.Mention));
+                    // CommandError.BadArgCount was getting thrown way too much because of the parameterless help commands
+                    case CommandError.UnmetPrecondition: break;
+                    case CommandError.UnknownCommand:
+                        {
+                            await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
+                            break;
+                        }
+                    default:
+                        {
+                            await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_USAGE, context.User.Mention));
+                            break;
+                        }
                 }
-                else if (result.Error.Value.ToString().Equals("UnknownCommand"))
-                {
-                    await context.Channel.SendMessageAsync(string.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
-                }
-                else
-                {
-                    await context.Channel.SendMessageAsync(result.ToString());
-                }                    
             }
         }
 
@@ -80,24 +103,30 @@ namespace FalloutRPG.Services
         /// </summary>
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
-            if (!(messageParam is SocketUserMessage message) || message.Author.IsBot) return;
-
-            int argPos = 0;
-            var context = new SocketCommandContext(_client, message);
-
-            if (!(message.HasStringPrefix(_config["prefix"], ref argPos) ||
-                message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
+            try
             {
-                await _expService.ProcessExperienceAsync(context);
-                return;
+                if (!(messageParam is SocketUserMessage message) || message.Author.IsBot) return;
+
+                int argPos = 0;
+                var context = new SocketCommandContext(_client, message);
+
+                if (!(message.HasStringPrefix(_config["prefix"], ref argPos) ||
+                    message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
+                {
+                    await _expService.ProcessExperienceAsync(context);
+                    return;
+                }
+
+                var result = await _commands.ExecuteAsync(
+                    context: context,
+                    argPos: argPos,
+                    services: _services);
             }
-
-            var result = await _commands.ExecuteAsync(
-                context: context,
-                argPos: argPos,
-                services: _services);
-
-            await OnCommandExecutedAsync(null, context, result);
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }

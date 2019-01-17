@@ -3,8 +3,11 @@ using Discord.Commands;
 using FalloutRPG.Addons;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
+using FalloutRPG.Models;
 using FalloutRPG.Services.Roleplay;
 using System;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
@@ -32,7 +35,7 @@ namespace FalloutRPG.Modules.Roleplay
             [Command]
             [Alias("show", "view")]
             public async Task ShowSpecialAsync(IUser targetUser = null) =>
-                await ShowSpecialAsync(targetUser);
+                await ShowSpecialAsync(targetUser, false);
 
             [Command("buffed")]
             [Alias("bshow", "bview")]
@@ -53,57 +56,53 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
-                if (!_specService.IsSpecialSet(character))
-                {
-                    await ReplyAsync(
-                        string.Format(Messages.ERR_SPECIAL_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
-
-                var special = character.Special;
+                var stats = character.Statistics;
                 if (useEffects)
-                    special = _effectsService.GetEffectiveSpecial(character);
+                    stats = _effectsService.GetEffectiveStatistics(character);
 
-                var embed = EmbedHelper.BuildBasicEmbed("Command: $special",
-                    $"**Name:** {character.Name}\n" +
-                    $"**STR:** {special.Strength}\n" +
-                    $"**PER:** {special.Perception}\n" +
-                    $"**END:** {special.Endurance}\n" +
-                    $"**CHA:** {special.Charisma}\n" +
-                    $"**INT:** {special.Intelligence}\n" +
-                    $"**AGI:** {special.Agility}\n" +
-                    $"**LUC:** {special.Luck}");
+                StringBuilder message = new StringBuilder($"**Name:** {character.Name}\n");
+
+                foreach (var special in stats.Where(x => x.Statistic is Special).OrderBy(x => x.Statistic.Id))
+                    message.Append($"**{special.Statistic.Name}:** {special.Value}\n");
+
+                if (!_specService.IsSpecialSet(character))
+                    message.Append($"*You have {character.SpecialPoints} S.P.E.C.I.A.L. points left to spend!*");
+
+                var embed = EmbedHelper.BuildBasicEmbed("Command: $special", message.ToString());
 
                 await ReplyAsync(userInfo.Mention, embed: embed);
             }
 
-            [Command("set")]
-            public async Task SetSpecialAsync(int str, int per, int end, int cha, int inte, int agi, int luc)
+            [Command("spend")]
+            [Alias("put", "upgrade")]
+            public async Task<RuntimeResult> UpgradeSpecialAsync(Special special)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
-                var special = new int[] { str, per, end, cha, inte, agi, luc };
 
-                if (character == null)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet();
 
-                if (_specService.IsSpecialSet(character))
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_SPECIAL_ALREADY_SET, userInfo.Mention));
-                    return;
-                }
+                return _specService.UpgradeSpecial(character, special);
+            }
+
+            [Command("set")]
+            public async Task<RuntimeResult> SetSpecialAsync(Special special, int amount)
+            {
+                var userInfo = Context.User;
+                var character = await _charService.GetCharacterAsync(userInfo.Id);
+
+                if (character == null) return CharacterResult.CharacterNotFound();
+                if (character.Level > 1 && _specService.IsSpecialSet(character)) return StatisticResult.SpecialAlreadySet();
 
                 try
                 {
-                    await _specService.SetInitialSpecialAsync(character, special);
-                    await ReplyAsync(string.Format(Messages.SPECIAL_SET_SUCCESS, userInfo.Mention));
+                    await _specService.SetInitialSpecialAsync(character, special, amount);
+                    return GenericResult.FromSuccess(String.Format(Messages.SPECIAL_SET_SUCCESS, userInfo.Mention));
                 }
                 catch (Exception e)
                 {
-                    await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
+                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
                 }
             }
         }

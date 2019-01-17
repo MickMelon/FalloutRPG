@@ -38,8 +38,6 @@ namespace FalloutRPG
         public async Task MainAsync()
         {
             config = BuildConfig();
-            CheckConnectionString();
-
             var services = BuildServiceProvider();
 
             services.GetRequiredService<LogService>();
@@ -74,12 +72,15 @@ namespace FalloutRPG
             // Roleplay
             .AddSingleton<Random>()
             .AddSingleton<RollService>()
+            .AddSingleton<StatisticsService>()
             .AddSingleton<SkillsService>()
             .AddSingleton<SpecialService>()
             .AddSingleton<StartupService>()
             .AddSingleton<CharacterService>()
             .AddSingleton<ExperienceService>()
             .AddSingleton<EffectsService>()
+            .AddSingleton<NpcPresetService>()
+            .AddSingleton<NpcService>()
 
             // Casino
             .AddSingleton<GamblingService>()
@@ -89,32 +90,19 @@ namespace FalloutRPG
             .AddSingleton<InteractiveService>()
 
             // Database
-            .AddDbContext<RpgContext>(options =>
-                options.UseSqlServer(config["sqlserver-connection-string"]))
-            .AddTransient<IRepository<Character>, EfRepository<Character>>()
-            .AddTransient<IRepository<SkillSheet>, EfRepository<SkillSheet>>()
-            .AddTransient<IRepository<Special>, EfRepository<Special>>()
-            .AddTransient<IRepository<Effect>, EfRepository<Effect>>()
+            .AddEntityFrameworkSqlite().AddDbContext<RpgContext>(optionsAction: options => options.UseSqlite("Filename=CharacterDB.db"))
+            .AddTransient<IRepository<Character>, EfSqliteRepository<Character>>()
+            .AddTransient<IRepository<Statistic>, EfSqliteRepository<Statistic>>()
+            .AddTransient<IRepository<Effect>, EfSqliteRepository<Effect>>()
+            .AddTransient<IRepository<NpcPreset>, EfSqliteRepository<NpcPreset>>()
             .BuildServiceProvider();
 
         /// <summary>
         /// Builds the configuration from the Config.json file.
         /// </summary>
         private IConfiguration BuildConfig() => new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
             .AddJsonFile("Config.json")
             .Build();
-
-        /// <summary>
-        /// Sets the SQL Server connection string variable if it's valid.
-        /// </summary>
-        private bool CheckConnectionString()
-        {
-            var connectionString = config["sqlserver-connection-string"];
-            if (!string.IsNullOrEmpty(connectionString)) return true;
-
-            Console.WriteLine("You have an invalid SQL Server connection string set in Config.json");
-            return false;
-        }
     }
 }

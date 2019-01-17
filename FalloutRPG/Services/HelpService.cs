@@ -3,6 +3,10 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
+using FalloutRPG.Models;
+using FalloutRPG.Services.Roleplay;
+using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,10 +14,16 @@ namespace FalloutRPG.Services
 {
     public class HelpService
     {
+        private readonly SkillsService _skillsService;
+        private readonly SpecialService _specialService;
         private readonly InteractiveService _interactiveService;
 
-        public HelpService(InteractiveService interactiveService)
+        public HelpService(SkillsService skillsService, 
+            SpecialService specialService,
+            InteractiveService interactiveService)
         {
+            _skillsService = skillsService;
+            _specialService = specialService;
             _interactiveService = interactiveService;
         }
 
@@ -41,6 +51,26 @@ namespace FalloutRPG.Services
             var embed = EmbedHelper.BuildBasicEmbedWithFields("Command: $help general", string.Empty,
                 Pages.HELP_GENERAL_PAGE1_TITLES, Pages.HELP_GENERAL_PAGE1_CONTENTS);
 
+            await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
+        }
+        #endregion
+
+        #region NPC Help
+        /// <summary>
+        /// Shows the NPC help menu.
+        /// </summary>
+        public async Task ShowNpcHelpAsync(SocketCommandContext context)
+        {
+            var userInfo = context.User;
+            var embed = EmbedHelper.BuildBasicEmbedWithFields("Command: $help npc", string.Empty,
+                Pages.HELP_NPC_PAGE1_TITLES, Pages.HELP_NPC_PAGE1_CONTENTS);
+            await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
+        }
+        public async Task ShowNpcPresetHelpAsync(SocketCommandContext context)
+        {
+            var userInfo = context.User;
+            var embed = EmbedHelper.BuildBasicEmbedWithFields("Command: $help npc preset", string.Empty,
+                Pages.HELP_NPC_PRESETS_PAGE1_TITLES, Pages.HELP_NPC_PRESETS_PAGE1_CONTENTS);
             await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
         }
         #endregion
@@ -95,10 +125,70 @@ namespace FalloutRPG.Services
             var userInfo = context.User;
             var message = new StringBuilder();
 
-            foreach (var skill in Globals.SKILL_NAMES)
-                message.Append($"{skill}\n");
+            foreach (var special in SpecialService.Specials.OrderBy(x => x.Id))
+            {
+                message.Append($"**{special.Name}:**\n");
+                foreach (var skill in SkillsService.Skills.Where(x => x.Special.Equals(special)))
+                {
+                    message.Append($"{skill.Name}\n");
+                }
+
+                message.Append($"\n");
+            }
 
             var embed = EmbedHelper.BuildBasicEmbed("Command: $help skills", message.ToString());
+
+            await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
+        }
+
+        public async Task ShowSkillsHelpAsync(SocketCommandContext context, Skill skill)
+        {
+            var userInfo = context.User;
+            string message = String.Empty;
+
+            message =
+            $"**Name:** {skill.Name}\n" +
+            $"**Description:** {skill.Description}\n" +
+            $"**Aliases:** {String.Join(" ,", skill.AliasesArray)}\n" +
+            $"**S.P.E.C.I.A.L.:** {skill.Special.Name}\n +" +
+            $"**Acts as:** {skill.StatisticFlag.ToString()}\n" +
+            $"**Minimum value to use:** {skill.MinimumValue}";
+            
+            var embed = EmbedHelper.BuildBasicEmbed(skill.Name, message);
+
+            await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
+        }
+        #endregion
+
+        #region Special Help
+        /// <summary>
+        /// Shows the skills help menu.
+        /// </summary>
+        public async Task ShowSpecialHelpAsync(SocketCommandContext context)
+        {
+            var userInfo = context.User;
+            var message = new StringBuilder();
+
+            foreach (var spec in SpecialService.Specials.OrderBy(x => x.Id).Select(x => x.Name))
+                message.Append($"{spec}\n");
+
+            var embed = EmbedHelper.BuildBasicEmbed("Command: $help skills", message.ToString());
+
+            await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
+        }
+
+        public async Task ShowSpecialHelpAsync(SocketCommandContext context, Special spec)
+        {
+            var userInfo = context.User;
+            string message = String.Empty;
+
+            message =
+            $"**Name:** {spec.Name}\n" +
+            $"**Description:** {spec.Description}\n" +
+            $"**Aliases:** {String.Join(" ,", spec.AliasesArray)}\n" +
+            $"**Acts as:** {spec.StatisticFlag.ToString()}\n";
+
+            var embed = EmbedHelper.BuildBasicEmbed(spec.Name, message);
 
             await context.User.SendMessageAsync(userInfo.Mention, embed: embed);
         }

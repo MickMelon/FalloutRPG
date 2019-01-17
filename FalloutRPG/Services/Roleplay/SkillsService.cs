@@ -1,28 +1,103 @@
+using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Models;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Services.Roleplay
 {
     public class SkillsService
     {
-        private const int DEFAULT_SKILL_POINTS = 10;
-        public const int MAX_SKILL_LEVEL = 200;
+        public static int TAG_MIN = 1;
+        public static int TAG_MAX = 6;
+        public static int TAG_MAX_QUANTITY = 2;
+        public static int TAG_POINTS = 36;
+
+        public static int MAX_SKILL_LEVEL = 12;
 
         private readonly CharacterService _charService;
+        private readonly ExperienceService _expService;
         private readonly SpecialService _specService;
+        private readonly StatisticsService _statService;
 
-        public SkillsService(CharacterService charService, SpecialService specService)
+        private readonly IConfiguration _config;
+        
+        public static IReadOnlyCollection<Skill> Skills { get => StatisticsService.Statistics.OfType<Skill>().ToList().AsReadOnly(); }
+        private IReadOnlyDictionary<int, int> _skillPrices;
+
+        public SkillsService(
+            CharacterService charService,
+            ExperienceService expService,
+            SpecialService specService,
+            StatisticsService statService,
+            IConfiguration config)
         {
             _charService = charService;
+            _expService = expService;
             _specService = specService;
+            _statService = statService;
+
+            _config = config;
+
+            LoadSkillConfig();
+        }
+
+        void LoadSkillConfig()
+        {
+            try
+            {
+                var temp = new Dictionary<int, int>();
+
+                foreach (var item in _config.GetSection("roleplay:skill-prices").GetChildren())
+                    temp.Add(Int32.Parse(item.Key), Int32.Parse(item.Value));
+
+                _skillPrices = temp;
+
+                TAG_POINTS = _config.GetValue<int>("roleplay:chargen:skill-points");
+                TAG_MAX = _config.GetValue<int>("roleplay:chargen:skill-level-limit");
+                TAG_MAX_QUANTITY = _config.GetValue<int>("roleplay:chargen:skills-at-limit");
+
+                MAX_SKILL_LEVEL = _config.GetValue<int>("roleplay:skill-max");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Skill prices improperly configured, check Config.json.");
+                throw;
+            }
         }
 
         /// <summary>
-        /// Set character's tag skills.
+        /// Used during chargen to set initial (tag) skills
         /// </summary>
-        public async Task SetTagSkills(Character character, Globals.SkillType tag1, Globals.SkillType tag2, Globals.SkillType tag3)
+        /// <param name="character">The character to set tag skills</param>
+        /// <param name="tag">The skill to tag</param>
+        /// <param name="points">The value to set 'tag' equal to.</param>
+        /// <returns>Remaining points.</returns>
+        public async Task<int> TagSkill(Character character, Skill tag, int points)
+        {
+            if (character == null) throw new ArgumentNullException("character");
+
+            if (!IsTagInRange(character.Skills, points))
+                throw new ArgumentException(Exceptions.CHAR_TAGS_OUT_OF_RANGE);
+
+            // Refund skill points used if overwriting the same skill
+            character.TagPoints += _statService.GetStatistic(character, tag);
+
+            if (character.TagPoints - points < 0)
+                throw new Exception(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
+
+            _statService.SetStatistic(character, tag, points);
+            character.TagPoints -= points;
+
+            await _charService.SaveCharacterAsync(character);
+            return character.TagPoints;
+        }
+
+        public async Task TagSkills(Character character, Skill tag1, Skill tag2, Skill tag3)
         {
             if (character == null) throw new ArgumentNullException("character");
 
@@ -32,196 +107,122 @@ namespace FalloutRPG.Services.Roleplay
             if (!AreUniqueTags(tag1, tag2, tag3))
                 throw new ArgumentException(Exceptions.CHAR_TAGS_NOT_UNIQUE);
 
+            _statService.InitializeStatistics(character.Statistics);
             InitializeSkills(character);
-            
-            SetTagSkill(character, tag1);
-            SetTagSkill(character, tag2);
-            SetTagSkill(character, tag3);
+
+            _statService.SetStatistic(character, tag1, _statService.GetStatistic(character, tag1) + 15);
+            _statService.SetStatistic(character, tag2, _statService.GetStatistic(character, tag2) + 15);
+            _statService.SetStatistic(character, tag3, _statService.GetStatistic(character, tag3) + 15);
 
             await _charService.SaveCharacterAsync(character);
         }
 
-        /// <summary>
-        /// Checks if character's skills are set.
-        /// </summary>
-        public bool AreSkillsSet(Character character)
+        private bool IsTagInRange(IList<StatisticValue> skills, int points)
         {
-            if (character == null || character.Skills == null)
+            if (points < TAG_MIN || points > TAG_MAX)
                 return false;
 
-            var properties = character.Skills.GetType().GetProperties();
+            // Unique MUSH rules :/
+            if (skills.Where(sk => sk.Value == TAG_MAX).Count() > TAG_MAX_QUANTITY)
+                return false;
 
-            foreach (var prop in properties)
+            if (points == TAG_MAX && skills.Where(sk => sk.Value == TAG_MAX).Count() >= TAG_MAX_QUANTITY)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if character's skills are tagged.
+        /// </summary>
+        public bool AreSkillsSet(IList<StatisticValue> skillSheet)
+        {
+            if (skillSheet == null)
+                return false;
+
+            if (_expService.UseNewVegasRules)
             {
-                if (prop.Name.Equals("CharacterId") || prop.Name.Equals("Id"))
-                    continue;
-
-                var value = Convert.ToInt32(prop.GetValue(character.Skills));
-                if (value == 0) return false;
+                if (skillSheet.Count <= 0) return false;
+                // This works because all SPECIAL and Skills should be set by now
+                return skillSheet.All(x => x.Value > 0);
             }
 
-            return true;
-        }
-
-        public SkillSheet CloneSkills(SkillSheet skillSheet)
-        {
-            var skills = new SkillSheet();
-
-            foreach (var item in typeof(SkillSheet).GetProperties())
-                item.SetValue(skills, item.GetValue(skillSheet));
-
-            skills.Id = -1;
-
-            return skills;
-        }
-
-        /// <summary>
-        /// Returns the value of the specified character's given skill.
-        /// </summary>
-        /// <returns>Returns 0 if character or skills are null.</returns>
-        public int GetSkill(SkillSheet skillSheet, Globals.SkillType skill)
-        {
-            if (skillSheet == null)
-                return 0;
-
-            return (int)typeof(SkillSheet).GetProperty(skill.ToString()).GetValue(skillSheet);
-        }
-
-        /// <returns>Returns 0 if character or skills are null.</returns>
-        public int GetSkill(Character character, Globals.SkillType skill) =>
-            GetSkill(character?.Skills, skill);
-
-        /// <summary>
-        /// Sets the value of the specified character's given skill.
-        /// </summary>
-        /// <returns>Returns false if skills are null.</returns>
-        public bool SetSkill(SkillSheet skillSheet, Globals.SkillType skill, int newValue)
-        {
-            if (skillSheet == null)
-                return false;
-
-            typeof(SkillSheet).GetProperty(skill.ToString()).SetValue(skillSheet, newValue);
-            return true;
-        }
-
-        /// <summary>
-        /// Sets the value of the specified character's given skill.
-        /// </summary>
-        /// <returns>Returns false if character or skills are null.</returns>
-        public bool SetSkill(Character character, Globals.SkillType skill, int newValue) =>
-            SetSkill(character?.Skills, skill, newValue);
-
-        /// <summary>
-        /// Gives character their skill points from leveling up.
-        /// </summary>
-        public void GiveSkillPoints(Character character)
-        {
-            if (character == null) throw new ArgumentNullException("character");
-
-            var points = CalculateSkillPoints(character.Special.Intelligence);
-
-            character.SkillPoints += points;
-        }
-
-        /// <summary>
-        /// Calculate skill points given on level up.
-        /// </summary>
-        /// <remarks>
-        /// Uses the Fallout New Vegas formula. (10 + (INT / 2))
-        /// </remarks>
-        public int CalculateSkillPoints(int intelligence)
-        {
-            return DEFAULT_SKILL_POINTS + (intelligence / 2);
-        }
-
-        /// <summary>
-        /// Puts an amount of points in a specified skill.
-        /// </summary>
-        public void PutPointsInSkill(Character character, Globals.SkillType skill, int points)
-        {
-            if (character == null) throw new ArgumentNullException("character");
-
-            if (!AreSkillsSet(character))
-                throw new Exception(Exceptions.CHAR_SKILLS_NOT_SET);
-
-            if (points < 1) return;
-
-            if (points > character.SkillPoints)
-                throw new Exception(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
-
-            var skillVal = GetSkill(character, skill);
-
-            if ((skillVal + points) > MAX_SKILL_LEVEL)
-                throw new Exception(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
-
-            SetSkill(character, skill, skillVal + points);
-            character.SkillPoints -= points;
-        }
-
-        /// <summary>
-        /// Checks if the tag name matches any of the skill names.
-        /// </summary>
-        private bool IsValidSkillName(string skill)
-        {
-            skill = skill.Trim();
-
-            foreach (var name in Globals.SKILL_NAMES)
-                if (skill.Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                    return true;
+            // Character has used all tag points
+            if (skillSheet.Where(x => x.Statistic is Skill).Sum(x => x.Value) >= TAG_POINTS)
+                return true;
 
             return false;
         }
 
         /// <summary>
+        /// Checks if character's skills are tagged.
+        /// </summary>
+        public bool AreSkillsSet(Character character) =>
+            AreSkillsSet(character?.Skills);
+
+        /// <summary>
+        /// Puts one extra point in a specified skill.
+        /// </summary>
+        public RuntimeResult UpgradeSkill(Character character, Skill skill)
+        {
+            if (character == null) throw new ArgumentNullException("character");
+
+            var skillVal = _statService.GetStatistic(character, skill);
+
+            if (skillVal + 1 > MAX_SKILL_LEVEL)
+                return GenericResult.FromError(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
+
+            int price = CalculatePrice(_statService.GetStatistic(character, skill), character.Level);
+
+            if (price > character.ExperiencePoints)
+                return GenericResult.FromError(String.Format(Messages.ERR_STAT_NOT_ENOUGH_POINTS, price));
+
+            if (price < 0)
+                return GenericResult.FromError(Messages.ERR_STAT_PRICE_NOT_SET);
+
+            _statService.SetStatistic(character, skill, skillVal + 1);
+            character.ExperiencePoints -= price;
+
+            return GenericResult.FromSuccess(Messages.SKILLS_SPEND_POINTS_SUCCESS);
+        }
+
+        /// <summary>
         /// Checks if all the tags are unique.
         /// </summary>
-        private bool AreUniqueTags(Globals.SkillType tag1, Globals.SkillType tag2, Globals.SkillType tag3)
+        private bool AreUniqueTags(Skill tag1, Skill tag2, Skill tag3)
         {
-            if (tag1.Equals(tag2) ||
-                tag1.Equals(tag3) ||
-                tag2.Equals(tag3))
-                return false;
-
-            return true;
+            return !(tag1.Equals(tag2) || tag1.Equals(tag3) || tag2.Equals(tag3));
         }
 
         /// <summary>
-        /// Sets a character's tag skill.
+        /// Checks if the special name is valid.
         /// </summary>
-        private void SetTagSkill(Character character, Globals.SkillType tag)
+        private bool IsValidSkillName(string skill)
         {
-            SetSkill(character, tag, GetSkill(character, tag) + 15);
+            return Skills.Select(sk => sk.AliasesArray).Any(aliases => aliases.Contains(skill));
         }
 
-        /// <summary>
-        /// Initializes a character's skills.
-        /// </summary>
-        private void InitializeSkills(Character character)
+        private int CalculatePrice(int skillLevel, int charLevel)
         {
-            character.Skills = new SkillSheet()
+            double multiplier = _expService.GetPriceMultiplier(charLevel);
+
+            if (_skillPrices.TryGetValue(skillLevel, out int basePrice))
             {
-                Barter = CalculateSkill(character.Special.Charisma, character.Special.Luck),
-                EnergyWeapons = CalculateSkill(character.Special.Perception, character.Special.Luck),
-                Explosives = CalculateSkill(character.Special.Perception, character.Special.Luck),
-                Guns = CalculateSkill(character.Special.Agility, character.Special.Luck),
-                Lockpick = CalculateSkill(character.Special.Perception, character.Special.Luck),
-                Medicine = CalculateSkill(character.Special.Intelligence, character.Special.Luck),
-                MeleeWeapons = CalculateSkill(character.Special.Strength, character.Special.Luck),
-                Repair = CalculateSkill(character.Special.Intelligence, character.Special.Luck),
-                Science = CalculateSkill(character.Special.Intelligence, character.Special.Luck),
-                Sneak = CalculateSkill(character.Special.Agility, character.Special.Luck),
-                Speech = CalculateSkill(character.Special.Charisma, character.Special.Luck),
-                Survival = CalculateSkill(character.Special.Endurance, character.Special.Luck),
-                Unarmed = CalculateSkill(character.Special.Endurance, character.Special.Luck)
-            };
+                return (int)(_skillPrices[skillLevel] * multiplier);
+            }
+
+            return -1;
         }
 
-        /// <summary>
-        /// Calculates a skill based on New Vegas formula.
-        /// </summary>
-        private int CalculateSkill(int stat, int luck)
+        public void InitializeSkills(Character character)
         {
-            return (2 + (2 * stat) + (luck / 2));
+            foreach (var skill in character.Skills)
+            {
+                var specialValue = _statService.GetStatistic(character, ((Skill)skill.Statistic).Special);
+                var luck = _statService.GetStatistic(character, Globals.StatisticFlag.Luck);
+
+                skill.Value = 2 + (2 * specialValue) + (luck / 2);
+            }
         }
     }
 }

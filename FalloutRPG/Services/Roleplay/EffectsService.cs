@@ -3,6 +3,7 @@ using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
 using FalloutRPG.Models.Effects;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,24 +14,23 @@ namespace FalloutRPG.Services.Roleplay
     public class EffectsService
     {
         private readonly CharacterService _characterService;
+        private readonly StatisticsService _statService;
+
         private readonly IRepository<Effect> _effectsRepository;
-        private readonly SkillsService _skillsService;
-        private readonly SpecialService _specialService;
 
         public EffectsService(
             CharacterService characterService,
-            IRepository<Effect> effectsRepository,
-            SkillsService skillsService,
-            SpecialService specialService)
+            StatisticsService statService,
+            IRepository<Effect> effectsRepository)
         {
             _characterService = characterService;
+            _statService = statService;
+
             _effectsRepository = effectsRepository;
-            _skillsService = skillsService;
-            _specialService = specialService;
         }
 
         public async Task CreateEffectAsync(string name, ulong ownerId) =>
-            await _effectsRepository.AddAsync(new Effect { Name = name, OwnerId = ownerId, SkillAdditions = new List<EffectSkill>(), SpecialAdditions = new List<EffectSpecial>() });
+            await _effectsRepository.AddAsync(new Effect { Name = name, OwnerId = ownerId, StatisticEffects = new List<StatisticValue>() });
 
         public async Task SaveEffectAsync(Effect effect) =>
             await _effectsRepository.SaveAsync(effect);
@@ -40,8 +40,7 @@ namespace FalloutRPG.Services.Roleplay
 
         public async Task<Effect> GetEffectAsync(string name) =>
             await _effectsRepository.Query.Where(x => x.Name.Equals(name))
-            .Include(x => x.SkillAdditions)
-            .Include(x => x.SpecialAdditions)
+            .Include(x => x.StatisticEffects)
             .FirstOrDefaultAsync();
 
         public async Task<bool> IsDuplicateName(string name) =>
@@ -49,72 +48,67 @@ namespace FalloutRPG.Services.Roleplay
 
         public async Task<List<Effect>> GetAllOwnedEffectsAsync(ulong ownerId) =>
             await _effectsRepository.Query.Where(x => x.OwnerId.Equals(ownerId))
-            .Include(x => x.SkillAdditions)
-            .Include(x => x.SpecialAdditions)
+            .Include(x => x.StatisticEffects)
             .ToListAsync();
 
         public async Task<int> CountEffectsAsync(ulong ownerId) =>
             await _effectsRepository.Query.CountAsync(x => x.OwnerId.Equals(ownerId));
 
-        public SkillSheet GetEffectiveSkills(Character character)
+        public IList<StatisticValue> GetEffectiveStatistics(Character character)
         {
-            var newSkills = _skillsService.CloneSkills(character.Skills);
+            var newStats = _statService.CloneStatistics(character.Statistics);
 
+            // Loop through all applied effects, then loop through every StatisticValue in the effect,
+            // then actually apply them
             foreach (var effect in character.EffectCharacters.Select(x => x.Effect))
             {
-                foreach (var skillEffect in effect.SkillAdditions)
+                foreach (var statEffect in effect.StatisticEffects)
                 {
-                    var newValue = _skillsService.GetSkill(newSkills, skillEffect.Skill) + skillEffect.EffectValue;
-                    if (newValue < 1) newValue = 1;
-                    _skillsService.SetSkill(newSkills, skillEffect.Skill, newValue);
+                    var newValue = _statService.GetStatistic(newStats, statEffect.Statistic) + statEffect.Value;
+
+                    if (statEffect.Statistic is Special && newValue < 1)
+                        newValue = 1;
+                    
+                    _statService.SetStatistic(newStats, statEffect.Statistic, newValue);
                 }
             }
 
-            return newSkills;
-        }
-
-        public Special GetEffectiveSpecial(Character character)
-        {
-            var newSpecial = _specialService.CloneSpecial(character.Special);
-
-            foreach (var effect in character.EffectCharacters.Select(x => x.Effect))
-                foreach (var specialEffect in effect.SpecialAdditions)
-                {
-                    var newValue = _specialService.GetSpecial(newSpecial, specialEffect.SpecialAttribute) + specialEffect.EffectValue;
-                    if (newValue < 1) newValue = 1;
-                    _specialService.SetSpecial(newSpecial, specialEffect.SpecialAttribute, newValue);
-                }
-
-            return newSpecial;
+            return newStats;
         }
 
         public string GetEffectInfo(Effect effect)
         {
+            if (effect?.StatisticEffects == null || effect?.StatisticEffects.Count <= 0) return String.Empty;
+
             StringBuilder sb = new StringBuilder();
 
             sb.Append($"__{effect.Name}__:\n");
 
-            if (effect.SpecialAdditions != null && effect.SpecialAdditions.Count > 0)
+            var specEffects = effect.StatisticEffects.Where(x => x.Statistic is Special);
+            if (specEffects.Count() > 0)
             {
                 sb.Append("**S.P.E.C.I.A.L.:** ");
-                foreach (var entry in effect.SpecialAdditions)
+
+                foreach (var entry in specEffects)
                 {
-                    if (entry.EffectValue > 0)
-                        sb.Append($"{entry.SpecialAttribute.ToString()}: +{entry.EffectValue} ");
+                    if (entry.Value > 0)
+                        sb.Append($"{entry.Statistic.Name}: +{entry.Value} ");
                     else
-                        sb.Append($"{entry.SpecialAttribute.ToString()}: {entry.EffectValue} ");
+                        sb.Append($"{entry.Statistic.Name}: {entry.Value} ");
                 }
             }
 
-            if (effect.SkillAdditions != null && effect.SkillAdditions.Count > 0)
+            var skillEffects = effect.StatisticEffects.Where(x => x.Statistic is Skill);
+            if (skillEffects.Count() > 0)
             {
                 sb.Append("\n**Skills:** ");
-                foreach (var entry in effect.SkillAdditions)
+
+                foreach (var entry in skillEffects)
                 {
-                    if (entry.EffectValue > 0)
-                        sb.Append($"{entry.Skill.ToString()}: +{entry.EffectValue} ");
+                    if (entry.Value > 0)
+                        sb.Append($"{entry.Statistic.Name}: +{entry.Value} ");
                     else
-                        sb.Append($"{entry.Skill.ToString()}: {entry.EffectValue} ");
+                        sb.Append($"{entry.Statistic.Name}: {entry.Value} ");
                 }
             }
 

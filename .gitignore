@@ -260,4 +260,3 @@ paket-files/
 __pycache__/
 *.pyc
 /FalloutRPG/Properties/PublishProfiles/F.R.A.G.S. Release.pubxml
-/FalloutRPG/Migrations

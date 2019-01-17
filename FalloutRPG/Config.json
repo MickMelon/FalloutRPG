@@ -1,6 +1,5 @@
 ﻿{
   "prefix": "!",
-  "sqlserver-connection-string": "",
   "tokens": {
     "discord": ""
   },
@@ -10,10 +9,50 @@
     "maximum-bet": 1000
   },
   "roleplay": {
-    "exp-channels": [ "" ],
-    "luck-influenced-rolls": true,
-    "luck-influence-percentage": 3.1,
-    "luck-influence-skill-cutoff": 100,
-    "luck-influence-special-cutoff": 5
+    "skill-max": 200,
+    "special-max": 10,
+    "use-percentage": true,
+    "use-old-probability": true,
+
+    "experience": {
+      "exp-channels": [ "" ],
+
+      "allowed-consecutive-messages": 3,
+      "message-length-divisor": 30,
+
+      "old-progression-system": {
+        "enabled": true,
+        "skill-points-on-level-up": 10,
+        "use-new-vegas-rules": true
+      },
+
+      "price-increase": {
+        "enabled": false,
+        "starting-level": 10,
+        "increase-every": 5,
+        "multiplier-addition": 0.5
+      },
+
+      "intelligence-based-exp-gain": {
+        "enabled": true,
+        "baseline": 5,
+        "multiplier": 0.01
+      }
+    },
+
+    "chargen": {
+      "skill-points": 0,
+      "skill-level-limit": 0,
+      "skills-at-limit": 0,
+
+      "special-points": 40,
+      "special-level-limit": 10,
+      "specials-at-limit": 7
+    },
+
+    "skill-prices": {
+    },
+    "special-prices": {
+    }
   }
 }

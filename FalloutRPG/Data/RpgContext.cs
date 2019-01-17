@@ -9,6 +9,9 @@ namespace FalloutRPG.Data
     {
         public DbSet<Character> Characters { get; set; }
         public DbSet<Effect> Effects { get; set; }
+        public DbSet<NpcPreset> NpcPresets { get; set; }
+        public DbSet<Skill> Skills { get; set; }
+        public DbSet<Special> Specials { get; set; }
 
         public RpgContext(DbContextOptions<RpgContext> options) : base(options)
         {

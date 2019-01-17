@@ -1,9 +1,12 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using FalloutRPG.Addons;
 using FalloutRPG.Constants;
+using FalloutRPG.Models;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
@@ -11,117 +14,180 @@ namespace FalloutRPG.Modules.Roleplay
     [Ratelimit(Globals.RATELIMIT_TIMES, Globals.RATELIMIT_SECONDS, Measure.Seconds)]
     public class RollModule : ModuleBase<SocketCommandContext>
     {
-        private readonly CharacterService _characterService;
+        private readonly CharacterService _charService;
         private readonly EffectsService _effectsService;
-        private readonly RollService _rollService;
-        private readonly SkillsService _skillsService;
-        private readonly SpecialService _specialService;
         private readonly HelpService _helpService;
+        private readonly NpcService _npcService;
+        private readonly RollService _rollService;
+        private readonly SpecialService _specialService;
 
-        public RollModule(CharacterService characterService,
+        public RollModule(
+            CharacterService characterService,
             EffectsService effectsService,
+            HelpService helpService,
+            NpcService npcService,
             RollService rollService,
-            SkillsService skillsService,
-            SpecialService specialService,
-            HelpService helpService)
+            SpecialService specialService)
         {
-            _characterService = characterService;
+            _charService = characterService;
             _effectsService = effectsService;
-            _rollService = rollService;
-            _skillsService = skillsService;
-            _specialService = specialService;
             _helpService = helpService;
+            _npcService = npcService;
+            _rollService = rollService;
+            _specialService = specialService;
         }
 
-        [Command("roll")]
+        [Command("roll"), Priority(2)]
         [Alias("r", "help")]
         public async Task ShowRollHelpAsync()
         {
             await _helpService.ShowRollHelpAsync(Context);
         }
 
+        #region Old, Single Rolls
         [Command("roll")]
         [Alias("r")]
-        public async Task RollSkill(Globals.SkillType skillToRoll) =>
-            await RollSkill(skillToRoll, false);
+        public async Task<RuntimeResult> RollSelfStatAsync(Statistic statToRoll) =>
+            await RollPlayerAsync(statToRoll, Context.User);
+
+        [Command("roll"), Priority(0)]
+        [Alias("r")]
+        public async Task<RuntimeResult> RollOthersStatAsync(Statistic statToRoll, IUser user) =>
+            await RollPlayerAsync(statToRoll, user);
+
+        [Command("roll"), Priority(1)]
+        [Alias("r")]
+        public async Task<RuntimeResult> RollNpcStatAsync(Statistic statToRoll, string npcName) =>
+            await Task.FromResult(RollNpcAsync(statToRoll, npcName));
 
         [Command("broll")]
         [Alias("br")]
-        public async Task RollSkillBuffed(Globals.SkillType skillToRoll) =>
-            await RollSkill(skillToRoll, true);
+        public async Task<RuntimeResult> RollSelfStatBuffedAsync(Statistic statToRoll) =>
+            await RollPlayerAsync(statToRoll, Context.User, true);
 
-        private async Task RollSkill(Globals.SkillType skillToRoll, bool useEffects)
+        [Command("broll"), Priority(0)]
+        [Alias("br")]
+        public async Task<RuntimeResult> RollOthersStatBuffedAsync(Statistic statToRoll, IUser user) =>
+            await RollPlayerAsync(statToRoll, user, true);
+
+        [Command("broll"), Priority(1)]
+        [Alias("br")]
+        public async Task<RuntimeResult> RollNpcStatBuffedAsync(Statistic statToRoll, string npcName) =>
+            await Task.FromResult(RollNpcAsync(statToRoll, npcName, true));
+        
+        #endregion
+
+        #region Roll VS
+        [Command("rollvs")]
+        [Alias("rv")]
+        public async Task<RuntimeResult> RollVsPlayerAsync(IUser user1, Statistic stat1, IUser user2, Statistic stat2) =>
+            await RollVsPlayers(user1, user2, stat1, stat2);
+
+        [Command("rollvs")]
+        [Alias("rv")]
+        public async Task<RuntimeResult> RollVsPlayerAsync(Statistic stat1, IUser user2, Statistic stat2) =>
+            await RollVsPlayers(Context.User, user2, stat1, stat2);
+
+        [Command("rollvs")]
+        [Alias("rv")]
+        public async Task<RuntimeResult> RollVsNpcAsync(Statistic stat1, string npcName, Statistic stat2) =>
+            await RollVsPlayerAndNpc(Context.User, npcName, stat1, stat2);
+
+        [Command("rollvs")]
+        [Alias("rv")]
+        public async Task<RuntimeResult> RollVsNpcAsync(IUser user, Statistic stat1, string npcName, Statistic stat2) =>
+            await RollVsPlayerAndNpc(user, npcName, stat1, stat2);
+
+        [Command("rollvs")]
+        [Alias("rv")]
+        public async Task<RuntimeResult> RollVsNpcAsync(string npcName, Statistic stat1, IUser user, Statistic stat2) =>
+            await RollVsPlayerAndNpc(user, npcName, stat1, stat2);
+
+        [Command("rollvs")]
+        [Alias("rv")]
+        public RuntimeResult RollVsNpcsAsync(string npcName1, Statistic stat1, string npcName2, Statistic stat2) =>
+            RollVsTwoNpcsAsync(npcName1, npcName2, stat1, stat2);
+
+        // useEffects
+        [Command("brollvs")]
+        [Alias("brv")]
+        public async Task<RuntimeResult> RollVsPlayerAsyncBuffed(IUser user1, Statistic stat1, IUser user2, Statistic stat2) =>
+            await RollVsPlayers(user1, user2, stat1, stat2, true);
+
+        [Command("brollvs")]
+        [Alias("brv")]
+        public async Task<RuntimeResult> RollVsPlayerAsyncBuffed(Statistic stat1, IUser user2, Statistic stat2) =>
+            await RollVsPlayers(Context.User, user2, stat1, stat2, true);
+
+        [Command("brollvs")]
+        [Alias("brv")]
+        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(Statistic stat1, string npcName, Statistic stat2) =>
+            await RollVsPlayerAndNpc(Context.User, npcName, stat1, stat2, true);
+
+        [Command("brollvs")]
+        [Alias("brv")]
+        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(IUser user, Statistic stat1, string npcName, Statistic stat2) =>
+            await RollVsPlayerAndNpc(user, npcName, stat1, stat2, true);
+
+        [Command("brollvs")]
+        [Alias("brv")]
+        public async Task<RuntimeResult> RollVsNpcAsyncBuffed(string npcName, Statistic stat1, IUser user, Statistic stat2) =>
+            await RollVsPlayerAndNpc(user, npcName, stat1, stat2, true);
+
+        [Command("brollvs")]
+        [Alias("brv")]
+        public RuntimeResult RollVsNpcsAsyncBuffed(string npcName1, Statistic stat1, string npcName2, Statistic stat2) =>
+            RollVsTwoNpcsAsync(npcName1, npcName2, stat1, stat2, true);
+        #endregion
+
+        private async Task<RuntimeResult> RollPlayerAsync(Statistic statToRoll, IUser user, bool useEffects = false)
         {
-            var character = await _characterService.GetCharacterAsync(Context.User.Id);
+            var character = await _charService.GetCharacterAsync(user.Id);
+            if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
 
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
-                return;
-            }
-
-            if (!_skillsService.AreSkillsSet(character))
-            {
-                await ReplyAsync(String.Format(Messages.ERR_SKILLS_NOT_FOUND, Context.User.Mention));
-                return;
-            }
-
-            if (useEffects)
-            {
-                var effectiveValue = _skillsService.GetSkill(_effectsService.GetEffectiveSkills(character), skillToRoll);
-                var effectiveLuck = _effectsService.GetEffectiveSpecial(character).Luck;
-
-                await ReplyAsync($"{Messages.MUSCLE_EMOJI}{_rollService.GetRollMessage(character.Name, skillToRoll.ToString(), _rollService.GetRollResult(effectiveValue, effectiveLuck, false))} ({Context.User.Mention})");
-            }
-            else
-            {
-                var skillValue = _skillsService.GetSkill(character, skillToRoll);
-
-                await ReplyAsync($"{_rollService.GetRollMessage(character.Name, skillToRoll.ToString(), _rollService.GetRollResult(skillValue, character.Special.Luck, false))} ({Context.User.Mention})");
-            }
+            return _rollService.RollStatistic(character, statToRoll, useEffects);
         }
 
-        [Command("roll")]
-        [Alias("r")]
-        public async Task RollSpecial(Globals.SpecialType specialToRoll) =>
-            await RollSpecial(specialToRoll, false);
-
-        [Command("broll")]
-        [Alias("br")]
-        public async Task RollSpecialBuffed(Globals.SpecialType specialToRoll) =>
-            await RollSpecial(specialToRoll, true);
-
-        private async Task RollSpecial(Globals.SpecialType specialToRoll, bool useEffects)
+        private RuntimeResult RollNpcAsync(Statistic statToRoll, string npcName, bool useEffects = false)
         {
-            var character = await _characterService.GetCharacterAsync(Context.User.Id);
+            var npc = _npcService.FindNpc(npcName);
+            if (npc == null) return CharacterResult.NpcNotFound(Context.User.Mention);
 
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            _npcService.ResetNpcTimer(npc);
 
-            if (!_specialService.IsSpecialSet(character))
-            {
-                await ReplyAsync(String.Format(Messages.ERR_SPECIAL_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            return _rollService.RollStatistic(npc, statToRoll, useEffects);
+        }
 
-            if (useEffects)
-            {
-                var newSpecial = _effectsService.GetEffectiveSpecial(character);
+        private async Task<RuntimeResult> RollVsPlayers(IUser user1, IUser user2, Statistic stat1, Statistic stat2, bool useEffects = false)
+        {
+            var char1 = await _charService.GetCharacterAsync(user1.Id);
+            var char2 = await _charService.GetCharacterAsync(user2.Id);
 
-                var effectiveValue = _specialService.GetSpecial(newSpecial, specialToRoll);
-                var effectiveLuck = newSpecial.Luck;
+            if (char1 == null || char2 == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
 
-                await ReplyAsync($"{Messages.MUSCLE_EMOJI}{_rollService.GetRollMessage(character.Name, specialToRoll.ToString(), _rollService.GetRollResult(effectiveValue, effectiveLuck, true))} {Context.User.Mention}");
-            }
-            else
-            {
-                var specialValue = _specialService.GetSpecial(character, specialToRoll);
+            return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
+        }
 
-                await ReplyAsync($"{_rollService.GetRollMessage(character.Name, specialToRoll.ToString(), _rollService.GetRollResult(specialValue, character.Special.Luck, true))} {Context.User.Mention}");
-            }
+        private async Task<RuntimeResult> RollVsPlayerAndNpc(IUser user, string npcName, Statistic stat1, Statistic stat2, bool useEffects = false)
+        {
+            var char1 = await _charService.GetCharacterAsync(user.Id);
+            var char2 = _npcService.FindNpc(npcName);
+
+            if (char1 == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+            if (char2 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
+
+            return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
+        }
+
+        private RuntimeResult RollVsTwoNpcsAsync(string npcName1, string npcName2, Statistic stat1, Statistic stat2, bool useEffects = false)
+        {
+            var char1 = _npcService.FindNpc(npcName1);
+            var char2 = _npcService.FindNpc(npcName2);
+
+            if (char1 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
+            if (char2 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
+
+            return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }
     }
 }
