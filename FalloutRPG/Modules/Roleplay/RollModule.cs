@@ -20,7 +20,6 @@ namespace FalloutRPG.Modules.Roleplay
         private readonly NpcService _npcService;
         private readonly RollService _rollService;
         private readonly SpecialService _specialService;
-        private readonly StatisticsService _statService;
 
         public RollModule(
             CharacterService characterService,
@@ -28,8 +27,7 @@ namespace FalloutRPG.Modules.Roleplay
             HelpService helpService,
             NpcService npcService,
             RollService rollService,
-            SpecialService specialService,
-            StatisticsService statService)
+            SpecialService specialService)
         {
             _charService = characterService;
             _effectsService = effectsService;
@@ -37,7 +35,6 @@ namespace FalloutRPG.Modules.Roleplay
             _npcService = npcService;
             _rollService = rollService;
             _specialService = specialService;
-            _statService = statService;
         }
 
         [Command("roll"), Priority(2)]
@@ -148,9 +145,6 @@ namespace FalloutRPG.Modules.Roleplay
             var character = await _charService.GetCharacterAsync(user.Id);
             if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
 
-            if (statToRoll is Skill sk && _statService.GetStatistic(character, statToRoll) < sk.MinimumValue)
-                return StatisticResult.SkillNotHighEnough(Context.User.Mention);
-
             return _rollService.RollStatistic(character, statToRoll, useEffects);
         }
 
@@ -158,9 +152,6 @@ namespace FalloutRPG.Modules.Roleplay
         {
             var npc = _npcService.FindNpc(npcName);
             if (npc == null) return CharacterResult.NpcNotFound(Context.User.Mention);
-
-            if (statToRoll is Skill sk && _statService.GetStatistic(npc, statToRoll) < sk.MinimumValue)
-                return StatisticResult.SkillNotHighEnough(Context.User.Mention);
 
             _npcService.ResetNpcTimer(npc);
 
@@ -174,30 +165,18 @@ namespace FalloutRPG.Modules.Roleplay
 
             if (char1 == null || char2 == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
 
-            if (stat1 is Skill sk1 && _statService.GetStatistic(char1, stat1) < sk1.MinimumValue)
-                return StatisticResult.SkillNotHighEnough(user1.Mention);
-
-            if (stat2 is Skill sk2 && _statService.GetStatistic(char2, stat2) < sk2.MinimumValue)
-                return StatisticResult.SkillNotHighEnough(user2.Mention);
-
             return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }
 
         private async Task<RuntimeResult> RollVsPlayerAndNpc(IUser user, string npcName, Statistic stat1, Statistic stat2, bool useEffects = false)
         {
             var char1 = await _charService.GetCharacterAsync(user.Id);
-            var npc2 = _npcService.FindNpc(npcName);
+            var char2 = _npcService.FindNpc(npcName);
 
             if (char1 == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
-            if (npc2 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
+            if (char2 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
 
-            if (stat1 is Skill sk1 && _statService.GetStatistic(char1, stat1) < sk1.MinimumValue)
-                return StatisticResult.SkillNotHighEnough(Context.User.Mention);
-
-            if (stat2 is Skill sk2 && _statService.GetStatistic(npc2, stat2) < sk2.MinimumValue)
-                return StatisticResult.SkillNotHighEnough(Context.User.Mention);
-
-            return _rollService.RollVsStatistic(char1, npc2, stat1, stat2, useEffects);
+            return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }
 
         private RuntimeResult RollVsTwoNpcsAsync(string npcName1, string npcName2, Statistic stat1, Statistic stat2, bool useEffects = false)
@@ -207,12 +186,6 @@ namespace FalloutRPG.Modules.Roleplay
 
             if (char1 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
             if (char2 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
-
-            if (stat1 is Skill sk && _statService.GetStatistic(char1, stat1) < sk.MinimumValue)
-                return StatisticResult.SkillNotHighEnough(Context.User.Mention);
-
-            if (stat2 is Skill sk2 && _statService.GetStatistic(char2, stat2) < sk2.MinimumValue)
-                return StatisticResult.SkillNotHighEnough(Context.User.Mention);
 
             return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }
