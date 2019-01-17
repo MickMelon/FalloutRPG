@@ -90,7 +90,7 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("rollvs")]
         [Alias("rv")]
-        public async Task<RuntimeResult> RollVsNpcAsync(string npcName, Statistic stat1, Statistic stat2) =>
+        public async Task<RuntimeResult> RollVsNpcAsync(Statistic stat1, string npcName, Statistic stat2) =>
             await RollVsPlayerAndNpc(Context.User, npcName, stat1, stat2);
 
         [Command("rollvs")]
