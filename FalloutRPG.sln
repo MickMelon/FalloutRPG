@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FalloutRPG", "FalloutRPG\FalloutRPG.csproj", "{13D95797-3727-43FA-B45C-25F3F3582A44}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FalloutRPG.UnitTests", "FalloutRPG.UnitTests\FalloutRPG.UnitTests.csproj", "{B56BE940-83F5-492D-9F7B-C84137280CC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FalloutRPG.UnitTests", "FalloutRPG.Tests\FalloutRPG.Tests.csproj", "{B56BE940-83F5-492D-9F7B-C84137280CC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

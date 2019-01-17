@@ -5,7 +5,7 @@ using FalloutRPG.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace FalloutRPG.UnitTests
+namespace FalloutRPG.Tests
 {
     public class TestHelper
     {

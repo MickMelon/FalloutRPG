@@ -10,7 +10,7 @@ using FalloutRPG.Services.Roleplay;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace FalloutRPG.UnitTests.Services.Roleplay
+namespace FalloutRPG.Tests.Services.Roleplay
 {
     public class CharacterServiceTests
     {

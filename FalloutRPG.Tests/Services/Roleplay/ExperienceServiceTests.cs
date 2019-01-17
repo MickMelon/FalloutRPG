@@ -6,7 +6,7 @@ using FalloutRPG.Services.Roleplay;
 using Xunit;
 using static FalloutRPG.Constants.Globals;
 
-namespace FalloutRPG.UnitTests.Services.Roleplay
+namespace FalloutRPG.Tests.Services.Roleplay
 {
     public class ExperienceServiceTests
     {
