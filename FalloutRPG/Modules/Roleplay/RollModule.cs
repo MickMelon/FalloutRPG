@@ -37,7 +37,7 @@ namespace FalloutRPG.Modules.Roleplay
             _specialService = specialService;
         }
 
-        [Command("roll"), Priority(2)]
+        [Command("roll")]
         [Alias("r", "help")]
         public async Task ShowRollHelpAsync()
         {
@@ -55,8 +55,8 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task<RuntimeResult> RollOthersStatAsync(Statistic statToRoll, IUser user) =>
             await RollPlayerAsync(statToRoll, user);
 
-        [Command("roll")]
-        [Alias("r")]
+        [Command("rollnpc")]
+        [Alias("rolln", "rn")]
         public async Task<RuntimeResult> RollNpcStatAsync(Statistic statToRoll, string npcName) =>
             await Task.FromResult(RollNpcAsync(statToRoll, npcName));
 
@@ -70,8 +70,8 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task<RuntimeResult> RollOthersStatBuffedAsync(Statistic statToRoll, IUser user) =>
             await RollPlayerAsync(statToRoll, user, true);
 
-        [Command("broll")]
-        [Alias("br")]
+        [Command("brollnpc")]
+        [Alias("brolln", "brn")]
         public async Task<RuntimeResult> RollNpcStatBuffedAsync(Statistic statToRoll, string npcName) =>
             await Task.FromResult(RollNpcAsync(statToRoll, npcName, true));
         
@@ -88,8 +88,8 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task<RuntimeResult> RollVsPlayerAsync(Statistic stat1, IUser user2, Statistic stat2) =>
             await RollVsPlayers(Context.User, user2, stat1, stat2);
 
-        [Command("rollvs")]
-        [Alias("rv")]
+        [Command("rollvsnpc")]
+        [Alias("rollvsn", "rvn")]
         public async Task<RuntimeResult> RollVsNpcAsync(Statistic stat1, string npcName, Statistic stat2) =>
             await RollVsPlayerAndNpc(Context.User, npcName, stat1, stat2);
 
@@ -98,13 +98,13 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task<RuntimeResult> RollVsNpcAsync(IUser user, Statistic stat1, string npcName, Statistic stat2) =>
             await RollVsPlayerAndNpc(user, npcName, stat1, stat2);
 
-        [Command("rollvs")]
-        [Alias("rv")]
+        [Command("rollvsnpc")]
+        [Alias("rollvsn", "rvn")]
         public async Task<RuntimeResult> RollVsNpcAsync(string npcName, Statistic stat1, IUser user, Statistic stat2) =>
             await RollVsPlayerAndNpc(user, npcName, stat1, stat2);
 
-        [Command("rollvs")]
-        [Alias("rv")]
+        [Command("rollvsnpc")]
+        [Alias("rollvsn", "rvn")]
         public RuntimeResult RollVsNpcsAsync(string npcName1, Statistic stat1, string npcName2, Statistic stat2) =>
             RollVsTwoNpcsAsync(npcName1, npcName2, stat1, stat2);
 
@@ -119,23 +119,23 @@ namespace FalloutRPG.Modules.Roleplay
         public async Task<RuntimeResult> RollVsPlayerAsyncBuffed(Statistic stat1, IUser user2, Statistic stat2) =>
             await RollVsPlayers(Context.User, user2, stat1, stat2, true);
 
-        [Command("brollvs")]
-        [Alias("brv")]
+        [Command("brollvsnpc")]
+        [Alias("brollvsn", "brvn")]
         public async Task<RuntimeResult> RollVsNpcAsyncBuffed(Statistic stat1, string npcName, Statistic stat2) =>
             await RollVsPlayerAndNpc(Context.User, npcName, stat1, stat2, true);
 
-        [Command("brollvs")]
-        [Alias("brv")]
+        [Command("brollvsnpc")]
+        [Alias("brollvsn", "brvn")]
         public async Task<RuntimeResult> RollVsNpcAsyncBuffed(IUser user, Statistic stat1, string npcName, Statistic stat2) =>
             await RollVsPlayerAndNpc(user, npcName, stat1, stat2, true);
 
-        [Command("brollvs")]
-        [Alias("brv")]
+        [Command("brollvsnpc")]
+        [Alias("brollvsn", "brvn")]
         public async Task<RuntimeResult> RollVsNpcAsyncBuffed(string npcName, Statistic stat1, IUser user, Statistic stat2) =>
             await RollVsPlayerAndNpc(user, npcName, stat1, stat2, true);
 
-        [Command("brollvs")]
-        [Alias("brv")]
+        [Command("brollvsnpc")]
+        [Alias("brollvsn", "brvn")]
         public RuntimeResult RollVsNpcsAsyncBuffed(string npcName1, Statistic stat1, string npcName2, Statistic stat2) =>
             RollVsTwoNpcsAsync(npcName1, npcName2, stat1, stat2, true);
         #endregion
