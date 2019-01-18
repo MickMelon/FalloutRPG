@@ -90,13 +90,13 @@ namespace FalloutRPG.Tests.Services.Roleplay
             }; 
 
             // Alternative to using Theory with 21 InlineData tags
-            for (int i = 1; i < 22; i++)
+            for (int i = 0; i < 21; i++)
             {
                 // Act
-                int expForLevel = expService.CalculateExperienceForLevel(i);
+                int expForLevel = expService.CalculateExperienceForLevel(i + 1);
 
                 // Assert
-                Assert.Equal(validExpLevels[i - 1], expForLevel);
+                Assert.Equal(validExpLevels[i], expForLevel);
             }
         }
 

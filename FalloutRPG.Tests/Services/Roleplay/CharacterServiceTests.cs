@@ -149,11 +149,10 @@ namespace FalloutRPG.Tests.Services.Roleplay
         }
 
         [Fact]
-        public async Task DeleteCharacter_NullCharacter_ThrowException()
+        public async Task DeleteCharacter_NullCharacter_ThrowArgumentNullException()
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
-            var nonExistingCharacter = new Character() { Id = 1 };
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
@@ -176,6 +175,7 @@ namespace FalloutRPG.Tests.Services.Roleplay
             var character = new Character() { Id = 1, Money = 1000 };
             await context.AddAsync(character);
             await context.SaveChangesAsync();
+
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
@@ -206,7 +206,7 @@ namespace FalloutRPG.Tests.Services.Roleplay
         }
 
         [Fact]
-        public async Task SaveCharacter_NullCharacter_ThrowException()
+        public async Task SaveCharacter_NullCharacter_ThrowArgumentNullException()
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
@@ -271,6 +271,7 @@ namespace FalloutRPG.Tests.Services.Roleplay
             var context = TestHelper.SetupTestRpgContext();
             await context.Characters.AddAsync(new Character() { DiscordId = 1, Name = "Foo"});
             await context.SaveChangesAsync();
+
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
@@ -288,10 +289,11 @@ namespace FalloutRPG.Tests.Services.Roleplay
         {
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
-            var characters = Enumerable.Range(1, 25)
+            var characters = Enumerable.Range(1, 25) // TODO: Load max characters from config
                 .Select(i => new Character() { Id = i, DiscordId = 1, Name = $"Mock{i}" });
             await context.Characters.AddRangeAsync(characters);
             await context.SaveChangesAsync();
+
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
@@ -318,6 +320,7 @@ namespace FalloutRPG.Tests.Services.Roleplay
             for (int i = 0; i < value; i++)
                 await context.AddAsync(new Character() { DiscordId = (ulong)i, Name = $"Mock{i}" });
             await context.SaveChangesAsync();
+
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
@@ -339,6 +342,7 @@ namespace FalloutRPG.Tests.Services.Roleplay
             var context = TestHelper.SetupTestRpgContext();
             await context.AddAsync(new Character() { DiscordId = 1, Name = "Foo"});
             await context.SaveChangesAsync();
+
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
@@ -357,6 +361,8 @@ namespace FalloutRPG.Tests.Services.Roleplay
             // Arrange
             var context = TestHelper.SetupTestRpgContext();
             await context.AddAsync(new Character() { DiscordId = 1, Name = "Foo"});
+            await context.SaveChangesAsync();
+
             var statsRepository = new EfSqliteRepository<Statistic>(context);
             var charRepository = new EfSqliteRepository<Character>(context);
             var statsService = new StatisticsService(statsRepository);
