@@ -182,7 +182,7 @@ namespace FalloutRPG.Tests.Services.Roleplay
             int expToNextLevel = expService.CalculateLevelForExperience(currentExp);
 
             // Assert
-            Assert.Equal(1, expToNextLevel);
+            Assert.Equal(expectedLevel, expToNextLevel);
         }
         #endregion
 
