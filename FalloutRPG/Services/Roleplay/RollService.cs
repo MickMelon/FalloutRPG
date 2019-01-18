@@ -143,7 +143,7 @@ namespace FalloutRPG.Services.Roleplay
         public RuntimeResult RollVsStatistic(Character character1, Character character2, Statistic stat1, Statistic stat2, bool useEffects = false)
         {
             var stats1 = character1.Statistics;
-            var stats2 = character1.Statistics;
+            var stats2 = character2.Statistics;
 
             if (useEffects)
             {
