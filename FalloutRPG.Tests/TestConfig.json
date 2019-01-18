@@ -14,7 +14,7 @@
       "use-percentage": false,
   
       "experience": {
-        "exp-channels": [ "1" ],
+        "exp-channels": [ 1, 2, 3, 4, 5 ],
   
         "allowed-consecutive-messages": 3,
         "message-length-divisor": 30,

@@ -146,23 +146,19 @@ namespace FalloutRPG.Services.Roleplay
         }
 
         /// <summary>
-        /// Calculates experience between the beginning of
-        /// one level and the next.
-        /// </summary>
-        public int CalculateExperienceToNextLevel(int level)
-        {
-            if (level < 1 || level > 1000) return -1;
-            return 50 + (150 * level);
-        }
-
-        /// <summary>
         /// Calculates the remaining experience required
         /// to get to the next level.
         /// </summary>
+        /// <returns>
+        /// Experience to next level or -1 if param is invalid.
+        /// </returns>
         public int CalculateRemainingExperienceToNextLevel(int experience)
         {
+            if (experience < 0) return -1;
+
             var nextLevel = (CalculateLevelForExperience(experience) + 1);
             var nextLevelExp = CalculateExperienceForLevel(nextLevel);
+
             return (nextLevelExp - experience);
         }
 
