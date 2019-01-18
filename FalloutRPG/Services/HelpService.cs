@@ -147,10 +147,9 @@ namespace FalloutRPG.Services
             string message = String.Empty;
 
             message =
-            $"**Name:** {skill.Name}\n" +
-            $"**Description:** {skill.Description}\n" +
-            $"**Aliases:** {String.Join(" ,", skill.AliasesArray)}\n" +
-            $"**S.P.E.C.I.A.L.:** {skill.Special.Name}\n +" +
+            $"**Description:** {(String.IsNullOrEmpty(skill.Description) ? "None" : skill.Description)}\n" +
+            $"**Aliases:** {String.Join(", ", skill.AliasesArray)}\n" +
+            $"**S.P.E.C.I.A.L.:** {skill.Special.Name}\n" +
             $"**Acts as:** {skill.StatisticFlag.ToString()}\n" +
             $"**Minimum value to use:** {skill.MinimumValue}";
             
@@ -183,9 +182,8 @@ namespace FalloutRPG.Services
             string message = String.Empty;
 
             message =
-            $"**Name:** {spec.Name}\n" +
-            $"**Description:** {spec.Description}\n" +
-            $"**Aliases:** {String.Join(" ,", spec.AliasesArray)}\n" +
+            $"**Description:** {(String.IsNullOrEmpty(spec.Description) ? "None" : spec.Description)}\n" +
+            $"**Aliases:** {String.Join(", ", spec.AliasesArray)}\n" +
             $"**Acts as:** {spec.StatisticFlag.ToString()}\n";
 
             var embed = EmbedHelper.BuildBasicEmbed(spec.Name, message);
