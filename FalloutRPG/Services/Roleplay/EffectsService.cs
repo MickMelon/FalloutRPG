@@ -78,7 +78,7 @@ namespace FalloutRPG.Services.Roleplay
 
         public string GetEffectInfo(Effect effect)
         {
-            if (effect?.StatisticEffects == null || effect?.StatisticEffects.Count <= 0) return String.Empty;
+            if (effect?.StatisticEffects == null) return String.Empty;
 
             StringBuilder sb = new StringBuilder();
 
