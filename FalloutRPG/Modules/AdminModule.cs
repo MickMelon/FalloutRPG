@@ -3,6 +3,7 @@ using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
 using FalloutRPG.Models;
+using FalloutRPG.Modules.Preconditions;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
@@ -15,6 +16,7 @@ namespace FalloutRPG.Modules
     [Alias("adm")]
     [RequireUserPermission(GuildPermission.BanMembers, Group = "Permission")]
     [RequireOwner(Group = "Permission")]
+    [RequireRole("FragsAdmin", Group = "Permission")]
     public class AdminModule : ModuleBase<SocketCommandContext>
     {
         private readonly CharacterService _charService;

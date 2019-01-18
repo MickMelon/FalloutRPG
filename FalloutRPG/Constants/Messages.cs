@@ -50,6 +50,8 @@
         // Command Error Messages
         public const string ERR_CMD_USAGE = FAILURE_EMOJI + "Incorrect command usage. Use $help if you are stuck. {0}";
         public const string ERR_CMD_NOT_EXIST = FAILURE_EMOJI + "Command doesn't exist. Use $help if you are stuck. {0}";
+        public const string ERR_CMD_REQUIRE_ROLE_FAIL = FAILURE_EMOJI + "You must be have the {0} role to use this command. {1}";
+        public const string ERR_CMD_NOT_IN_GUILD = FAILURE_EMOJI + "You must be in a server to use this command.";
 
         // Character Error Messages
         public const string ERR_CHAR_NOT_FOUND = FAILURE_EMOJI + "Unable to find character. {0}";
