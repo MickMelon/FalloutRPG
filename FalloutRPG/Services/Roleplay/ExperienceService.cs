@@ -3,7 +3,9 @@ using Discord.Commands;
 using Discord.WebSocket;
 using FalloutRPG.Constants;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Configuration;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,44 +16,37 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class ExperienceService
     {
-        private List<ulong> experienceEnabledChannels;
         private readonly Random _random;
-
-        private bool intelligenceEnabled;
-        private int intelligenceBaseline;
-        private double intelligenceMultiplier;
-
-        private double messageLengthDivisor;
-        private int allowedConsecutiveMessages;
-
-        private bool priceIncreaseEnabled;
-        private double priceIncreaseMultiplierAddition;
-        private int priceIncreaseStartingLevel;
-        private int priceIncreaseEveryXLevels;
-
-        public static bool UseOldProgression { get; private set; } = false;
-        public int DefaultSkillPoints { get; private set; } = 10;
-        public bool UseNewVegasRules { get; private set; } = false;
-
-        private const int DEFAULT_EXP_GAIN = 100;
 
         private readonly CharacterService _charService;
         private readonly StatisticsService _statService;
         private readonly DiscordSocketClient _client;
-        private readonly IConfiguration _config;
+
+        private readonly ExperienceOptions _expOptions;
+        private readonly GeneralOptions _genOptions;
+        private readonly ProgressionOptions _progressOptions;
+
+        private const int DEFAULT_EXP_GAIN = 100;
+        public static bool UseOldProgression = false;
 
         public ExperienceService(
             CharacterService charService,
             StatisticsService statService,
             DiscordSocketClient client,
-            IConfiguration config,
+            ExperienceOptions expOptions,
+            GeneralOptions genOptions,
+            ProgressionOptions progressOptions,
             Random random)
         {
             _charService = charService;
             _statService = statService;
 
             _client = client;
-            _config = config;
+
+            _expOptions = expOptions;
+            _genOptions = genOptions;
+            _progressOptions = progressOptions;
+            UseOldProgression = _progressOptions.UseOldProgression;
             
             LoadExperienceConfig();
             _random = random;
@@ -71,17 +66,17 @@ namespace FalloutRPG.Services.Roleplay
             if (character == null || context.Message.ToString().StartsWith("(")) return;
 
             // filter out messages sent by FRAGS
-            var cache = context.Channel.GetCachedMessages(Math.Max(100, allowedConsecutiveMessages))
+            var cache = context.Channel.GetCachedMessages(Math.Max(100, _expOptions.AllowedConsecutiveMessages))
                 .Where(x => !x.Author.ToString().Equals(context.Client.CurrentUser.ToString()))
                 .OfType<SocketUserMessage>();
 
             // filter out messages trying to send commands
             int argPos = 0;
-            cache = cache.Where(x => !(x.HasStringPrefix(_config["prefix"], ref argPos) ||
+            cache = cache.Where(x => !(x.HasStringPrefix(_genOptions.Prefix, ref argPos) ||
                     x.HasMentionPrefix(_client.CurrentUser, ref argPos)));   
 
-            if (cache.Count() > allowedConsecutiveMessages &&
-                cache.Take(allowedConsecutiveMessages).All(x => x.Author.Equals(context.User)))
+            if (cache.Count() > _expOptions.AllowedConsecutiveMessages &&
+                cache.Take(_expOptions.AllowedConsecutiveMessages).All(x => x.Author.Equals(context.User)))
                 return;
 
             var expToGive = GetExperienceFromMessage(character, context.Message.Content.Where(x => !Char.IsWhiteSpace(x)).Count());
@@ -123,15 +118,12 @@ namespace FalloutRPG.Services.Roleplay
 
         public int GetExperienceFromMessage(Character character, int messageLength)
         {
-            double expValue = Math.Round(Math.Max(1, messageLength / messageLengthDivisor));
+            double expValue = Math.Max(1.0, (double)messageLength / _expOptions.MessageLengthDivisor);
 
-            if (intelligenceEnabled)
-            {
-                int intStat = _statService.GetStatistic(character, Globals.StatisticFlag.Intelligence);
+            int intStat = _statService.GetStatistic(character, Globals.StatisticFlag.Intelligence);
 
-                if (intStat > 0)
-                    expValue *= 1 + (intStat - intelligenceBaseline) * intelligenceMultiplier;
-            }
+            if (intStat > 0)
+                expValue *= 1 + intStat * _expOptions.IntelligenceMultiplier;
 
             return (int)Math.Round(expValue);
         }
@@ -181,7 +173,7 @@ namespace FalloutRPG.Services.Roleplay
         /// </summary>
         public bool IsInExperienceEnabledChannel(ulong channelId)
         {
-            foreach (var channel in experienceEnabledChannels)
+            foreach (var channel in _expOptions.EnabledChannels)
                 if (channelId == channel)
                     return true;
 
@@ -190,14 +182,15 @@ namespace FalloutRPG.Services.Roleplay
 
         public double GetPriceMultiplier(int level)
         {
+            var priceIncrease = _progressOptions.NewProgression.PriceIncrease;
             double multiplier = 1.0;
 
-            if (priceIncreaseEnabled)
+            if (priceIncrease.Enabled)
             {
-                level -= priceIncreaseStartingLevel;
+                level -= priceIncrease.StartingLevel;
 
-                for (int i = 0; i <= level; i += priceIncreaseEveryXLevels)
-                    multiplier += priceIncreaseMultiplierAddition;
+                for (int i = 0; i <= level; i += priceIncrease.IncreaseEvery)
+                    multiplier += priceIncrease.MultiplierAddition;
             }
 
             return multiplier;
@@ -205,9 +198,10 @@ namespace FalloutRPG.Services.Roleplay
 
         public int CalculateSkillPoints(int level, int intelligence)
         {
+            var oldProg = _progressOptions.OldProgression;
             int extraPoints = 0;
 
-            if (UseNewVegasRules)
+            if (oldProg.UseNewVegasRules)
             {
                 extraPoints = intelligence / 2;
 
@@ -221,7 +215,7 @@ namespace FalloutRPG.Services.Roleplay
                 }
             }
 
-            return DefaultSkillPoints + extraPoints;
+            return oldProg.SkillPointsOnLevelUp + extraPoints;
         }
 
         /// <summary>
@@ -232,47 +226,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             try
             {
-                experienceEnabledChannels = _config
-                    .GetSection("roleplay:experience:exp-channels")
-                    .GetChildren()
-                    .Select(x => UInt64.Parse(x.Value))
-                    .ToList();
-
-                UseOldProgression = _config
-                    .GetValue<bool>("roleplay:experience:old-progression-system:enabled");
-
-                DefaultSkillPoints = _config
-                    .GetValue<int>("roleplay:experience:old-progression-system:skill-points-on-level-up");
-
-                UseNewVegasRules = _config
-                    .GetValue<bool>("roleplay:experience:old-progression-system:use-new-vegas-rules");
-
-                intelligenceEnabled = _config
-                    .GetValue<bool>("roleplay:experience:intelligence-based-exp-gain:enabled");
-
-                intelligenceBaseline = _config
-                    .GetValue<int>("roleplay:experience:intelligence-based-exp-gain:baseline");
                 
-                intelligenceMultiplier = _config
-                    .GetValue<double>("roleplay:experience:intelligence-based-exp-gain:multiplier");
-
-                allowedConsecutiveMessages = _config
-                    .GetValue<int>("roleplay:experience:allowed-consecutive-messages");
-
-                messageLengthDivisor = _config
-                    .GetValue<double>("roleplay:experience:message-length-divisor");
-
-                priceIncreaseEnabled = _config
-                    .GetValue<bool>("roleplay:experience:price-increase:enabled");
-
-                priceIncreaseStartingLevel = _config
-                    .GetValue<int>("roleplay:experience:price-increase:starting-level");
-
-                priceIncreaseEveryXLevels = _config
-                    .GetValue<int>("roleplay:experience:price-increase:increase-every");
-
-                priceIncreaseMultiplierAddition = _config
-                    .GetValue<double>("roleplay:experience:price-increase:multiplier-addition");
             }
             catch (Exception)
             {

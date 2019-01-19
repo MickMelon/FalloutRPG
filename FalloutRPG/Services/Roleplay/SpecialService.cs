@@ -2,6 +2,7 @@
 using FalloutRPG.Constants;
 using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -15,31 +16,34 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class SpecialService
     {
+        public const int SPECIAL_MIN = 1;
         private static int CONFIGURED_SPECIAL_POINTS = 29;
         public static int STARTING_SPECIAL_POINTS { get => CONFIGURED_SPECIAL_POINTS - Specials.Count * SPECIAL_MIN; }
 
-        public static int SPECIAL_MAX = 10;
-        public static int SPECIAL_MAX_CHARGEN = 8;
-        public static int SPECIAL_MAX_CHARGEN_QUANTITY = 2;
-        public static int SPECIAL_MIN = 1;
-
         private readonly CharacterService _charService;
+        private readonly ChargenOptions _chargenOptions;
         private readonly ExperienceService _expService;
+        private readonly ProgressionOptions _progOptions;
+        private readonly RoleplayOptions _roleplayOptions;
         private readonly StatisticsService _statService;
-        private readonly IConfiguration _config;
 
         public static IReadOnlyCollection<Special> Specials { get => StatisticsService.Statistics.OfType<Special>().ToList().AsReadOnly(); }
         private IReadOnlyDictionary<int, int> _specialPrices;
 
         public SpecialService(CharacterService charService,
+            ChargenOptions chargenOptions,
             ExperienceService expService,
+            ProgressionOptions progOptions,
             StatisticsService statService,
-            IConfiguration config)
+            RoleplayOptions roleplayOptions)
         {
+            _chargenOptions = chargenOptions;
+            _progOptions = progOptions;
+            _roleplayOptions = roleplayOptions;
+
             _charService = charService;
             _expService = expService;
             _statService = statService;
-            _config = config;
 
             LoadSpecialConfig();
         }
@@ -50,17 +54,11 @@ namespace FalloutRPG.Services.Roleplay
             {
                 var temp = new Dictionary<int, int>();
 
-                foreach (var item in _config.GetSection("roleplay:skill-prices").GetChildren())
-                    temp.Add(Int32.Parse(item.Key), Int32.Parse(item.Value));
+                foreach (var item in _progOptions.NewProgression.SpecialUpgradePrices)
+                    temp.Add(Int32.Parse(item.Key), item.Value);
 
                 _specialPrices = temp;
-
-                SPECIAL_MAX = _config.GetValue<int>("roleplay:special-max");
-
-                CONFIGURED_SPECIAL_POINTS = _config.GetValue<int>("roleplay:chargen:special-points");
-
-                SPECIAL_MAX_CHARGEN = _config.GetValue<int>("roleplay:chargen:special-level-limit");
-                SPECIAL_MAX_CHARGEN_QUANTITY = _config.GetValue<int>("roleplay:chargen:specials-at-limit");
+                CONFIGURED_SPECIAL_POINTS = _chargenOptions.SpecialPoints;
             }
             catch (Exception)
             {
@@ -72,23 +70,24 @@ namespace FalloutRPG.Services.Roleplay
         /// <summary>
         /// Set character's special.
         /// </summary>
-        public async Task SetInitialSpecialAsync(Character character, Special special, int points)
+        public async Task<RuntimeResult> SetInitialSpecialAsync(Character character, Special special, int points)
         {
             if (character == null) throw new ArgumentNullException("character");
 
             if (!IsSpecialInRange(character.Special, points))
-                throw new ArgumentException(Exceptions.CHAR_SPECIAL_NOT_IN_RANGE);
+                return GenericResult.FromError(String.Format(Exceptions.CHAR_SPECIAL_NOT_IN_RANGE, SPECIAL_MIN, _chargenOptions.SpecialLevelMax, _chargenOptions.SpecialsAtLimit));
 
             // Refund special points used if overwriting the same skill
             character.SpecialPoints += _statService.GetStatistic(character, special);
 
             if (character.SpecialPoints - points < 0)
-                throw new Exception(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
+                return GenericResult.FromError(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
 
             _statService.SetStatistic(character, special, points);
             character.SpecialPoints -= points;
 
             await _charService.SaveCharacterAsync(character);
+            return GenericResult.FromSuccess(String.Format(Messages.SPECIAL_SET_SUCCESS));
         }
 
         /// <summary>
@@ -100,7 +99,7 @@ namespace FalloutRPG.Services.Roleplay
 
             var specialVal = _statService.GetStatistic(character, special);
 
-            if (specialVal + 1 > SPECIAL_MAX)
+            if (specialVal + 1 > _roleplayOptions.SpecialMax)
                 return GenericResult.FromError(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
 
             int price = CalculatePrice(_statService.GetStatistic(character, special), character.Level);
@@ -133,14 +132,15 @@ namespace FalloutRPG.Services.Roleplay
         {
             var special = stats.Where(x => x.Statistic is Special);
 
-            if (points < SPECIAL_MIN || points > SPECIAL_MAX_CHARGEN)
+            if (points < SPECIAL_MIN || points > _chargenOptions.SpecialLevelMax)
                 return false;
 
             // Unique MUSH rules :/
-            if (special.Where(sp => sp.Value == SPECIAL_MAX_CHARGEN).Count() > SPECIAL_MAX_CHARGEN_QUANTITY)
+            if (special.Where(sp => sp.Value == _chargenOptions.SpecialLevelMax).Count() > _chargenOptions.SpecialsAtLimit)
                 return false;
 
-            if (points == SPECIAL_MAX_CHARGEN && special.Where(sp => sp.Value == SPECIAL_MAX_CHARGEN).Count() >= SPECIAL_MAX_CHARGEN_QUANTITY)
+            if (points == _chargenOptions.SpecialLevelMax &&
+                special.Where(sp => sp.Value == _chargenOptions.SpecialLevelMax).Count() >= _chargenOptions.SpecialsAtLimit)
                 return false;
 
             return true;
@@ -167,7 +167,7 @@ namespace FalloutRPG.Services.Roleplay
             if (special.Sum(x => x.Value) != STARTING_SPECIAL_POINTS) return false;
 
             foreach (var sp in special)
-                if (sp.Value < SPECIAL_MIN || sp.Value > SPECIAL_MAX)
+                if (sp.Value < SPECIAL_MIN || sp.Value > _roleplayOptions.SpecialMax)
                     return false;
 
             return true;

@@ -1,4 +1,5 @@
 ﻿using Discord;
+using FalloutRPG.Models.Configuration;
 using FalloutRPG.Services.Roleplay;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -11,26 +12,17 @@ namespace FalloutRPG.Services.Casino
 {
     public class GamblingService
     {
-        private List<ulong> _gamblingChannels;
         public readonly Dictionary<IUser, long> UserBalances;
 
-        private readonly IConfiguration _config;
         private readonly CharacterService _charService;
+        private readonly GamblingOptions _gamblingOptions;
 
-        public readonly long MINIMUM_BET;
-        public readonly long MAXIMUM_BET;
-
-        public GamblingService(IConfiguration config, CharacterService charService)
+        public GamblingService(CharacterService charService, GamblingOptions gamblingOptions)
         {
             UserBalances = new Dictionary<IUser, long>();
-
-            _config = config;
-
-            MINIMUM_BET = long.Parse(_config["gambling:minimum-bet"]);
-            MAXIMUM_BET = long.Parse(_config["gambling:maximum-bet"]);
-
+            
             _charService = charService;
-            LoadGamblingEnabledChannels();
+            _gamblingOptions = gamblingOptions;
         }
 
         public async Task UpdateBalances()
@@ -52,7 +44,7 @@ namespace FalloutRPG.Services.Casino
 
         public bool IsGamblingEnabledChannel(ulong channelId)
         {
-            if (_gamblingChannels.Contains(channelId))
+            if (_gamblingOptions.EnabledChannels.Contains(channelId))
                 return true;
             return false;
         }
@@ -82,24 +74,6 @@ namespace FalloutRPG.Services.Casino
             AlreadyInDictionary,
             NullCharacter,
             UnknownError
-        }
-
-        private void LoadGamblingEnabledChannels()
-        {
-            try
-            {
-                _gamblingChannels =
-                    _config
-                    .GetSection("gambling:enabled-channels")
-                    .GetChildren()
-                    .Select(x => UInt64.Parse(x.Value))
-                    .ToList();
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("You have not specified any gambling enabled channels in Config.json");
-                _gamblingChannels = new List<ulong>();
-            }
         }
     }
 }

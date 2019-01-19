@@ -95,15 +95,7 @@ namespace FalloutRPG.Modules.Roleplay
                 if (character == null) return CharacterResult.CharacterNotFound();
                 if (character.Level > 1 && _specService.IsSpecialSet(character)) return StatisticResult.SpecialAlreadySet();
 
-                try
-                {
-                    await _specService.SetInitialSpecialAsync(character, special, amount);
-                    return GenericResult.FromSuccess(String.Format(Messages.SPECIAL_SET_SUCCESS, userInfo.Mention));
-                }
-                catch (Exception e)
-                {
-                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
-                }
+                return await _specService.SetInitialSpecialAsync(character, special, amount);
             }
         }
     }

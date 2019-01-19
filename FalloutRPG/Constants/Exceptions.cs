@@ -12,7 +12,7 @@ namespace FalloutRPG.Constants
         public const string CHAR_NAMES_NOT_UNIQUE = "Character name was not unique for your Discord ID.";
         public const string CHAR_SPECIAL_LENGTH = "The input special length did not equal 7.";
         public const string CHAR_SPECIAL_DOESNT_ADD_UP = "SPECIAL does not add up to 40.";
-        public static readonly string CHAR_SPECIAL_NOT_IN_RANGE = $"One or more SPECIAL attributes were not between {SpecialService.SPECIAL_MIN} and {SpecialService.SPECIAL_MAX_CHARGEN} ({SpecialService.SPECIAL_MAX_CHARGEN_QUANTITY} attributes allowed at max during chargen).";
+        public const string CHAR_SPECIAL_NOT_IN_RANGE = "One or more SPECIAL attributes were not between {0} and {1}. ({2} attributes allowed at max during chargen).";
         public const string CHAR_SPECIAL_NOT_FOUND = "Unable to find SPECIAL for that character.";
         public const string CHAR_INVALID_TAG_NAMES = "One or more tag names were invalid.";
         public const string CHAR_INVALID_SKILL_NAME = "Skill name was invalid.";
