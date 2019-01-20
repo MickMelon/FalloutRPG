@@ -87,7 +87,8 @@ namespace FalloutRPG.Services.Roleplay
             character.SpecialPoints -= points;
 
             await _charService.SaveCharacterAsync(character);
-            return GenericResult.FromSuccess(String.Format(Messages.SPECIAL_SET_SUCCESS));
+
+            return GenericResult.FromSuccess(Messages.SPECIAL_SET_SUCCESS);
         }
 
         /// <summary>
