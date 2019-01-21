@@ -77,12 +77,13 @@ namespace FalloutRPG.Services.Roleplay
             if (!IsSpecialInRange(character.Special, points))
                 return GenericResult.FromError(String.Format(Exceptions.CHAR_SPECIAL_NOT_IN_RANGE, SPECIAL_MIN, _chargenOptions.SpecialLevelMax, _chargenOptions.SpecialsAtMax));
 
-            // Refund special points used if overwriting the same skill
-            character.SpecialPoints += _statService.GetStatistic(character, special);
+            var current = _statService.GetStatistic(character, special);
 
-            if (character.SpecialPoints - points < 0)
+            if (character.SpecialPoints + current - points < 0)
                 return GenericResult.FromError(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
 
+            // Refund special points used if overwriting the same skill
+            character.SpecialPoints += current;
             _statService.SetStatistic(character, special, points);
             character.SpecialPoints -= points;
 
