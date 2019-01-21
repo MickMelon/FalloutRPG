@@ -75,7 +75,7 @@ namespace FalloutRPG.Services.Roleplay
             if (character == null) throw new ArgumentNullException("character");
 
             if (!IsSpecialInRange(character.Special, points))
-                return GenericResult.FromError(String.Format(Exceptions.CHAR_SPECIAL_NOT_IN_RANGE, SPECIAL_MIN, _chargenOptions.SpecialLevelMax, _chargenOptions.SpecialsAtLimit));
+                return GenericResult.FromError(String.Format(Exceptions.CHAR_SPECIAL_NOT_IN_RANGE, SPECIAL_MIN, _chargenOptions.SpecialLevelMax, _chargenOptions.SpecialsAtMax));
 
             // Refund special points used if overwriting the same skill
             character.SpecialPoints += _statService.GetStatistic(character, special);
@@ -137,11 +137,11 @@ namespace FalloutRPG.Services.Roleplay
                 return false;
 
             // Unique MUSH rules :/
-            if (special.Where(sp => sp.Value == _chargenOptions.SpecialLevelMax).Count() > _chargenOptions.SpecialsAtLimit)
+            if (special.Where(sp => sp.Value == _chargenOptions.SpecialLevelMax).Count() > _chargenOptions.SpecialsAtMax)
                 return false;
 
             if (points == _chargenOptions.SpecialLevelMax &&
-                special.Where(sp => sp.Value == _chargenOptions.SpecialLevelMax).Count() >= _chargenOptions.SpecialsAtLimit)
+                special.Where(sp => sp.Value == _chargenOptions.SpecialLevelMax).Count() >= _chargenOptions.SpecialsAtMax)
                 return false;
 
             return true;

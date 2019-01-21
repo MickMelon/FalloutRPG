@@ -12,14 +12,6 @@ namespace FalloutRPG.Models.Configuration
 
         public int SpecialPoints { get; set; }
         public int SpecialLevelMax { get; set; }
-        public int SpecialsAtLimit { get; set; }
-
-        //  "SkillPoints": 0,
-        //"SkillLevelLimit": 0,
-        //"SkillsAtLimit": 0,
-
-        //"SpecialPoints": 40,
-        //"SpecialLevelLimit": 10,
-        //"SpecialsAtLimit": 7
+        public int SpecialsAtMax { get; set; }
     }
 }

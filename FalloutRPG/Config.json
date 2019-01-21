@@ -1,58 +1,64 @@
 ﻿{
-  "prefix": "!",
-  "tokens": {
-    "discord": ""
+  "Prefix": "!",
+  "Tokens": {
+    "Discord": ""
   },
-  "gambling": {
-    "enabled-channels": [ "" ],
-    "minimum-bet": 30,
-    "maximum-bet": 1000
+  "Gambling": {
+    "EnabledChannels": [ "" ],
+    "MinBet": 30,
+    "MaxBet": 1000
   },
-  "roleplay": {
-    "skill-max": 200,
-    "special-max": 10,
-    "use-percentage": true,
-    "use-old-probability": true,
+  "Roleplay": {
+    "CharacterMax": 25,
 
-    "experience": {
-      "exp-channels": [ "" ],
+    "SkillMax": 200,
+    "SpecialMax": 10,
+    "UsePercentage": true,
+    "UseOldProbability": true,
 
-      "allowed-consecutive-messages": 3,
-      "message-length-divisor": 30,
+    "Experience": {
+      "EnabledChannels": [ "" ],
 
-      "old-progression-system": {
-        "enabled": true,
-        "skill-points-on-level-up": 10,
-        "use-new-vegas-rules": true
+      "AllowedConsecutiveMessages": 3,
+      "MessageLengthDivisor": 30,
+
+      "IntelligenceMultiplier": 0.01
+    },
+
+    "Progression": {
+      "UseOldProgression": true,
+
+      "OldProgression": {
+        "SkillPointsOnLevelUp": 10,
+        "UseNewVegasRules": true
       },
 
-      "price-increase": {
-        "enabled": false,
-        "starting-level": 10,
-        "increase-every": 5,
-        "multiplier-addition": 0.5
-      },
+      "NewProgression": {
+        "PriceIncrease": {
+          "Enabled": false,
+          "StartingLevel": 10,
+          "IncreaseEvery": 5,
+          "MultiplierAddition": 0.5
+        },
 
-      "intelligence-based-exp-gain": {
-        "enabled": true,
-        "baseline": 5,
-        "multiplier": 0.01
+        "SkillUpgradePrices": {
+          "0": 0
+        },
+
+        "SpecialUpgradePrices": {
+          "0": 0
+        }
       }
     },
 
-    "chargen": {
-      "skill-points": 0,
-      "skill-level-limit": 0,
-      "skills-at-limit": 0,
+    "Chargen": {
+      "SkillPoints": 0,
+      "SkillLevelMax": 0,
+      "SkillsAtMax": 0,
 
-      "special-points": 40,
-      "special-level-limit": 10,
-      "specials-at-limit": 7
-    },
-
-    "skill-prices": {
-    },
-    "special-prices": {
+      "SpecialPoints": 40,
+      "SpecialLevelMax": 10,
+      "SpecialsAtMax": 7
     }
   }
 }
