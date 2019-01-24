@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Collections.ObjectModel;
+using Discord;
 
 namespace FalloutRPG.Helpers
 {
@@ -73,6 +74,20 @@ namespace FalloutRPG.Helpers
             }
 
             return builder.Build();
+        }
+
+        public static Embed BuildBasicEmbedWithFields(
+            string title,
+            string content, 
+            ReadOnlyCollection<string> fieldTitles,
+            ReadOnlyCollection<string> fieldContents)
+        {
+            string[] fieldTitlesArray = new string[fieldTitles.Count];
+            string[] fieldContentsArray = new string[fieldContents.Count];
+            fieldTitles.CopyTo(fieldTitlesArray, 0);
+            fieldContents.CopyTo(fieldContentsArray, 0);
+
+            return BuildBasicEmbedWithFields(title, content, fieldTitlesArray, fieldContentsArray);
         }
     }
 }

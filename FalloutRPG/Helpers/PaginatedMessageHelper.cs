@@ -2,6 +2,7 @@
 using Discord.Addons.Interactive;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace FalloutRPG.Helpers
 {
@@ -86,6 +87,19 @@ namespace FalloutRPG.Helpers
                 fields.Add(CreateFieldBuilder(titles[i], contents[i]));
 
             return fields;
+        }
+
+        public static List<EmbedFieldBuilder> CreatePageFields(
+            ReadOnlyCollection<string> titles,
+            ReadOnlyCollection<string> contents
+        )
+        {
+            string[] titlesArray = new string[titles.Count];
+            string[] contentsArray = new string[contents.Count];
+            titles.CopyTo(titlesArray, 0);
+            contents.CopyTo(contentsArray, 0);
+
+            return CreatePageFields(titlesArray, contentsArray);
         }
     }
 }
