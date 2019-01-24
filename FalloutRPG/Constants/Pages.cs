@@ -4,7 +4,7 @@
     {
         #region HELP GROUP
         #region Index Help Pages
-        public static readonly string[] HELP_PAGE1_TITLES = 
+        public static string[] HELP_PAGE1_TITLES = 
         {
             "$help general",
             "$help character",
@@ -13,7 +13,7 @@
             "$help craps"
         };
 
-        public static readonly string[] HELP_PAGE1_CONTENTS = 
+        public static string[] HELP_PAGE1_CONTENTS = 
         {
             "Displays general help menu.",
             "Displays character help menu.",
@@ -24,14 +24,14 @@
         #endregion
 
         #region General Help Pages
-        public static readonly string[] HELP_GENERAL_PAGE1_TITLES = 
+        public static string[] HELP_GENERAL_PAGE1_TITLES = 
         {
             "$pay [@user] [amount]",
             "$daysleft",
             "$highscores"
         };
 
-        public static readonly string[] HELP_GENERAL_PAGE1_CONTENTS = 
+        public static string[] HELP_GENERAL_PAGE1_CONTENTS = 
         {
             "Pays a user the specified amount of caps.",
             "Shows how many days are left until the release of Fallout 76 using UTC.",
@@ -40,7 +40,7 @@
         #endregion
 
         #region Character Help Pages
-        public static readonly string[] HELP_CHAR_PAGE1_TITLES = 
+        public static string[] HELP_CHAR_PAGE1_TITLES = 
         {
             "$char show",
             "$char show [@user]",
@@ -53,7 +53,7 @@
             "$char desc update [desc]"
         };
 
-        public static readonly string[] HELP_CHAR_PAGE1_CONTENTS = 
+        public static string[] HELP_CHAR_PAGE1_CONTENTS = 
         {
             "Displays your character.",
             "Displays specified user's character.",
@@ -66,7 +66,7 @@
             "Updates your character's description."
         };
 
-        public static readonly string[] HELP_CHAR_PAGE2_TITLES = 
+        public static string[] HELP_CHAR_PAGE2_TITLES = 
         {
             "$char stats",
             "$char stats [@user]",
@@ -80,7 +80,7 @@
             "$char special set [S] [P] [E] [C] [I] [A] [L]"
         };
 
-        public static readonly string[] HELP_CHAR_PAGE2_CONTENTS = 
+        public static string[] HELP_CHAR_PAGE2_CONTENTS = 
         {
             "Displays your level and experience.",
             "Displays specified user's level and experience.",
@@ -96,17 +96,17 @@
         #endregion
 
         #region NPC Help Pages
-        public static readonly string[] HELP_NPC_PAGE1_TITLES = 
+        public static string[] HELP_NPC_PAGE1_TITLES = 
         {
             "$npc create [NPC type] [First Name]",
             "$npc roll [Skill/SPECIAL to roll] [First name]"
         };
-        public static readonly string[] HELP_NPC_PAGE1_CONTENTS = 
+        public static string[] HELP_NPC_PAGE1_CONTENTS = 
         {
             "Creates a new NPC with slightly random stats influenced by the given NPC type.",
             "Gets a roll result based on the NPC's skills or S.P.E.C.I.A.L.."
         };
-        public static readonly string[] HELP_NPC_PRESETS_PAGE1_TITLES = 
+        public static string[] HELP_NPC_PRESETS_PAGE1_TITLES = 
         {
             "$npc preset create [Name]",
             "$npc preset create [Name] [STR] [PER] [END] [CHA] [INT] [AGI] [LUC]",
@@ -117,7 +117,7 @@
             "$npc preset init",
             "$npc preset view",
         };
-        public static readonly string[] HELP_NPC_PRESETS_PAGE1_CONTENTS = 
+        public static string[] HELP_NPC_PRESETS_PAGE1_CONTENTS = 
         {
             "Creates a new NPC preset with the given name. Note: this preset will be completely empty.",
             "Creates a new NPC preset with the given name and S.P.E.C.I.A.L.. This preset will have its Skills set to what a player's would look like without 'Tag!'.",
@@ -131,13 +131,13 @@
         #endregion
 
         #region Roll Help Pages
-        public static readonly string[] HELP_ROLL_PAGE1_TITLES = 
+        public static string[] HELP_ROLL_PAGE1_TITLES = 
         {
             "$roll [skill]",
             "$roll [special]"
         };
 
-        public static readonly string[] HELP_ROLL_PAGE1_CONTENTS = 
+        public static string[] HELP_ROLL_PAGE1_CONTENTS = 
         {
             "Gets a roll result based on the skill level.",
             "Gets a roll result based on the SPECIAL level."
@@ -145,7 +145,7 @@
         #endregion
 
         #region Craps Help Pages
-        public static readonly string[] HELP_CRAPS_PAGE1_TITLES = 
+        public static string[] HELP_CRAPS_PAGE1_TITLES = 
         {
             "$craps join",
             "$craps leave",
@@ -155,7 +155,7 @@
             "Bet Types"
         };
 
-        public static readonly string[] HELP_CRAPS_PAGE1_CONTENTS = 
+        public static string[] HELP_CRAPS_PAGE1_CONTENTS = 
         {
             "Joins current craps game.",
             "Leaves current craps game.",
@@ -167,7 +167,7 @@
         #endregion
 
         #region Admin Help Pages
-        public static readonly string[] HELP_ADMIN_PAGE1_TITLES = 
+        public static string[] HELP_ADMIN_PAGE1_TITLES = 
         {
             "$admin givemoney [@user] [amount]",
             "$admin giveskillpoints [@user] [amount]",
@@ -175,7 +175,7 @@
             "$admin reset [@user]"
         };
 
-        public static readonly string[] HELP_ADMIN_PAGE1_CONTENTS = 
+        public static string[] HELP_ADMIN_PAGE1_CONTENTS = 
         {
             "Gives a character the specified amount of caps.",
             "Gives a character the specified amount of skill points.",
@@ -185,7 +185,7 @@
         #endregion
 
         #region Tutorial
-        public static readonly string[] TUTORIAL_TITLES = 
+        public static string[] TUTORIAL_TITLES = 
         {
             "STEP 1: CREATING A CHARACTER",
             "STEP 2: SETTING A STORY AND DESCRIPTION",
@@ -194,7 +194,7 @@
             "STEP 5: ROLLING"
         };
 
-        public static readonly string[] TUTORIAL_CONTENTS = 
+        public static string[] TUTORIAL_CONTENTS = 
         {
             "Use $char create [firstname] [lastname] to create your character.",
             "Use $char story set [story] and $char desc set [desc] to set your story and description.",
@@ -207,7 +207,7 @@
 
         #region CHARACTER GROUP
         #region Display Character
-        public static readonly string[] CHAR_PAGE1_TITLES = 
+        public static string[] CHAR_PAGE1_TITLES = 
         {
             "Name",
             "Description",
@@ -217,12 +217,12 @@
             "Caps"
         };
 
-        public static readonly string[] CHAR_PAGE2_TITLES = 
+        public static string[] CHAR_PAGE2_TITLES = 
         {
             ""
         };
 
-        public static readonly string[] CHAR_PAGE1_CONTENTS = 
+        public static string[] CHAR_PAGE1_CONTENTS = 
         {
 
         };
