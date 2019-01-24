@@ -1,1 +1,2 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2c9857e59bae4a03be0aef3f3ba64ace)](https://app.codacy.com/app/MickMelon/FalloutRPG?utm_source=github.com&utm_medium=referral&utm_content=MickMelon/FalloutRPG&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/MickMelon/FalloutRPG.svg?branch=master)](https://travis-ci.org/MickMelon/FalloutRPG)
