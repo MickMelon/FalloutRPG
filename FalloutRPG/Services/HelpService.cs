@@ -15,7 +15,6 @@ namespace FalloutRPG.Services
     public class HelpService
     {
         private readonly SkillsService _skillsService;
-        private readonly SpecialService _specialService;
         private readonly InteractiveService _interactiveService;
 
         public HelpService(SkillsService skillsService, 
@@ -23,7 +22,6 @@ namespace FalloutRPG.Services
             InteractiveService interactiveService)
         {
             _skillsService = skillsService;
-            _specialService = specialService;
             _interactiveService = interactiveService;
         }
 

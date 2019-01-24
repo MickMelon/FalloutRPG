@@ -2,7 +2,7 @@
 
 namespace FalloutRPG.Constants
 {
-    public class Pages
+    public static class Pages
     {
         #region HELP GROUP
         #region Index Help Pages

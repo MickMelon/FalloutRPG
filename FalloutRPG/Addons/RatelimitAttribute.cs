@@ -56,6 +56,8 @@ namespace FalloutRPG.Addons
                 case Measure.Seconds:
                     _invokeLimitPeriod = TimeSpan.FromSeconds(period);
                     break;
+                default:
+                    throw new InvalidOperationException($"Unexpected value measure = {measure.ToString()}");
             }
         }
 
