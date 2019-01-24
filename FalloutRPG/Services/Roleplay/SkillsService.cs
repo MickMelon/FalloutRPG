@@ -1,6 +1,7 @@
 using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Configuration;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -12,36 +13,35 @@ namespace FalloutRPG.Services.Roleplay
 {
     public class SkillsService
     {
-        public static int TAG_MIN = 1;
-        public static int TAG_MAX = 6;
-        public static int TAG_MAX_QUANTITY = 2;
-        public static int TAG_POINTS = 36;
-
-        public static int MAX_SKILL_LEVEL = 12;
-
         private readonly CharacterService _charService;
+        private readonly ChargenOptions _chargenOptions;
         private readonly ExperienceService _expService;
+        private readonly ProgressionOptions _progOptions;
+        private readonly RoleplayOptions _roleplayOptions;
         private readonly SpecialService _specService;
         private readonly StatisticsService _statService;
-
-        private readonly IConfiguration _config;
         
         public static IReadOnlyCollection<Skill> Skills { get => StatisticsService.Statistics.OfType<Skill>().ToList().AsReadOnly(); }
         private IReadOnlyDictionary<int, int> _skillPrices;
+        private const int TAG_MIN = 1;
 
         public SkillsService(
             CharacterService charService,
+            ChargenOptions chargenOptions,
             ExperienceService expService,
+            ProgressionOptions progOptions,
+            RoleplayOptions roleplayOptions,
             SpecialService specService,
             StatisticsService statService,
             IConfiguration config)
         {
             _charService = charService;
+            _chargenOptions = chargenOptions;
             _expService = expService;
+            _progOptions = progOptions;
+            _roleplayOptions = roleplayOptions;
             _specService = specService;
             _statService = statService;
-
-            _config = config;
 
             LoadSkillConfig();
         }
@@ -52,16 +52,10 @@ namespace FalloutRPG.Services.Roleplay
             {
                 var temp = new Dictionary<int, int>();
 
-                foreach (var item in _config.GetSection("roleplay:skill-prices").GetChildren())
-                    temp.Add(Int32.Parse(item.Key), Int32.Parse(item.Value));
+                foreach (var item in _progOptions.NewProgression.SkillUpgradePrices)
+                    temp.Add(Int32.Parse(item.Key), item.Value);
 
                 _skillPrices = temp;
-
-                TAG_POINTS = _config.GetValue<int>("roleplay:chargen:skill-points");
-                TAG_MAX = _config.GetValue<int>("roleplay:chargen:skill-level-limit");
-                TAG_MAX_QUANTITY = _config.GetValue<int>("roleplay:chargen:skills-at-limit");
-
-                MAX_SKILL_LEVEL = _config.GetValue<int>("roleplay:skill-max");
             }
             catch (Exception)
             {
@@ -119,14 +113,16 @@ namespace FalloutRPG.Services.Roleplay
 
         private bool IsTagInRange(IList<StatisticValue> skills, int points)
         {
-            if (points < TAG_MIN || points > TAG_MAX)
+            var chargen = _chargenOptions;
+
+            if (points <  TAG_MIN || points > chargen.SkillLevelMax)
                 return false;
 
             // Unique MUSH rules :/
-            if (skills.Where(sk => sk.Value == TAG_MAX).Count() > TAG_MAX_QUANTITY)
+            if (skills.Where(sk => sk.Value == chargen.SkillLevelMax).Count() > chargen.SkillsAtMax)
                 return false;
 
-            if (points == TAG_MAX && skills.Where(sk => sk.Value == TAG_MAX).Count() >= TAG_MAX_QUANTITY)
+            if (points == chargen.SkillLevelMax && skills.Where(sk => sk.Value == chargen.SkillLevelMax).Count() >= chargen.SkillsAtMax)
                 return false;
 
             return true;
@@ -140,7 +136,7 @@ namespace FalloutRPG.Services.Roleplay
             if (skillSheet == null)
                 return false;
 
-            if (_expService.UseNewVegasRules)
+            if (_progOptions.OldProgression.UseNewVegasRules)
             {
                 if (skillSheet.Count <= 0) return false;
                 // This works because all SPECIAL and Skills should be set by now
@@ -148,7 +144,7 @@ namespace FalloutRPG.Services.Roleplay
             }
 
             // Character has used all tag points
-            if (skillSheet.Where(x => x.Statistic is Skill).Sum(x => x.Value) >= TAG_POINTS)
+            if (skillSheet.Where(x => x.Statistic is Skill).Sum(x => x.Value) >= _chargenOptions.SkillPoints)
                 return true;
 
             return false;
@@ -169,7 +165,7 @@ namespace FalloutRPG.Services.Roleplay
 
             var skillVal = _statService.GetStatistic(character, skill);
 
-            if (skillVal + 1 > MAX_SKILL_LEVEL)
+            if (skillVal + 1 > _roleplayOptions.SkillMax)
                 return GenericResult.FromError(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
 
             int price = CalculatePrice(_statService.GetStatistic(character, skill), character.Level);

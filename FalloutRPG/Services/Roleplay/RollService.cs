@@ -3,6 +3,7 @@ using Discord.Commands;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Configuration;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace FalloutRPG.Services.Roleplay
     public class RollService
     {
         private readonly EffectsService _effectsService;
+        private readonly RoleplayOptions _roleplayOptions;
         private readonly SpecialService _specService;
         private readonly SkillsService _skillsService;
         private readonly StatisticsService _statService;
@@ -24,25 +26,21 @@ namespace FalloutRPG.Services.Roleplay
         private const int DICE_SIDES = 8;
         private const int SUCCESS_ROLL = 8;
 
-        private readonly bool usePercentage;
-        private readonly bool useOldProbability;
-
         public RollService(
             EffectsService effectsService,
+            RoleplayOptions roleplayOptions,
             SpecialService specService,
             SkillsService skillsService,
             StatisticsService statService,
-            Random rand,
-            IConfiguration config)
+            Random rand)
         {
             _effectsService = effectsService;
+            _roleplayOptions = roleplayOptions;
             _specService = specService;
             _skillsService = skillsService;
             _statService = statService;
-            _rand = rand;
 
-            usePercentage = config.GetValue<bool>("roleplay:use-percentage");
-            useOldProbability = config.GetValue<bool>("roleplay:use-old-probability");
+            _rand = rand;
         }
 
         private int GetNumberOfDice(IList<StatisticValue> stats, Statistic stat)
@@ -79,7 +77,7 @@ namespace FalloutRPG.Services.Roleplay
 
             double maxSuccessRoll = CalculateProbability(DICE_SIDES, GetNumberOfDice(stats, stat)) * 100;
 
-            if (useOldProbability)
+            if (_roleplayOptions.UseOldProbability)
             {
                 var statValue = _statService.GetStatistic(stats, stat);
 
@@ -109,7 +107,7 @@ namespace FalloutRPG.Services.Roleplay
             string message = "";
             Color color = new Color(200, 45, 0);
 
-            if (usePercentage)
+            if (_roleplayOptions.UsePercentage)
             {
                 var result = GetOldRollResult(stats, stat);
 
@@ -143,7 +141,7 @@ namespace FalloutRPG.Services.Roleplay
         public RuntimeResult RollVsStatistic(Character character1, Character character2, Statistic stat1, Statistic stat2, bool useEffects = false)
         {
             var stats1 = character1.Statistics;
-            var stats2 = character1.Statistics;
+            var stats2 = character2.Statistics;
 
             if (useEffects)
             {
@@ -157,7 +155,7 @@ namespace FalloutRPG.Services.Roleplay
 
             string message = "";
 
-            if (usePercentage)
+            if (_roleplayOptions.UsePercentage)
             {
                 var result1 = GetOldRollResult(stats1, stat1);
                 var result2 = GetOldRollResult(stats2, stat2);

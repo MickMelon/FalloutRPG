@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using FalloutRPG.Data;
 using FalloutRPG.Data.Repositories;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Configuration;
 using FalloutRPG.Models.Effects;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Casino;
@@ -12,6 +13,7 @@ using FalloutRPG.Services.Roleplay;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -62,8 +64,25 @@ namespace FalloutRPG
                 CaseSensitiveCommands = false,
                 DefaultRunMode = RunMode.Async
             }))
+            // Config
             .AddSingleton(config)
-            .AddSingleton<CommandHandler>()
+            .Configure<GeneralOptions>(config)
+            .Configure<GamblingOptions>(config.GetSection("Gambling"))
+            .Configure<RoleplayOptions>(config.GetSection("Roleplay"))
+            .Configure<ChargenOptions>(config.GetSection("Roleplay:Chargen"))
+            .Configure<ExperienceOptions>(config.GetSection("Roleplay:Experience"))
+            .Configure<ProgressionOptions>(config.GetSection("Roleplay:Progression"))
+            .Configure<TokensOptions>(config.GetSection("Tokens"))
+
+            .AddScoped(cfg => cfg.GetService<IOptionsSnapshot<GeneralOptions>>().Value)
+            .AddScoped(cfg => cfg.GetService<IOptionsSnapshot<GamblingOptions>>().Value)
+            .AddScoped(cfg => cfg.GetService<IOptionsSnapshot<RoleplayOptions>>().Value)
+            .AddScoped(cfg => cfg.GetService<IOptionsSnapshot<ChargenOptions>>().Value)
+            .AddScoped(cfg => cfg.GetService<IOptionsSnapshot<ExperienceOptions>>().Value)
+            .AddScoped(cfg => cfg.GetService<IOptionsSnapshot<ProgressionOptions>>().Value)
+            .AddScoped(cfg => cfg.GetService<IOptionsSnapshot<TokensOptions>>().Value)
+
+            .AddScoped<CommandHandler>()
             .AddSingleton<LogService>()
             .AddSingleton<StartupService>()
             .AddSingleton<HelpService>()
@@ -77,13 +96,13 @@ namespace FalloutRPG
             .AddSingleton<SpecialService>()
             .AddSingleton<StartupService>()
             .AddSingleton<CharacterService>()
-            .AddSingleton<ExperienceService>()
+            .AddScoped<ExperienceService>()
             .AddSingleton<EffectsService>()
             .AddSingleton<NpcPresetService>()
             .AddSingleton<NpcService>()
 
             // Casino
-            .AddSingleton<GamblingService>()
+            .AddScoped<GamblingService>()
             .AddSingleton<CrapsService>()
 
             // Addons
@@ -102,7 +121,7 @@ namespace FalloutRPG
         /// </summary>
         private IConfiguration BuildConfig() => new ConfigurationBuilder()
             .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("Config.json")
+            .AddJsonFile("Config.json", false, true)
             .Build();
     }
 }

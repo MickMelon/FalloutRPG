@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using FalloutRPG.Constants;
+using FalloutRPG.Models.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace FalloutRPG.Services.Casino
     public class CrapsService
     {
         private readonly GamblingService _gamblingService;
+        private readonly GamblingOptions _gamblingOptions;
 
         private readonly Random _rand;
 
@@ -28,7 +30,9 @@ namespace FalloutRPG.Services.Casino
 
         private Timer _rollTimer;
 
-        public CrapsService(GamblingService gamblingService, Random rand)
+        public CrapsService(GamblingService gamblingService,
+            GamblingOptions gamblingOptions,
+            Random rand)
         {
             _players = new List<IUser>();
             _bets = new List<Bet>();
@@ -39,6 +43,7 @@ namespace FalloutRPG.Services.Casino
             _shooterIndex = 0;
 
             _gamblingService = gamblingService;
+            _gamblingOptions = gamblingOptions;
 
             _rand = rand;
 
@@ -107,10 +112,10 @@ namespace FalloutRPG.Services.Casino
                 if (_gamblingService.AddUserBalanceAsync(user).Result != GamblingService.AddUserBalanceResult.Success) // failed to add user
                     return String.Format(Messages.ERR_BALANCE_ADD_FAIL, user.Mention);
 
-            if (betAmount > _gamblingService.UserBalances[user] || betAmount > _gamblingService.MAXIMUM_BET)
+            if (betAmount > _gamblingService.UserBalances[user] || betAmount > _gamblingOptions.MaxBet)
                 return String.Format(Messages.ERR_BET_TOO_HIGH, user.Mention);
 
-            if (betAmount < _gamblingService.MINIMUM_BET)
+            if (betAmount < _gamblingOptions.MinBet)
                 return String.Format(Messages.ERR_BET_TOO_LOW, user.Mention);
 
             if (Enum.TryParse(betToPlace, true, out BetType betType))

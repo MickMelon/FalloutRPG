@@ -4,6 +4,7 @@ using FalloutRPG.Addons;
 using FalloutRPG.Constants;
 using FalloutRPG.Helpers;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Configuration;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
@@ -25,6 +26,8 @@ namespace FalloutRPG.Modules.Roleplay
             private readonly CharacterService _charService;
             private readonly EffectsService _effectsService;
             private readonly ExperienceService _expService;
+            private readonly ProgressionOptions _progOptions;
+            private readonly RoleplayOptions _roleplayOptions;
             private readonly SkillsService _skillsService;
             private readonly SpecialService _specService;
             private readonly StatisticsService _statsService;
@@ -34,6 +37,8 @@ namespace FalloutRPG.Modules.Roleplay
                 CharacterService charService,
                 EffectsService effectsService,
                 ExperienceService expService,
+                ProgressionOptions progOptions,
+                RoleplayOptions roleplayOptions,
                 SkillsService skillsService,
                 SpecialService specService,
                 StatisticsService statsService,
@@ -42,6 +47,8 @@ namespace FalloutRPG.Modules.Roleplay
                 _charService = charService;
                 _effectsService = effectsService;
                 _expService = expService;
+                _progOptions = progOptions;
+                _roleplayOptions = roleplayOptions;
                 _skillsService = skillsService;
                 _specService = specService;
                 _statsService = statsService;
@@ -118,7 +125,9 @@ namespace FalloutRPG.Modules.Roleplay
             [Command("tag")]
             public async Task<RuntimeResult> TagSkillsAsync(Skill tag1, Skill tag2, Skill tag3)
             {
-                if (!_expService.UseNewVegasRules) return StatisticResult.NotUsingNewVegasRules();
+                if (!_progOptions.UseOldProgression || 
+                    !_progOptions.OldProgression.UseNewVegasRules)
+                    return StatisticResult.NotUsingNewVegasRules();
 
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
@@ -196,7 +205,7 @@ namespace FalloutRPG.Modules.Roleplay
 
                 var skillVal = _statsService.GetStatistic(character, skill);
 
-                if ((skillVal + points) > SkillsService.MAX_SKILL_LEVEL)
+                if ((skillVal + points) > _roleplayOptions.SkillMax)
                     return GenericResult.FromError(Exceptions.CHAR_SKILL_POINTS_GOES_OVER_MAX);
 
                 _statsService.SetStatistic(character, skill, skillVal + points);

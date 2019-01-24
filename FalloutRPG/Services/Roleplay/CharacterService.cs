@@ -2,6 +2,7 @@
 using FalloutRPG.Data.Repositories;
 using FalloutRPG.Helpers;
 using FalloutRPG.Models;
+using FalloutRPG.Models.Configuration;
 using FalloutRPG.Models.Effects;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,12 +16,22 @@ namespace FalloutRPG.Services.Roleplay
     {
         private const int MAX_CHARACTERS = 25;
 
+        private readonly ChargenOptions _chargenOptions;
+        private readonly RoleplayOptions _roleplayOptions;
+
         private readonly StatisticsService _statsService;
 
         private readonly IRepository<Character> _charRepository;
 
-        public CharacterService(StatisticsService statsService, IRepository<Character> charRepository)
+        public CharacterService(
+            ChargenOptions chargenOptions,
+            RoleplayOptions roleplayOptions,
+            StatisticsService statsService,
+            IRepository<Character> charRepository)
         {
+            _chargenOptions = chargenOptions;
+            _roleplayOptions = roleplayOptions;
+
             _statsService = statsService;
 
             _statsService.StatisticsUpdated += OnStatisticsUpdated;
@@ -87,7 +98,7 @@ namespace FalloutRPG.Services.Roleplay
                 Experience = 0,
                 ExperiencePoints = 0,
                 SpecialPoints = SpecialService.STARTING_SPECIAL_POINTS,
-                TagPoints = SkillsService.TAG_POINTS,
+                TagPoints = _chargenOptions.SkillPoints,
                 Money = 1000,
                 Statistics = new List<StatisticValue>(),
                 EffectCharacters = new List<EffectCharacter>()
@@ -164,7 +175,7 @@ namespace FalloutRPG.Services.Roleplay
             }
             else
             {
-                character.TagPoints = SkillsService.TAG_POINTS;
+                character.TagPoints = _chargenOptions.SkillPoints;
                 character.ExperiencePoints = character.Experience;
             }
             
