@@ -84,6 +84,9 @@ namespace FalloutRPG.Modules.Roleplay
         [Alias("rm")]
         public async Task<RuntimeResult> RollManualAsync(Statistic stat, int value)
         {
+            if (value > 5000)
+                return GenericResult.FromError("Too high.");
+
             var mockCharacter = new Character { Name = Context.User.Username };
             mockCharacter.Statistics = new List<StatisticValue> { new StatisticValue { Statistic = stat, Value = value } };
             return await Task.FromResult(_rollService.RollStatistic(mockCharacter, stat));
