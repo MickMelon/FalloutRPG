@@ -6,7 +6,9 @@ using FalloutRPG.Models;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FalloutRPG.Modules.Roleplay
@@ -18,6 +20,7 @@ namespace FalloutRPG.Modules.Roleplay
         private readonly EffectsService _effectsService;
         private readonly HelpService _helpService;
         private readonly NpcService _npcService;
+        private readonly Random _random;
         private readonly RollService _rollService;
         private readonly SpecialService _specialService;
 
@@ -27,7 +30,8 @@ namespace FalloutRPG.Modules.Roleplay
             HelpService helpService,
             NpcService npcService,
             RollService rollService,
-            SpecialService specialService)
+            SpecialService specialService,
+            Random random)
         {
             _charService = characterService;
             _effectsService = effectsService;
@@ -35,6 +39,8 @@ namespace FalloutRPG.Modules.Roleplay
             _npcService = npcService;
             _rollService = rollService;
             _specialService = specialService;
+
+            _random = random;
         }
 
         [Command("roll")]
@@ -44,11 +50,50 @@ namespace FalloutRPG.Modules.Roleplay
             await _helpService.ShowRollHelpAsync(Context);
         }
 
+        [Command("roll")]
+        [Alias("r")]
+        public async Task<RuntimeResult> RollDiceAsync(int dieCount, int sides, int bonus = 0)
+        {
+            if (dieCount > 20)
+                return GenericResult.FromError(Messages.ROLL_DICE_TOO_MANY);
+
+            if (sides > 100)
+                return GenericResult.FromError(Messages.ROLL_DICE_TOO_MANY_SIDES);
+
+            int[] dice = new int[dieCount];
+
+            int sum = 0;
+
+            for (int die = 0; die < dieCount; die++)
+            {
+                int dieResult = _random.Next(1, sides + 1);
+                dice[die] = dieResult;
+                sum += dieResult;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (int die = 0; die < dice.Length; die++)
+                sb.Append($"[{dice[die]}] + ");
+
+            sb.Append($"{bonus} = {dice.Sum() + bonus}");
+
+            return await Task.FromResult(GenericResult.FromSuccess(String.Format(Messages.ROLL_DICE, sb.ToString(), Context.User.Mention)));
+        }
+
+        [Command("roll")]
+        [Alias("r")]
+        public async Task<RuntimeResult> RollManualAsync(Statistic stat, int value)
+        {
+            var mockCharacter = new Character { Name = Context.User.Username };
+            mockCharacter.Statistics = new List<StatisticValue> { new StatisticValue { Statistic = stat, Value = value } };
+            return await Task.FromResult(_rollService.RollStatistic(mockCharacter, stat));
+        }
+
         #region Old, Single Rolls
         [Command("roll")]
         [Alias("r")]
         public async Task<RuntimeResult> RollSelfStatAsync(Statistic statToRoll) =>
-            await RollPlayerAsync(statToRoll, Context.User);
+                await RollPlayerAsync(statToRoll, Context.User);
 
         [Command("roll")]
         [Alias("r")]
@@ -74,7 +119,7 @@ namespace FalloutRPG.Modules.Roleplay
         [Alias("brolln", "brn")]
         public async Task<RuntimeResult> RollNpcStatBuffedAsync(Statistic statToRoll, string npcName) =>
             await Task.FromResult(RollNpcAsync(statToRoll, npcName, true));
-        
+
         #endregion
 
         #region Roll VS

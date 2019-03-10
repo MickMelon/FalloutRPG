@@ -9,6 +9,7 @@
         public static readonly string NPC_SUFFIX = "\uD83D\uDCBBNPC ";
         public static readonly string QUESTION_EMOJI = "❓ ";
         public static readonly string MUSCLE_EMOJI = "\uD83D\uDCAA";
+        public static readonly string DICE_EMOJI = "\uD83C\uDFB2";
 
         // Character Messages
         public static readonly string CHAR_CREATED_SUCCESS = SUCCESS_EMOJI + "Character created successfully. {0}";
@@ -152,5 +153,12 @@
         public static readonly string ERR_NPC_PRESET_ENABLE = FAILURE_EMOJI + "Failed to enable NPC preset: {0}. Check for typos {1}";
         public static readonly string ERR_NPC_PRESET_DISABLE = FAILURE_EMOJI + "Failed to disable NPC preset: {0}. Check for typos {1}";
         public static readonly string ERR_NPC_PRESET_EDIT = FAILURE_EMOJI + "Failed to modify NPC preset attribute. {0}";
+
+        // Roll Messages
+        public static readonly string ROLL_DICE = DICE_EMOJI + "Rolled: {0}. ({1})";
+
+        // Roll Error Messages
+        public static readonly string ROLL_DICE_TOO_MANY = "There were too many die to be rolled; max is twenty.";
+        public static readonly string ROLL_DICE_TOO_MANY_SIDES = "There were too many sides on that die to be rolled; max is one hundred.";
     }
 }

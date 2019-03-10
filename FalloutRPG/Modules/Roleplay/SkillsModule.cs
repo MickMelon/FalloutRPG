@@ -122,6 +122,23 @@ namespace FalloutRPG.Modules.Roleplay
                 await _helpService.ShowSkillsHelpAsync(Context);
             }
 
+            [Command("init")]
+            public async Task<RuntimeResult> InitializeStatisticsAsync()
+            {
+                if (!_progOptions.UseOldProgression ||
+                    !_progOptions.OldProgression.UseNewVegasRules)
+                    return StatisticResult.NotUsingNewVegasRules();
+
+                var character = await _charService.GetCharacterAsync(Context.User.Id);
+                if (character == null) return CharacterResult.CharacterNotFound();
+
+                _statsService.InitializeStatistics(character.Statistics);
+                _skillsService.InitializeSkills(character, true);
+                await _charService.SaveCharacterAsync(character);
+
+                return GenericResult.FromSuccess("Character skills initialized successfully.");
+            }
+
             [Command("tag")]
             public async Task<RuntimeResult> TagSkillsAsync(Skill tag1, Skill tag2, Skill tag3)
             {

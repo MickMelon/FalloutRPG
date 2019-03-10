@@ -210,14 +210,17 @@ namespace FalloutRPG.Services.Roleplay
             return -1;
         }
 
-        public void InitializeSkills(Character character)
+        public void InitializeSkills(Character character, bool onlyNewSkills = false)
         {
             foreach (var skill in character.Skills)
             {
-                var specialValue = _statService.GetStatistic(character, ((Skill)skill.Statistic).Special);
-                var luck = _statService.GetStatistic(character, Globals.StatisticFlag.Luck);
+                if (!onlyNewSkills || (onlyNewSkills && skill.Value == 0))
+                {
+                    var specialValue = _statService.GetStatistic(character, ((Skill)skill.Statistic).Special);
+                    var luck = _statService.GetStatistic(character, Globals.StatisticFlag.Luck);
 
-                skill.Value = 2 + (2 * specialValue) + (luck / 2);
+                    skill.Value = 2 + (2 * specialValue) + (luck / 2);
+                }
             }
         }
     }
