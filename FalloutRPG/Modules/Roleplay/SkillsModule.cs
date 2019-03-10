@@ -79,6 +79,7 @@ namespace FalloutRPG.Modules.Roleplay
                     return;
                 }
 
+                bool skillsSet = _skillsService.AreSkillsSet(character);
                 var stats = character.Statistics;
                 if (useEffects)
                     stats = _effectsService.GetEffectiveStatistics(character);
@@ -88,17 +89,24 @@ namespace FalloutRPG.Modules.Roleplay
                 foreach (var special in SpecialService.Specials.OrderBy(x => x.Id))
                 {
                     message.Append($"__**{special.Name}:**__\n");
-                    foreach (var skill in stats.Where(x => x.Statistic is Skill sk && sk.Special.Equals(special)))
+                    foreach (var skill in stats.Where(x => x.Statistic is Skill sk && sk.Special.Equals(special)).OrderBy(x => x.Statistic.Name))
                     {
-                        if (skill.Value == 0) continue;
+                        if (skillsSet)
+                        {
+                            if (skill.Value == 0) continue;
 
-                        message.Append($"**{skill.Statistic.Name}:** {skill.Value}\n");
+                            message.Append($"**{skill.Statistic.Name}:** {skill.Value}\n");
+                        }
+                        else
+                        {
+                            message.Append($"*{skill.Statistic.Name}*, ");
+                        }
                     }
 
                     message.Append($"\n");
                 }
 
-                if (_skillsService.AreSkillsSet(character))
+                if (skillsSet)
                 {
                     if (character.ExperiencePoints > 0)
                     {
@@ -107,7 +115,8 @@ namespace FalloutRPG.Modules.Roleplay
                 }
                 else
                 {
-                    message.Append($"*You have {character.TagPoints} Tag points left to spend!*");
+                    if (!_progOptions.OldProgression.UseNewVegasRules)
+                        message.Append($"*You have {character.TagPoints} Tag points left to spend!*");
                 }
 
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $skills", message.ToString());
