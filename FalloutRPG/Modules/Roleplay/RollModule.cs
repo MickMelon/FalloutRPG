@@ -80,8 +80,8 @@ namespace FalloutRPG.Modules.Roleplay
             return await Task.FromResult(GenericResult.FromSuccess(String.Format(Messages.ROLL_DICE, sb.ToString(), Context.User.Mention)));
         }
 
-        [Command("roll")]
-        [Alias("r")]
+        [Command("rollm")]
+        [Alias("rm")]
         public async Task<RuntimeResult> RollManualAsync(Statistic stat, int value)
         {
             var mockCharacter = new Character { Name = Context.User.Username };

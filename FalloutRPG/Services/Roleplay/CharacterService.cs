@@ -147,6 +147,7 @@ namespace FalloutRPG.Services.Roleplay
         {
             // for whatever reason, initializeStatistics ain't cutting it...probably a race condition(?)
             if (character.Statistics == null) character.Statistics = new List<StatisticValue>();
+            character.Statistics.Clear();
 
             _statsService.InitializeStatistics(character.Statistics);            
 

@@ -132,6 +132,18 @@ namespace FalloutRPG.Modules.Roleplay
                 var character = await _charService.GetCharacterAsync(Context.User.Id);
                 if (character == null) return CharacterResult.CharacterNotFound();
 
+                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet(Context.User.Mention);
+
+                // Makes sure at least one skill has a value, otherwise the character might not have tagged their skills yet
+                // We can't use !AreSkillsSet because it assumes that EVERY skill (including the brand new one) is greater than 0 at this point
+                // If a new skill just got added, it's going to be 0 for everybody!
+                if (character.Skills.Count(x => x.Value > 0) < 1) return StatisticResult.SkillsNotSet(Context.User.Mention);
+
+                // Now we check if all the skills count is the same, because if this is true, there aren't any new skills to initialize,
+                // running this command is pointless and adds unnecessary risk
+                if (character.Skills.Count == StatisticsService.Statistics.OfType<Skill>().Count())
+                    return StatisticResult.SkillsAlreadyTagged(Context.User.Mention);
+
                 _statsService.InitializeStatistics(character.Statistics);
                 _skillsService.InitializeSkills(character, true);
                 await _charService.SaveCharacterAsync(character);
