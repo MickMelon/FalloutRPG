@@ -8,6 +8,7 @@ using FalloutRPG.Modules.Preconditions;
 using FalloutRPG.Services;
 using FalloutRPG.Services.Roleplay;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -26,8 +27,6 @@ namespace FalloutRPG.Modules
         private readonly SpecialService _specialService;
         private readonly StatisticsService _statService;
         private readonly HelpService _helpService;
-
-        private readonly IRepository<Character> _charRepo;
 
         public AdminModule(CharacterService charService,
             ExperienceService experienceService,
@@ -245,20 +244,6 @@ namespace FalloutRPG.Modules
         {
             await _charService.ResetAllCharactersAsync();
             await ReplyAsync(string.Format(Messages.ADM_RESET, Context.User.Mention));
-        }
-
-        [Command("initallcharacters")]
-        [RequireOwner]
-        public async Task<RuntimeResult> InitializeStatisticsAsync()
-        {
-            foreach (var character in await _charRepo.FetchAllAsync())
-            {
-                _statService.InitializeStatistics(character.Statistics);
-                _skillsService.InitializeSkills(character, true);
-                await _charService.SaveCharacterAsync(character);
-            }
-
-            return GenericResult.FromSuccess("Character skills initialized successfully.");
         }
 
         [Command("delete")]
