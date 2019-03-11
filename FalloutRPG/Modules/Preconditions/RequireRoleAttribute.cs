@@ -20,7 +20,7 @@ namespace FalloutRPG.Modules.Preconditions
                 if (user.Roles.Any(r => r.Name == _name))
                     return Task.FromResult(PreconditionResult.FromSuccess());
                 
-                return Task.FromResult(PreconditionResult.FromError(String.Format(Messages.ERR_CMD_REQUIRE_ROLE_FAIL, _name, user.Mention)));
+                return Task.FromResult(PreconditionResult.FromError(String.Format(Messages.ERR_CMD_REQUIRE_ROLE_FAIL, _name)));
             }
             else
                 return Task.FromResult(PreconditionResult.FromError(Messages.ERR_CMD_NOT_IN_GUILD));

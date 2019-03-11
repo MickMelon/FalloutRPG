@@ -34,27 +34,22 @@ namespace FalloutRPG.Modules.Roleplay
 
             [Command]
             [Alias("show", "view")]
-            public async Task ShowSpecialAsync(IUser targetUser = null) =>
+            public async Task<RuntimeResult> ShowSpecialAsync(IUser targetUser = null) =>
                 await ShowSpecialAsync(targetUser, false);
 
             [Command("buffed")]
             [Alias("bshow", "bview")]
-            public async Task ShowSpecialBuffedAsync(IUser targetUser = null) =>
+            public async Task<RuntimeResult> ShowSpecialBuffedAsync(IUser targetUser = null) =>
                 await ShowSpecialAsync(targetUser, true);
 
-            private async Task ShowSpecialAsync(IUser targetUser = null, bool useEffects = false)
+            private async Task<RuntimeResult> ShowSpecialAsync(IUser targetUser = null, bool useEffects = false)
             {
                 var userInfo = Context.User;
                 var character = targetUser == null
                     ? await _charService.GetCharacterAsync(userInfo.Id)
                     : await _charService.GetCharacterAsync(targetUser.Id);
 
-                if (character == null)
-                {
-                    await ReplyAsync(
-                        string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound();
 
                 var stats = character.Statistics;
                 if (useEffects)
@@ -71,6 +66,7 @@ namespace FalloutRPG.Modules.Roleplay
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $special", message.ToString());
 
                 await ReplyAsync(userInfo.Mention, embed: embed);
+                return GenericResult.FromSilentSuccess();
             }
 
             [Command("spend")]
@@ -80,7 +76,7 @@ namespace FalloutRPG.Modules.Roleplay
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+                if (character == null) return CharacterResult.CharacterNotFound();
                 if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet();
 
                 return _specService.UpgradeSpecial(character, special);

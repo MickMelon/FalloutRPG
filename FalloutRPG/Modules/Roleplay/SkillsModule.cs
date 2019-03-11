@@ -57,27 +57,22 @@ namespace FalloutRPG.Modules.Roleplay
 
             [Command]
             [Alias("show", "view")]
-            public async Task ShowSkillsAsync(IUser targetUser = null) =>
+            public async Task<RuntimeResult> ShowSkillsAsync(IUser targetUser = null) =>
                 await ShowSkillsAsync(targetUser, false);
 
             [Command("buffed")]
             [Alias("buff", "showb", "viewb")]
-            public async Task ShowSkillsBuffedAsync(IUser targetUser = null) =>
+            public async Task<RuntimeResult> ShowSkillsBuffedAsync(IUser targetUser = null) =>
                 await ShowSkillsAsync(targetUser, true);
 
-            private async Task ShowSkillsAsync(IUser targetUser = null, bool useEffects = false)
+            private async Task<RuntimeResult> ShowSkillsAsync(IUser targetUser = null, bool useEffects = false)
             {
                 var userInfo = Context.User;
                 var character = targetUser == null
                     ? await _charService.GetCharacterAsync(userInfo.Id)
                     : await _charService.GetCharacterAsync(targetUser.Id);
 
-                if (character == null)
-                {
-                    await ReplyAsync(
-                        string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound();
 
                 bool skillsSet = _skillsService.AreSkillsSet(character);
                 var stats = character.Statistics;
@@ -122,6 +117,7 @@ namespace FalloutRPG.Modules.Roleplay
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $skills", message.ToString());
 
                 await ReplyAsync(userInfo.Mention, embed: embed);
+                return GenericResult.FromSilentSuccess();
             }
 
             [Command("help")]
@@ -141,17 +137,17 @@ namespace FalloutRPG.Modules.Roleplay
                 var character = await _charService.GetCharacterAsync(Context.User.Id);
                 if (character == null) return CharacterResult.CharacterNotFound();
 
-                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet(Context.User.Mention);
+                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet();
 
                 // Makes sure at least one skill has a value, otherwise the character might not have tagged their skills yet
                 // We can't use !AreSkillsSet because it assumes that EVERY skill (including the brand new one) is greater than 0 at this point
                 // If a new skill just got added, it's going to be 0 for everybody!
-                if (character.Skills.Count(x => x.Value > 0) < 1) return StatisticResult.SkillsNotSet(Context.User.Mention);
+                if (character.Skills.Count(x => x.Value > 0) < 1) return StatisticResult.SkillsNotSet();
 
                 // Now we check if all the skills count is the same, because if this is true, there aren't any new skills to initialize,
                 // running this command is pointless and adds unnecessary risk
                 if (character.Skills.Count == StatisticsService.Statistics.OfType<Skill>().Count())
-                    return StatisticResult.SkillsAlreadyTagged(Context.User.Mention);
+                    return StatisticResult.SkillsAlreadyTagged();
 
                 _statsService.InitializeStatistics(character.Statistics);
                 _skillsService.InitializeSkills(character, true);
@@ -177,11 +173,11 @@ namespace FalloutRPG.Modules.Roleplay
                 try
                 {
                     await _skillsService.TagSkills(character, tag1, tag2, tag3);
-                    return GenericResult.FromSuccess(string.Format(Messages.SKILLS_SET_SUCCESS, userInfo.Mention));
+                    return GenericResult.FromSuccess(Messages.SKILLS_SET_SUCCESS);
                 }
                 catch (Exception e)
                 {
-                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
+                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message}");
                 }
             }
 
@@ -194,17 +190,17 @@ namespace FalloutRPG.Modules.Roleplay
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
-                if (_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsAlreadyTagged(Context.User.Mention);
+                if (character == null) return CharacterResult.CharacterNotFound();
+                if (_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsAlreadyTagged();
 
                 try
                 {
                     await _skillsService.TagSkill(character, tag, points);
-                    return GenericResult.FromSuccess(string.Format(Messages.SKILLS_SET_SUCCESS, userInfo.Mention));
+                    return GenericResult.FromSuccess(Messages.SKILLS_SET_SUCCESS);
                 }
                 catch (Exception e)
                 {
-                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message} ({userInfo.Mention})");
+                    return GenericResult.FromError($"{Messages.FAILURE_EMOJI} {e.Message}");
                 }
             }
 
@@ -217,7 +213,7 @@ namespace FalloutRPG.Modules.Roleplay
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+                if (character == null) return CharacterResult.CharacterNotFound();
                 if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
 
                 return _skillsService.UpgradeSkill(character, skill);
@@ -232,11 +228,11 @@ namespace FalloutRPG.Modules.Roleplay
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+                if (character == null) return CharacterResult.CharacterNotFound();
 
                 if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
 
-                if (points < 1) return GenericResult.FromError(String.Format(Messages.ERR_SKILLS_POINTS_BELOW_ONE, userInfo.Mention));
+                if (points < 1) return GenericResult.FromError(Messages.ERR_SKILLS_POINTS_BELOW_ONE);
 
                 if (points > character.ExperiencePoints)
                     return GenericResult.FromError(Exceptions.CHAR_NOT_ENOUGH_SKILL_POINTS);
@@ -262,10 +258,10 @@ namespace FalloutRPG.Modules.Roleplay
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
-                if (!character.IsReset) return GenericResult.FromError(string.Format(Messages.ERR_SKILLS_NONE_TO_CLAIM, userInfo.Mention));
-                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet(Context.User.Mention);
-                if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet(Context.User.Mention);
+                if (character == null) return CharacterResult.CharacterNotFound();
+                if (!character.IsReset) return GenericResult.FromError(Messages.ERR_SKILLS_NONE_TO_CLAIM);
+                if (!_specService.IsSpecialSet(character)) return StatisticResult.SpecialNotSet();
+                if (!_skillsService.AreSkillsSet(character)) return StatisticResult.SkillsNotSet();
 
                 _statsService.InitializeStatistics(character.Statistics);
 
@@ -278,7 +274,7 @@ namespace FalloutRPG.Modules.Roleplay
                 character.IsReset = false;
                 await _charService.SaveCharacterAsync(character);
 
-                return GenericResult.FromSuccess(string.Format(Messages.SKILLS_POINTS_CLAIMED, character.ExperiencePoints, userInfo.Mention));
+                return GenericResult.FromSuccess(string.Format(Messages.SKILLS_POINTS_CLAIMED, character.ExperiencePoints));
             }
         }
     }

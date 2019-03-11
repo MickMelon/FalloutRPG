@@ -77,7 +77,7 @@ namespace FalloutRPG.Modules.Roleplay
 
             sb.Append($"{bonus} = {dice.Sum() + bonus}");
 
-            return await Task.FromResult(GenericResult.FromSuccess(String.Format(Messages.ROLL_DICE, sb.ToString(), Context.User.Mention)));
+            return await Task.FromResult(GenericResult.FromSuccess(String.Format(Messages.ROLL_DICE, sb.ToString())));
         }
 
         [Command("rollm")]
@@ -191,7 +191,7 @@ namespace FalloutRPG.Modules.Roleplay
         private async Task<RuntimeResult> RollPlayerAsync(Statistic statToRoll, IUser user, bool useEffects = false)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
-            if (character == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             return _rollService.RollStatistic(character, statToRoll, useEffects);
         }
@@ -199,7 +199,7 @@ namespace FalloutRPG.Modules.Roleplay
         private RuntimeResult RollNpcAsync(Statistic statToRoll, string npcName, bool useEffects = false)
         {
             var npc = _npcService.FindNpc(npcName);
-            if (npc == null) return CharacterResult.NpcNotFound(Context.User.Mention);
+            if (npc == null) return CharacterResult.NpcNotFound();
 
             _npcService.ResetNpcTimer(npc);
 
@@ -211,7 +211,7 @@ namespace FalloutRPG.Modules.Roleplay
             var char1 = await _charService.GetCharacterAsync(user1.Id);
             var char2 = await _charService.GetCharacterAsync(user2.Id);
 
-            if (char1 == null || char2 == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
+            if (char1 == null || char2 == null) return CharacterResult.CharacterNotFound();
 
             return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }
@@ -221,8 +221,8 @@ namespace FalloutRPG.Modules.Roleplay
             var char1 = await _charService.GetCharacterAsync(user.Id);
             var char2 = _npcService.FindNpc(npcName);
 
-            if (char1 == null) return CharacterResult.CharacterNotFound(Context.User.Mention);
-            if (char2 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
+            if (char1 == null) return CharacterResult.CharacterNotFound();
+            if (char2 == null) return CharacterResult.NpcNotFound();
 
             return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }
@@ -232,8 +232,8 @@ namespace FalloutRPG.Modules.Roleplay
             var char1 = _npcService.FindNpc(npcName1);
             var char2 = _npcService.FindNpc(npcName2);
 
-            if (char1 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
-            if (char2 == null) return CharacterResult.NpcNotFound(Context.User.Mention);
+            if (char1 == null) return CharacterResult.NpcNotFound();
+            if (char2 == null) return CharacterResult.NpcNotFound();
 
             return _rollService.RollVsStatistic(char1, char2, stat1, stat2, useEffects);
         }

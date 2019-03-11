@@ -174,87 +174,87 @@ namespace FalloutRPG.Modules
         }
 
         [Command("givemoney")]
-        public async Task GiveMoneyAsync(IUser user, int money)
+        public async Task<RuntimeResult> GiveMoneyAsync(IUser user, int money)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
-            if (character == null) return;
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             character.Money += money;
 
             await _charService.SaveCharacterAsync(character);
-            await ReplyAsync(string.Format(Messages.ADM_GAVE_MONEY, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.ADM_GAVE_MONEY);
         }
 
         [Command("giveexp")]
-        public async Task GiveExperienceAsync(IUser user, int points)
+        public async Task<RuntimeResult> GiveExperienceAsync(IUser user, int points)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
-            if (character == null) return;
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             await _experienceService.GiveExperienceAsync(character, points);
 
             await _charService.SaveCharacterAsync(character);
-            await ReplyAsync(string.Format(Messages.ADM_GAVE_EXP_POINTS, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.ADM_GAVE_EXP_POINTS);
         }
 
         [Command("giveskillpoints")]
         [RequireOwner]
-        public async Task GiveSkillPointsAsync(IUser user, int points)
+        public async Task<RuntimeResult> GiveSkillPointsAsync(IUser user, int points)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
-            if (character == null) return;
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             character.ExperiencePoints += points;
 
             await _charService.SaveCharacterAsync(character);
-            await ReplyAsync(string.Format(Messages.ADM_GAVE_SKILL_POINTS, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.ADM_GAVE_SKILL_POINTS);
         }
 
         [Command("changename")]
-        public async Task ChangeCharacterNameAsync(IUser user, [Remainder]string name)
+        public async Task<RuntimeResult> ChangeCharacterNameAsync(IUser user, [Remainder]string name)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
-            if (character == null) return;
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             if (!StringHelper.IsOnlyLetters(name))
-                return;
+                return GenericResult.FromError("Name contained non-alphabetic characters.");
 
             if (name.Length > 24 || name.Length < 2)
-                return;
+                return GenericResult.FromError("Name was too long or short.");
 
             character.Name = StringHelper.ToTitleCase(name);
 
             await _charService.SaveCharacterAsync(character);
-            await ReplyAsync(string.Format(Messages.ADM_CHANGED_NAME, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.ADM_CHANGED_NAME);
         }
         
         [Command("reset")]
-        public async Task ResetCharacterAsync(IUser user)
+        public async Task<RuntimeResult> ResetCharacterAsync(IUser user)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
-            if (character == null) return;
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             await _charService.ResetCharacterAsync(character);
-            await ReplyAsync(string.Format(Messages.ADM_RESET, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.ADM_RESET);
         }
 
         [Command("resetallcharacters")]
         [RequireOwner]
-        public async Task ResetAllCharactersAsync()
+        public async Task<RuntimeResult> ResetAllCharactersAsync()
         {
             await _charService.ResetAllCharactersAsync();
-            await ReplyAsync(string.Format(Messages.ADM_RESET, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.ADM_RESET);
         }
 
         [Command("delete")]
         [RequireOwner]
-        public async Task DeleteCharacterAsync(IUser user)
+        public async Task<RuntimeResult> DeleteCharacterAsync(IUser user)
         {
             var character = await _charService.GetCharacterAsync(user.Id);
-            if (character == null) return;
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             await _charService.DeleteCharacterAsync(character);
-            await ReplyAsync(string.Format(Messages.ADM_DELETE, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.ADM_DELETE);
         }
     }
 }

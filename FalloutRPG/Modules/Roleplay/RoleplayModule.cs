@@ -26,25 +26,17 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("pay")]
-        public async Task PayAsync(IUser user, int amount)
+        public async Task<RuntimeResult> PayAsync(IUser user, int amount)
         {
-            if (amount < 1) return;
+            if (amount < 1) return GenericResult.FromError(Messages.ERR_NOT_ENOUGH_CAPS);
 
             var sourceChar = await _charService.GetCharacterAsync(Context.User.Id);
-            if (sourceChar == null) return;
+            if (sourceChar == null) return CharacterResult.CharacterNotFound();
 
             var targetChar = await _charService.GetCharacterAsync(user.Id);
-            if (targetChar == null)
-            {
-                await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (targetChar == null) return CharacterResult.CharacterNotFound();
 
-            if (amount > sourceChar.Money)
-            {
-                await ReplyAsync(string.Format(Messages.ERR_NOT_ENOUGH_CAPS, Context.User.Mention));
-                return;
-            }
+            if (amount > sourceChar.Money) return GenericResult.FromError(Messages.ERR_NOT_ENOUGH_CAPS);
 
             sourceChar.Money -= amount;
             targetChar.Money += amount;
@@ -52,7 +44,7 @@ namespace FalloutRPG.Modules.Roleplay
             await _charService.SaveCharacterAsync(sourceChar);
             await _charService.SaveCharacterAsync(targetChar);
 
-            await ReplyAsync(string.Format(Messages.PAY_SUCCESS, user.Mention, amount, Context.User.Mention));
+            return GenericResult.FromSuccess(string.Format(Messages.PAY_SUCCESS, user.Mention, amount));
         }
 
         [Command("highscores")]

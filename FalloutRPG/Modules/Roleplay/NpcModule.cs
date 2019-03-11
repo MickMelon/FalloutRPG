@@ -27,25 +27,21 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("create")]
         [Alias("new")]
-        public async Task CreateNewNpcAsync(string name, string type)
+        public async Task<RuntimeResult> CreateNewNpcAsync(string name, string type)
         {
             try
             {
                 var preset = await _presetService.GetNpcPreset(type);
 
                 if (preset == null)
-                {
-                    await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
-                    return;
-                }
+                    return GenericResult.FromError(Messages.ERR_NPC_PRESET_NOT_FOUND);
 
                 _npcService.CreateNpc(name, preset);
-                await ReplyAsync(String.Format(Messages.NPC_CREATED_SUCCESS, type, name));
+                return GenericResult.FromSuccess(String.Format(Messages.NPC_CREATED_SUCCESS, type, name));
             }
             catch (Exception e)
             {
-                await ReplyAsync(Messages.FAILURE_EMOJI + e.Message);
-                return;
+                return GenericResult.FromError(e.Message);
             }
         }
 

@@ -68,7 +68,7 @@ namespace FalloutRPG.Services
 
             if (result is RuntimeResult rr && !String.IsNullOrEmpty(rr.Reason))
             {
-                await context.Channel.SendMessageAsync(message);
+                await context.Channel.SendMessageAsync($"{message} ({context.User.Mention})");
             }
 
             else if (result is RollResult roll)
@@ -85,16 +85,17 @@ namespace FalloutRPG.Services
                     case CommandError.UnmetPrecondition: break;
                     case CommandError.UnknownCommand:
                         {
-                            await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_NOT_EXIST, context.User.Mention));
+                            await context.Channel.SendMessageAsync($"{Messages.ERR_CMD_NOT_EXIST} ({context.User.Mention})");
                             break;
                         }
                     default:
                         {
-                            await context.Channel.SendMessageAsync(String.Format(Messages.ERR_CMD_USAGE, context.User.Mention));
+                            await context.Channel.SendMessageAsync($"{Messages.ERR_CMD_USAGE} ({context.User.Mention})");
                             break;
                         }
                 }
             }
+            await context.Message.DeleteAsync();
         }
 
         /// <summary>

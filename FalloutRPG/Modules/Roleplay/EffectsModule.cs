@@ -16,6 +16,7 @@ namespace FalloutRPG.Modules.Roleplay
     [Alias("effect")]
     public class EffectsModule : ModuleBase
     {
+        private const int MAX_EFFECTS = 10;
         private readonly EffectsService _effectsService;
 
         public EffectsModule(EffectsService effectsService)
@@ -24,15 +25,11 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("list")]
-        public async Task ListEffectsAsync()
+        public async Task<RuntimeResult> ListEffectsAsync()
         {
             var effects = await _effectsService.GetAllOwnedEffectsAsync(Context.User.Id);
 
-            if (effects == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (effects == null) return GenericResult.FromError(Messages.ERR_EFFECT_NOT_FOUND);
 
             var message = new StringBuilder();
 
@@ -44,64 +41,46 @@ namespace FalloutRPG.Modules.Roleplay
             var embed = EmbedHelper.BuildBasicEmbed("Command: $effect list", message.ToString());
 
             await ReplyAsync(Context.User.Mention, embed: embed);
+            return GenericResult.FromSilentSuccess();
         }
 
         [Command("info")]
-        public async Task ViewEffectAsync([Remainder]string name)
+        public async Task<RuntimeResult> ViewEffectAsync([Remainder]string name)
         {
             var effect = await _effectsService.GetEffectAsync(name);
 
-            if (effect == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (effect == null) return GenericResult.FromError(Messages.ERR_EFFECT_NOT_FOUND);
 
             await ReplyAsync(message: Context.User.Mention, embed: EmbedHelper.BuildBasicEmbed(null, _effectsService.GetEffectInfo(effect)));
+            return GenericResult.FromSilentSuccess();
         }
 
         [Command("create")]
-        public async Task CreateEffectAsync([Remainder]string name)
+        public async Task<RuntimeResult> CreateEffectAsync([Remainder]string name)
         {
             if (!StringHelper.IsOnlyLetters(name))
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_ALPHABETICAL, Context.User.Mention));
-                return;
-            }
+                return GenericResult.FromError(Messages.ERR_EFFECT_NOT_ALPHABETICAL);
 
             if (name.Length > 24)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NAME_TOO_LONG, Context.User.Mention));
-                return;
-            }
+                return GenericResult.FromError(Messages.ERR_EFFECT_NAME_TOO_LONG);
 
-            if (await _effectsService.CountEffectsAsync(Context.User.Id) >= 10)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_TOO_MANY, Context.User.Mention));
-                return;
-            }
+            if (await _effectsService.CountEffectsAsync(Context.User.Id) >= MAX_EFFECTS)
+                return GenericResult.FromError(Messages.ERR_EFFECT_TOO_MANY);
 
             if (await _effectsService.IsDuplicateName(name))
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NAME_DUPLICATE, Context.User.Mention));
-                return;
-            }
+                return GenericResult.FromError(Messages.ERR_EFFECT_NAME_DUPLICATE);
 
             await _effectsService.CreateEffectAsync(name, Context.User.Id);
 
-            await ReplyAsync(String.Format(Messages.EFFECT_CREATE_SUCCESS, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.EFFECT_CREATE_SUCCESS);
         }
 
         [Command]
-        public async Task EditEffectAsync(string name, Statistic stat, int value)
+        public async Task<RuntimeResult> EditEffectAsync(string name, Statistic stat, int value)
         {
             var effect = (await _effectsService.GetAllOwnedEffectsAsync(Context.User.Id)).Find(x => x.Name.Equals(name));
 
-            if (effect == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (effect == null) return GenericResult.FromError(Messages.ERR_EFFECT_NOT_FOUND);
 
             var match = effect.StatisticEffects.FirstOrDefault(x => x.Statistic.Equals(stat));
 
@@ -119,23 +98,19 @@ namespace FalloutRPG.Modules.Roleplay
 
             await _effectsService.SaveEffectAsync(effect);
 
-            await ReplyAsync(String.Format(Messages.EFFECT_EDIT_SUCCESS, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.EFFECT_EDIT_SUCCESS);
         }
 
         [Command("delete")]
-        public async Task DeleteEffectAsync([Remainder]string name)
+        public async Task<RuntimeResult> DeleteEffectAsync([Remainder]string name)
         {
             var effect = (await _effectsService.GetAllOwnedEffectsAsync(Context.User.Id)).Find(x => x.Name.Equals(name));
 
-            if (effect == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (effect == null) return GenericResult.FromError(Messages.ERR_EFFECT_NOT_FOUND);
 
             await _effectsService.DeleteEffectAsync(effect);
 
-            await ReplyAsync(String.Format(Messages.EFFECT_DELETE_SUCCESS, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.EFFECT_DELETE_SUCCESS);
         }
     }
 
@@ -154,73 +129,51 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("effects")]
         [Alias("effect", "wounds", "wound", "buffs", "buff", "debuffs", "debuff")]
-        public async Task ShowCharacterEffectsAsync()
+        public async Task<RuntimeResult> ShowCharacterEffectsAsync()
         {
             var userInfo = Context.User;
             var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                return;
-            }
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             string info = _effectsService.GetCharacterEffects(character);
 
             await ReplyAsync(userInfo.Mention, embed: EmbedHelper.BuildBasicEmbed($"{character.Name}'s Effects:", info));
+            return GenericResult.FromSilentSuccess();
         }
 
         [Command("apply")]
-        public async Task ApplyEffectAsync([Remainder]string name)
+        public async Task<RuntimeResult> ApplyEffectAsync([Remainder]string name)
         {
             var character = await _charService.GetCharacterAsync(Context.User.Id);
 
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             var effect = await _effectsService.GetEffectAsync(name);
 
-            if (effect == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (effect == null) return GenericResult.FromError(Messages.ERR_EFFECT_NOT_FOUND);
 
             if (character.EffectCharacters == null) character.EffectCharacters = new List<EffectCharacter>();
 
             if (character.EffectCharacters.Any(x => x.Effect.Equals(effect)))
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_ALREADY_APPLIED, Context.User.Mention));
-                return;
-            }
+                return GenericResult.FromError(Messages.ERR_EFFECT_ALREADY_APPLIED);
 
             character.EffectCharacters.Add(new EffectCharacter { Character = character, Effect = effect });
             await _charService.SaveCharacterAsync(character);
 
-            await ReplyAsync(String.Format(Messages.EFFECT_APPLY_SUCCESS, effect.Name, character.Name, Context.User.Mention));
+            return GenericResult.FromSuccess(String.Format(Messages.EFFECT_APPLY_SUCCESS, effect.Name, character.Name));
         }
 
         [Command("unapply")]
-        public async Task RemoveEffectAsync([Remainder]string name)
+        public async Task<RuntimeResult> RemoveEffectAsync([Remainder]string name)
         {
             var character = await _charService.GetCharacterAsync(Context.User.Id);
 
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_CHAR_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (character == null) return CharacterResult.CharacterNotFound();
 
             var effect = await _effectsService.GetEffectAsync(name);
 
-            if (effect == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (effect == null) return GenericResult.FromError(Messages.ERR_EFFECT_NOT_FOUND);
 
             //if (character.Effects == null) character.Effects = new List<Effect>();
             if (character.EffectCharacters == null) character.EffectCharacters = new List<EffectCharacter>();
@@ -228,7 +181,7 @@ namespace FalloutRPG.Modules.Roleplay
             character.EffectCharacters.Remove(character.EffectCharacters.Where(x => x.Effect.Equals(effect)).FirstOrDefault());
             await _charService.SaveCharacterAsync(character);
 
-            await ReplyAsync(String.Format(Messages.EFFECT_REMOVE_SUCCESS, effect.Name, character.Name, Context.User.Mention));
+            return GenericResult.FromSuccess(String.Format(Messages.EFFECT_REMOVE_SUCCESS, effect.Name, character.Name));
         }
     }
 
@@ -246,79 +199,56 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("effects")]
         [Alias("effect", "wounds", "wound", "buffs", "buff", "debuffs", "debuff")]
-        public async Task ShowCharacterEffectsAsync(string name)
+        public async Task<RuntimeResult> ShowCharacterEffectsAsync(string name)
         {
             var userInfo = Context.User;
             var character = _npcService.FindNpc(name);
 
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, userInfo.Mention));
-                return;
-            }
+            if (character == null) return CharacterResult.NpcNotFound();
 
             string info = _effectsService.GetCharacterEffects(character);
 
             await ReplyAsync(userInfo.Mention, embed: EmbedHelper.BuildBasicEmbed($"{character.Name}'s Effects:", info));
+            return GenericResult.FromSilentSuccess();
         }
 
         [Command("apply")]
-        public async Task ApplyEffectAsync(string npcName, [Remainder]string name)
+        public async Task<RuntimeResult> ApplyEffectAsync(string npcName, [Remainder]string name)
         {
             var character = _npcService.FindNpc(npcName);
-
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (character == null) return CharacterResult.NpcNotFound();
 
             var effect = await _effectsService.GetEffectAsync(name);
+            if (effect == null) return GenericResult.FromError(Messages.ERR_EFFECT_NOT_FOUND);
 
-            if (effect == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_FOUND, Context.User.Mention));
-                return;
-            }
-
-            if (character.EffectCharacters == null) character.EffectCharacters = new List<EffectCharacter>();
+            if (character.EffectCharacters == null)
+                character.EffectCharacters = new List<EffectCharacter>();
 
             if (character.EffectCharacters.Any(x => x.Effect.Equals(effect)))
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_ALREADY_APPLIED, Context.User.Mention));
-                return;
-            }
+                return GenericResult.FromError(Messages.ERR_EFFECT_ALREADY_APPLIED);
 
             character.EffectCharacters.Add(new EffectCharacter { Character = character, Effect = effect });
 
-            await ReplyAsync(String.Format(Messages.EFFECT_APPLY_SUCCESS, effect.Name, character.Name, Context.User.Mention));
+            return GenericResult.FromSuccess(String.Format(Messages.EFFECT_APPLY_SUCCESS, effect.Name, character.Name));
         }
 
         [Command("unapply")]
-        public async Task RemoveEffectAsync(string npcName, [Remainder]string name)
+        public async Task<RuntimeResult> RemoveEffectAsync(string npcName, [Remainder]string name)
         {
             var character = _npcService.FindNpc(npcName);
 
-            if (character == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (character == null) return CharacterResult.NpcNotFound();
 
             var effect = await _effectsService.GetEffectAsync(name);
 
-            if (effect == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_EFFECT_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+            if (effect == null) return GenericResult.FromError(Messages.ERR_EFFECT_NOT_FOUND);
 
             //if (character.Effects == null) character.Effects = new List<Effect>();
             if (character.EffectCharacters == null) character.EffectCharacters = new List<EffectCharacter>();
 
             character.EffectCharacters.Remove(character.EffectCharacters.Where(x => x.Effect.Equals(effect)).FirstOrDefault());
 
-            await ReplyAsync(String.Format(Messages.EFFECT_REMOVE_SUCCESS, effect.Name, character.Name, Context.User.Mention));
+            return GenericResult.FromSuccess(String.Format(Messages.EFFECT_REMOVE_SUCCESS, effect.Name, character.Name));
         }
     }
 }

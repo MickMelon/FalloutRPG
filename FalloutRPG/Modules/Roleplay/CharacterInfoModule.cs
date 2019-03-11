@@ -21,27 +21,24 @@ namespace FalloutRPG.Modules.Roleplay
 
         [Command("changename")]
         [Ratelimit(1, Globals.RATELIMIT_SECONDS, Measure.Seconds)]
-        public async Task ChangeCharacterNameAsync([Remainder]string name)
+        public async Task<RuntimeResult> ChangeCharacterNameAsync([Remainder]string name)
         {
             var character = await _charService.GetCharacterAsync(Context.User.Id);
             
-            if (character == null) return;
+            if (character == null) return CharacterResult.CharacterNotFound();
 
-            if (!StringHelper.IsOnlyLetters(name))
-                return;
+            if (!StringHelper.IsOnlyLetters(name)) return GenericResult.FromError("Name contained non-alphabetic characters.");
 
-            if (name.Length > 24 || name.Length < 2)
-                return;
+            if (name.Length > 24 || name.Length < 2) return GenericResult.FromError("Name was too long or short.");
 
             var fixedName = StringHelper.ToTitleCase(name);
 
-            if (await _charService.HasDuplicateName(Context.User.Id, fixedName))
-                return;
+            if (await _charService.HasDuplicateName(Context.User.Id, fixedName)) return GenericResult.FromError("Name is a duplicate.");
 
             character.Name = fixedName;
 
             await _charService.SaveCharacterAsync(character);
-            await ReplyAsync(string.Format(Messages.CHAR_CHANGED_NAME, Context.User.Mention));
+            return GenericResult.FromSuccess(Messages.CHAR_CHANGED_NAME);
         }
 
         [Group("story")]
@@ -57,49 +54,38 @@ namespace FalloutRPG.Modules.Roleplay
             [Command]
             [Alias("show")]
             [Ratelimit(1, Globals.RATELIMIT_SECONDS, Measure.Seconds)]
-            public async Task ShowCharacterStoryAsync(IUser targetUser = null)
+            public async Task<RuntimeResult> ShowCharacterStoryAsync(IUser targetUser = null)
             {
                 var userInfo = Context.User;
                 var character = targetUser == null
                     ? await _charService.GetCharacterAsync(userInfo.Id)
                     : await _charService.GetCharacterAsync(targetUser.Id);
 
-                if (character == null)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound();
 
-                if (character.Story == null || character.Story.Equals(""))
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_STORY_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (character.Story == null || character.Story.Equals("")) return GenericResult.FromError(Messages.ERR_STORY_NOT_FOUND);
 
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $character story",
                     $"**Name:** {character.Name}\n" +
                     $"**Story:** {character.Story}");
 
                 await ReplyAsync(userInfo.Mention, embed: embed);
+                return GenericResult.FromSilentSuccess();
             }
 
             [Command("update")]
             [Alias("set")]
-            public async Task UpdateCharacterStoryAsync([Remainder]string story)
+            public async Task<RuntimeResult> UpdateCharacterStoryAsync([Remainder]string story)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (character == null)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound();
 
                 character.Story = story;
 
                 await _charService.SaveCharacterAsync(character);
-                await ReplyAsync(string.Format(Messages.CHAR_STORY_SUCCESS, userInfo.Mention));
+                return GenericResult.FromSuccess(Messages.CHAR_STORY_SUCCESS);
             }
         }
 
@@ -116,49 +102,39 @@ namespace FalloutRPG.Modules.Roleplay
 
             [Command]
             [Alias("show")]
-            public async Task ShowCharacterDescriptionAsync(IUser targetUser = null)
+            public async Task<RuntimeResult> ShowCharacterDescriptionAsync(IUser targetUser = null)
             {
                 var userInfo = Context.User;
                 var character = targetUser == null
                     ? await _charService.GetCharacterAsync(userInfo.Id)
                     : await _charService.GetCharacterAsync(targetUser.Id);
 
-                if (character == null)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound();
 
                 if (character.Description == null || character.Description.Equals(""))
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_DESC_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                    return GenericResult.FromError(Messages.ERR_DESC_NOT_FOUND);
 
                 var embed = EmbedHelper.BuildBasicEmbed("Command: $character description",
                     $"**Name:** {character.Name}\n" +
                     $"**Description:** {character.Description}");
 
                 await ReplyAsync(userInfo.Mention, embed: embed);
+                return GenericResult.FromSilentSuccess();
             }
 
             [Command("update")]
             [Alias("set")]
-            public async Task UpdateCharacterDescriptionAsync([Remainder]string description)
+            public async Task<RuntimeResult> UpdateCharacterDescriptionAsync([Remainder]string description)
             {
                 var userInfo = Context.User;
                 var character = await _charService.GetCharacterAsync(userInfo.Id);
 
-                if (character == null)
-                {
-                    await ReplyAsync(string.Format(Messages.ERR_CHAR_NOT_FOUND, userInfo.Mention));
-                    return;
-                }
+                if (character == null) return CharacterResult.CharacterNotFound();
 
                 character.Description = description;
 
                 await _charService.SaveCharacterAsync(character);
-                await ReplyAsync(string.Format(Messages.CHAR_DESC_SUCCESS, userInfo.Mention));
+                return GenericResult.FromSuccess(Messages.CHAR_DESC_SUCCESS);
             }
         }
     }

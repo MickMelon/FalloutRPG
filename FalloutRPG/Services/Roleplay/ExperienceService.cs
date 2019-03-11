@@ -264,7 +264,7 @@ namespace FalloutRPG.Services.Roleplay
                 await _charService.SaveCharacterAsync(character);
             }
 
-            await user.SendMessageAsync(string.Format(Messages.SKILLS_LEVEL_UP, user.Mention, character.ExperiencePoints));
+            await user.SendMessageAsync(string.Format(Messages.SKILLS_LEVEL_UP, character.ExperiencePoints));
         }
     }
 }

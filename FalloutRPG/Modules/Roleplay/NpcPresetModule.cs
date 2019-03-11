@@ -36,16 +36,16 @@ namespace FalloutRPG.Modules.Roleplay
         }
 
         [Command("create")]
-        public async Task CreatePresetAsync(string name)
+        public async Task<RuntimeResult> CreatePresetAsync(string name)
         {
             try
             {
                 await _presetService.CreateNpcPresetAsync(name);
-                await ReplyAsync(String.Format(Messages.NPC_PRESET_CREATE, name, Context.User.Mention));
+                return GenericResult.FromSuccess(String.Format(Messages.NPC_PRESET_CREATE, name));
             }
             catch (Exception e)
             {
-                await ReplyAsync($"{Messages.FAILURE_EMOJI} {e.Message} ({Context.User.Mention})");
+                return GenericResult.FromError(e.Message);
                 throw;
             }
         }
@@ -56,29 +56,26 @@ namespace FalloutRPG.Modules.Roleplay
             var preset = await _presetService.GetNpcPreset(name);
 
             if (preset == null)
-                return GenericResult.FromError(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
+                return GenericResult.FromError(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND));
 
             _statsService.SetStatistic(preset.Statistics, stat, newValue);
             await _presetService.SaveNpcPreset(preset);
 
-            return GenericResult.FromSuccess(String.Format(Messages.NPC_PRESET_EDIT_SPECIAL, preset.Name, Context.User.Mention));
+            return GenericResult.FromSuccess(String.Format(Messages.NPC_PRESET_EDIT_SPECIAL, preset.Name));
         }
 
         [Command("toggle")]
-        public async Task TogglePresetAsync(string name)
+        public async Task<RuntimeResult> TogglePresetAsync(string name)
         {
             var preset = await _presetService.GetNpcPreset(name);
 
             if (preset == null)
-            {
-                await ReplyAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, Context.User.Mention));
-                return;
-            }
+                return GenericResult.FromError(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND));
 
             preset.Enabled = !preset.Enabled;
             await _presetService.SaveNpcPreset(preset);
 
-            await ReplyAsync(String.Format(Messages.NPC_PRESET_TOGGLE, preset.Name, preset.Enabled, Context.User.Mention));
+            return GenericResult.FromSuccess(String.Format(Messages.NPC_PRESET_TOGGLE, preset.Name, preset.Enabled));
         }
 
         [Command("view")]
@@ -89,7 +86,7 @@ namespace FalloutRPG.Modules.Roleplay
             NpcPreset preset = await _presetService.GetNpcPreset(name);
 
             if (preset == null)
-                await dmChannel.SendMessageAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, name, Context.User.Mention));
+                await dmChannel.SendMessageAsync(String.Format(Messages.ERR_NPC_PRESET_NOT_FOUND, name));
 
             StringBuilder sb = new StringBuilder();
 

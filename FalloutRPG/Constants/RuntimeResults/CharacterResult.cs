@@ -9,10 +9,10 @@ namespace FalloutRPG.Constants
         {
         }
 
-        public static CharacterResult CharacterNotFound(string mention = "") =>
-            new CharacterResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_CHAR_NOT_FOUND, mention));
+        public static CharacterResult CharacterNotFound() =>
+            new CharacterResult(CommandError.ObjectNotFound, Messages.ERR_CHAR_NOT_FOUND);
 
-        public static CharacterResult NpcNotFound(string mention = "") =>
-            new CharacterResult(CommandError.ObjectNotFound, String.Format(Messages.ERR_NPC_CHAR_NOT_FOUND, mention));
+        public static CharacterResult NpcNotFound() =>
+            new CharacterResult(CommandError.ObjectNotFound, Messages.ERR_NPC_CHAR_NOT_FOUND);
     }
 }

@@ -12,66 +12,66 @@
         public static readonly string DICE_EMOJI = "\uD83C\uDFB2";
 
         // Character Messages
-        public static readonly string CHAR_CREATED_SUCCESS = SUCCESS_EMOJI + "Character created successfully. {0}";
-        public static readonly string CHAR_STORY_SUCCESS = SUCCESS_EMOJI + "Character story updated successfully. {0}";
-        public static readonly string CHAR_DESC_SUCCESS = SUCCESS_EMOJI + "Character description updated successfully. {0}";
-        public static readonly string CHAR_CHANGED_NAME = SUCCESS_EMOJI + "Character name successfully changed. {0}";
-        public static readonly string CHAR_ACTIVATED = SUCCESS_EMOJI + "Character {0} is now active. {1}";
+        public static readonly string CHAR_CREATED_SUCCESS = SUCCESS_EMOJI + "Character created successfully.";
+        public static readonly string CHAR_STORY_SUCCESS = SUCCESS_EMOJI + "Character story updated successfully.";
+        public static readonly string CHAR_DESC_SUCCESS = SUCCESS_EMOJI + "Character description updated successfully.";
+        public static readonly string CHAR_CHANGED_NAME = SUCCESS_EMOJI + "Character name successfully changed.";
+        public static readonly string CHAR_ACTIVATED = SUCCESS_EMOJI + "Character {0} is now active.";
         public static readonly string CHAR_REMOVE_CONFIRM = QUESTION_EMOJI + "**Are you sure you want to delete `{0}` level {1}? This action CANNOT be undone!**" +
-            " To confirm this action, reply with the name of the character. {2}";
-        public static readonly string CHAR_REMOVE_SUCCESS = SUCCESS_EMOJI + "The character `{0}` was deleted successfully. {1}";
-        public static readonly string CHAR_NOT_REMOVED = FAILURE_EMOJI + "The character `{0}` was **NOT** deleted. {1}";
+            " To confirm this action, reply with the name of the character.";
+        public static readonly string CHAR_REMOVE_SUCCESS = SUCCESS_EMOJI + "The character `{0}` was deleted successfully.";
+        public static readonly string CHAR_NOT_REMOVED = FAILURE_EMOJI + "The character `{0}` was **NOT** deleted.";
 
         // Stats Messages
         public static readonly string EXP_LEVEL_UP = "Congratulations {0}, you have just advanced to level {1}!";
-        public static readonly string SKILLS_LEVEL_UP = "Hey, {0}! You have {1} unspent skill points. Spend them with *$char skills spend [skill] [points]*";
+        public static readonly string SKILLS_LEVEL_UP = "You have {0} unspent skill points. Spend them with *$char skills spend [skill] [points]*";
         public static readonly string SKILLS_SPEND_POINTS_SUCCESS = SUCCESS_EMOJI + "Skill points added successfully.";
-        public static readonly string SKILLS_SET_SUCCESS = SUCCESS_EMOJI + "Character skills set successfully. {0}";
-        public static readonly string SPECIAL_SET_SUCCESS = SUCCESS_EMOJI + "Character SPECIAL set successfully. {0}";
-        public static readonly string SKILLS_POINTS_CLAIMED = SUCCESS_EMOJI + "{0} skill points were successfully claimed! {1}";
+        public static readonly string SKILLS_SET_SUCCESS = SUCCESS_EMOJI + "Character skills set successfully.";
+        public static readonly string SPECIAL_SET_SUCCESS = SUCCESS_EMOJI + "Character SPECIAL set successfully.";
+        public static readonly string SKILLS_POINTS_CLAIMED = SUCCESS_EMOJI + "{0} skill points were successfully claimed!";
         public static readonly string SKILLS_ADDED = SUCCESS_EMOJI + "Skill successfully added.";
         public static readonly string SKILLS_REMOVED = SUCCESS_EMOJI + "Skill successfully removed.";
         public static readonly string SPECIAL_ADDED = SUCCESS_EMOJI + "Special successfully added.";
         public static readonly string SPECIAL_REMOVED = SUCCESS_EMOJI + "Special successfully removed.";
-        public static readonly string STAT_RENAMED = SUCCESS_EMOJI + "Statisitc renamed successfully.";
+        public static readonly string STAT_RENAMED = SUCCESS_EMOJI + "Statistic renamed successfully.";
 
         // Money Messages
-        public static readonly string PAY_SUCCESS = SUCCESS_EMOJI + "You gave {0} {1} caps. {2}";
-        public static readonly string ERR_NOT_ENOUGH_CAPS = FAILURE_EMOJI + "You do not have enough caps! {0}";
+        public static readonly string PAY_SUCCESS = SUCCESS_EMOJI + "You gave {0} {1} caps.";
+        public static readonly string ERR_NOT_ENOUGH_CAPS = FAILURE_EMOJI + "You do not have enough caps!";
 
         // Admin Messages
-        public static readonly string ADM_GAVE_MONEY = ADM_EMOJI + "Money given successfully. {0}";
-        public static readonly string ADM_GAVE_SKILL_POINTS = ADM_EMOJI + "Skill points given successfully. {0}";
-        public static readonly string ADM_GAVE_EXP_POINTS = ADM_EMOJI + "Experience points given successfully. {0}";
-        public static readonly string ADM_GAVE_SPEC_POINTS = ADM_EMOJI + "SPECIAL points given successfully. {0}";
-        public static readonly string ADM_RESET = ADM_EMOJI + "Reset character skills and SPECIAL successfully. {0}";
-        public static readonly string ADM_DELETE = ADM_EMOJI + "Deleted character successfully. {0}";
-        public static readonly string ADM_CHANGED_NAME = ADM_EMOJI + "Character name changed successfully. {0}";
+        public static readonly string ADM_GAVE_MONEY = ADM_EMOJI + "Money given successfully.";
+        public static readonly string ADM_GAVE_SKILL_POINTS = ADM_EMOJI + "Skill points given successfully.";
+        public static readonly string ADM_GAVE_EXP_POINTS = ADM_EMOJI + "Experience points given successfully.";
+        public static readonly string ADM_GAVE_SPEC_POINTS = ADM_EMOJI + "SPECIAL points given successfully.";
+        public static readonly string ADM_RESET = ADM_EMOJI + "Reset character skills and SPECIAL successfully.";
+        public static readonly string ADM_DELETE = ADM_EMOJI + "Deleted character successfully.";
+        public static readonly string ADM_CHANGED_NAME = ADM_EMOJI + "Character name changed successfully.";
 
         // Command Error Messages
-        public static readonly string ERR_CMD_USAGE = FAILURE_EMOJI + "Incorrect command usage. Use $help if you are stuck. {0}";
-        public static readonly string ERR_CMD_NOT_EXIST = FAILURE_EMOJI + "Command doesn't exist. Use $help if you are stuck. {0}";
-        public static readonly string ERR_CMD_REQUIRE_ROLE_FAIL = FAILURE_EMOJI + "You must be have the {0} role to use this command. {1}";
+        public static readonly string ERR_CMD_USAGE = FAILURE_EMOJI + "Incorrect command usage. Use $help if you are stuck.";
+        public static readonly string ERR_CMD_NOT_EXIST = FAILURE_EMOJI + "Command doesn't exist. Use $help if you are stuck.";
+        public static readonly string ERR_CMD_REQUIRE_ROLE_FAIL = FAILURE_EMOJI + "You must be have the {0} role to use this command.";
         public static readonly string ERR_CMD_NOT_IN_GUILD = FAILURE_EMOJI + "You must be in a server to use this command.";
 
         // Character Error Messages
-        public static readonly string ERR_CHAR_NOT_FOUND = FAILURE_EMOJI + "Unable to find character. {0}";
-        public static readonly string ERR_STORY_NOT_FOUND = FAILURE_EMOJI + "Unable to find character story. {0}";
-        public static readonly string ERR_DESC_NOT_FOUND = FAILURE_EMOJI + "Unable to find character description. {0}";
-        public static readonly string ERR_SPECIAL_NOT_FOUND = FAILURE_EMOJI + "Unable to find character SPECIAL. {0}";
-        public static readonly string ERR_CHAR_ALREADY_ACTIVE = FAILURE_EMOJI + "Character `{0}` is already active. {1}";
+        public static readonly string ERR_CHAR_NOT_FOUND = FAILURE_EMOJI + "Unable to find character.";
+        public static readonly string ERR_STORY_NOT_FOUND = FAILURE_EMOJI + "Unable to find character story.";
+        public static readonly string ERR_DESC_NOT_FOUND = FAILURE_EMOJI + "Unable to find character description.";
+        public static readonly string ERR_SPECIAL_NOT_FOUND = FAILURE_EMOJI + "Unable to find character SPECIAL.";
+        public static readonly string ERR_CHAR_ALREADY_ACTIVE = FAILURE_EMOJI + "Character `{0}` is already active.";
         public static readonly string ERR_CHAR_CANT_REMOVE_ACTIVE = FAILURE_EMOJI + "Character `{0}` cannot be removed because it is your active character. " +
-            "Please switch by using the `$char activate [name]` command. {1}";
+            "Please switch by using the `$char activate [name]` command.";
 
         // Stats Error Messages
-        public static readonly string ERR_SKILLS_NOT_FOUND = FAILURE_EMOJI + "Unable to find character skills. {0}";
-        public static readonly string ERR_SKILLS_ALREADY_SET = FAILURE_EMOJI + "Character skills are already set. {0}";
-        public static readonly string ERR_SKILLS_POINTS_GOES_OVER_MAX = "Unable to add skill points because it will take the skill above the max level. {0}";
-        public static readonly string ERR_SPECIAL_ALREADY_SET = FAILURE_EMOJI + "Character SPECIAL is already set. {0}";
-        public static readonly string ERR_SKILLS_NONE_TO_CLAIM = FAILURE_EMOJI + "You don't have any skill points that you can claim. {0}";
-        public static readonly string ERR_SKILLS_POINTS_BELOW_ONE = FAILURE_EMOJI + "You cannot put less than one point in a skill. {0}";
-        public static readonly string ERR_SKILLS_TOO_LOW = FAILURE_EMOJI + "The skill's level was too low to use. {0}";
-        public static readonly string ERR_STAT_ALREADY_EXISTS = FAILURE_EMOJI + "A statistic with the given name already exists. {0}";
+        public static readonly string ERR_SKILLS_NOT_FOUND = FAILURE_EMOJI + "Unable to find character skills.";
+        public static readonly string ERR_SKILLS_ALREADY_SET = FAILURE_EMOJI + "Character skills are already set.";
+        public static readonly string ERR_SKILLS_POINTS_GOES_OVER_MAX = "Unable to add skill points because it will take the skill above the max level.";
+        public static readonly string ERR_SPECIAL_ALREADY_SET = FAILURE_EMOJI + "Character SPECIAL is already set.";
+        public static readonly string ERR_SKILLS_NONE_TO_CLAIM = FAILURE_EMOJI + "You don't have any skill points that you can claim.";
+        public static readonly string ERR_SKILLS_POINTS_BELOW_ONE = FAILURE_EMOJI + "You cannot put less than one point in a skill.";
+        public static readonly string ERR_SKILLS_TOO_LOW = FAILURE_EMOJI + "The skill's level was too low to use.";
+        public static readonly string ERR_STAT_ALREADY_EXISTS = FAILURE_EMOJI + "A statistic with the given name already exists.";
         public static readonly string ERR_STAT_NOT_ENOUGH_POINTS = "Character does not have enough experience points. Price: {0}XP.";
         public static readonly string ERR_STAT_PRICE_NOT_SET = "Upgrade price not set.";
         public static readonly string ERR_STAT_USING_OLD_PROGRESSION = "Configuration is set to use old progresion system.";
@@ -121,19 +121,19 @@
         public static readonly string ERR_CRAPS_PASS_FAIL = FAILURE_EMOJI + "Couldn't pass the dice for {0}. Do you have a bet placed, or the only one playing?";
 
         // Effects Messages
-        public static readonly string EFFECT_CREATE_SUCCESS = SUCCESS_EMOJI + "Effect created successfully. {0}";
-        public static readonly string EFFECT_EDIT_SUCCESS = SUCCESS_EMOJI + "Effect edited successfully. {0}";
-        public static readonly string EFFECT_DELETE_SUCCESS = SUCCESS_EMOJI + "Effect deleted successfully. {0}";
-        public static readonly string EFFECT_APPLY_SUCCESS = SUCCESS_EMOJI + "`{0}` applied successfully to `{1}`. {2}";
-        public static readonly string EFFECT_REMOVE_SUCCESS = SUCCESS_EMOJI + "`{0}` successfully removed from `{1}`. {2}";
+        public static readonly string EFFECT_CREATE_SUCCESS = SUCCESS_EMOJI + "Effect created successfully.";
+        public static readonly string EFFECT_EDIT_SUCCESS = SUCCESS_EMOJI + "Effect edited successfully.";
+        public static readonly string EFFECT_DELETE_SUCCESS = SUCCESS_EMOJI + "Effect deleted successfully.";
+        public static readonly string EFFECT_APPLY_SUCCESS = SUCCESS_EMOJI + "`{0}` applied successfully to `{1}`.";
+        public static readonly string EFFECT_REMOVE_SUCCESS = SUCCESS_EMOJI + "`{0}` successfully removed from `{1}`.";
 
         // Effects Error Messages
-        public static readonly string ERR_EFFECT_NOT_FOUND = FAILURE_EMOJI + "Unable to find effect. {0}";
-        public static readonly string ERR_EFFECT_TOO_MANY = FAILURE_EMOJI + "You have reached the limit of effects per account. {0}";
-        public static readonly string ERR_EFFECT_NAME_DUPLICATE = FAILURE_EMOJI + "An effect already exists with the given name. {0}";
-        public static readonly string ERR_EFFECT_NAME_TOO_LONG = FAILURE_EMOJI + "The given effect name was too long. {0}";
-        public static readonly string ERR_EFFECT_NOT_ALPHABETICAL = FAILURE_EMOJI + "The effect name must contain only letters. {0}";
-        public static readonly string ERR_EFFECT_ALREADY_APPLIED = FAILURE_EMOJI + "The specified effect is already applied. {0}";
+        public static readonly string ERR_EFFECT_NOT_FOUND = FAILURE_EMOJI + "Unable to find effect.";
+        public static readonly string ERR_EFFECT_TOO_MANY = FAILURE_EMOJI + "You have reached the limit of effects per account.";
+        public static readonly string ERR_EFFECT_NAME_DUPLICATE = FAILURE_EMOJI + "An effect already exists with the given name.";
+        public static readonly string ERR_EFFECT_NAME_TOO_LONG = FAILURE_EMOJI + "The given effect name was too long.";
+        public static readonly string ERR_EFFECT_NOT_ALPHABETICAL = FAILURE_EMOJI + "The effect name must contain only letters.";
+        public static readonly string ERR_EFFECT_ALREADY_APPLIED = FAILURE_EMOJI + "The specified effect is already applied.";
 
         // NPC Messages
         public static readonly string NPC_CREATED_SUCCESS = SUCCESS_EMOJI + "NPC created with type: `{0}` and name: `{1}`.";
@@ -147,15 +147,15 @@
         public static readonly string NPC_PRESET_EDIT_SPECIAL = SUCCESS_EMOJI + "NPC preset: `{0}` S.P.E.C.I.A.L. values changed. {1}";
 
         // NPC Error Messages
-        public static readonly string ERR_NPC_CHAR_NOT_FOUND = FAILURE_EMOJI + "An NPC with the given name could not be found. {0}";
-        public static readonly string ERR_NPC_PRESET_NOT_FOUND = FAILURE_EMOJI + "An NPC preset with the given name could not be found. {0}";
-        public static readonly string ERR_NPC_PRESET_CREATE = FAILURE_EMOJI + "NPC preset creation failed. {0}";
-        public static readonly string ERR_NPC_PRESET_ENABLE = FAILURE_EMOJI + "Failed to enable NPC preset: {0}. Check for typos {1}";
-        public static readonly string ERR_NPC_PRESET_DISABLE = FAILURE_EMOJI + "Failed to disable NPC preset: {0}. Check for typos {1}";
-        public static readonly string ERR_NPC_PRESET_EDIT = FAILURE_EMOJI + "Failed to modify NPC preset attribute. {0}";
+        public static readonly string ERR_NPC_CHAR_NOT_FOUND = FAILURE_EMOJI + "An NPC with the given name could not be found.";
+        public static readonly string ERR_NPC_PRESET_NOT_FOUND = FAILURE_EMOJI + "An NPC preset with the given name could not be found.";
+        public static readonly string ERR_NPC_PRESET_CREATE = FAILURE_EMOJI + "NPC preset creation failed.";
+        public static readonly string ERR_NPC_PRESET_ENABLE = FAILURE_EMOJI + "Failed to enable NPC preset: {0}. Check for typos.";
+        public static readonly string ERR_NPC_PRESET_DISABLE = FAILURE_EMOJI + "Failed to disable NPC preset: {0}. Check for typos.";
+        public static readonly string ERR_NPC_PRESET_EDIT = FAILURE_EMOJI + "Failed to modify NPC preset attribute.";
 
         // Roll Messages
-        public static readonly string ROLL_DICE = DICE_EMOJI + "Rolled: {0}. ({1})";
+        public static readonly string ROLL_DICE = DICE_EMOJI + "Rolled: {0}.";
 
         // Roll Error Messages
         public static readonly string ROLL_DICE_TOO_MANY = "There were too many die to be rolled; max is twenty.";

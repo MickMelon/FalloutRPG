@@ -29,11 +29,11 @@ namespace FalloutRPG.Modules.Roleplay
         {
             if (attribValue < minimum)
             {
-                return $"[{attribName} {attribValue}/{minimum}] Check **failed** for {charName}! ({Context.User.Mention})";
+                return $"[{attribName} {attribValue}/{minimum}] Check **failed** for {charName}!";
             }
             else
             {
-                return $"[{attribName} {minimum}] Check **passed** for {charName}! ({Context.User.Mention})";
+                return $"[{attribName} {minimum}] Check **passed** for {charName}!";
             }
         }
 
