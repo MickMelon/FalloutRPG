@@ -91,7 +91,7 @@ namespace FalloutRPG.Modules.Roleplay
                     message.Append($"__**{special.Name}:**__\n");
                     foreach (var skill in stats.Where(x => x.Statistic is Skill sk && sk.Special.Equals(special)).OrderBy(x => x.Statistic.Name))
                     {
-                        if (skillsSet)
+                        if (skillsSet || !_progOptions.UseOldProgression)
                         {
                             if (skill.Value == 0) continue;
 
