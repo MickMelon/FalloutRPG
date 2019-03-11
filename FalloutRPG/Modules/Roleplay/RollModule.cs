@@ -50,8 +50,8 @@ namespace FalloutRPG.Modules.Roleplay
             await _helpService.ShowRollHelpAsync(Context);
         }
 
-        [Command("roll")]
-        [Alias("r")]
+        [Command("rolld")]
+        [Alias("rolldice", "rd")]
         public async Task<RuntimeResult> RollDiceAsync(int dieCount, int sides, int bonus = 0)
         {
             if (dieCount > 20)
