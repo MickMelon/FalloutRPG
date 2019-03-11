@@ -95,7 +95,12 @@ namespace FalloutRPG.Services
                         }
                 }
             }
-            await context.Message.DeleteAsync();
+
+            try
+            {
+                await context.Message.DeleteAsync();
+            }
+            catch (Exception) { }
         }
 
         /// <summary>
