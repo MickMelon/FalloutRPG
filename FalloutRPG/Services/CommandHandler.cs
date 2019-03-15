@@ -50,14 +50,7 @@ namespace FalloutRPG.Services
                 assembly: Assembly.GetEntryAssembly(),
                 services: _services);
 
-            #pragma warning disable CS1998
-            _client.MessageReceived += async (message) =>
-            #pragma warning restore CS1998
-            {
-                #pragma warning disable CS4014
-                Task.Run(() => HandleCommandAsync(message));
-                #pragma warning restore CS4014
-            };
+            _client.MessageReceived += HandleCommandAsync;
 
             _commands.CommandExecuted += OnCommandExecutedAsync;
         }
@@ -119,10 +112,11 @@ namespace FalloutRPG.Services
                 if (!(message.HasStringPrefix(_config["prefix"], ref argPos) ||
                     message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
                 {
-                    await _expService.ProcessExperienceAsync(context);
+                    _ = _expService.ProcessExperienceAsync(context);
                     return;
                 }
 
+                Console.WriteLine("executing command");
                 var result = await _commands.ExecuteAsync(
                     context: context,
                     argPos: argPos,

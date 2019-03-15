@@ -48,7 +48,6 @@ namespace FalloutRPG.Services.Roleplay
             _progressOptions = progressOptions;
             UseOldProgression = _progressOptions.UseOldProgression;
             
-            LoadExperienceConfig();
             _random = random;
         }
 
@@ -79,7 +78,7 @@ namespace FalloutRPG.Services.Roleplay
                 cache.Take(_expOptions.AllowedConsecutiveMessages).All(x => x.Author.Equals(context.User)))
                 return;
 
-            var expToGive = GetExperienceFromMessage(character, context.Message.Content.Where(x => !Char.IsWhiteSpace(x)).Count());
+            var expToGive = GetExperienceFromMessage(character, context.Message.Content.Count(x => !Char.IsWhiteSpace(x)));
 
             if (await GiveExperienceAsync(character, expToGive))
             {
@@ -216,22 +215,6 @@ namespace FalloutRPG.Services.Roleplay
             }
 
             return oldProg.SkillPointsOnLevelUp + extraPoints;
-        }
-
-        /// <summary>
-        /// Loads the experience enabled channels from the
-        /// configuration file.
-        /// </summary>
-        private void LoadExperienceConfig()
-        {
-            try
-            {
-                
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Experience settings improperly configured, Config.json.");
-            }
         }
 
         /// <summary>
