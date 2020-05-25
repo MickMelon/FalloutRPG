@@ -1,3 +1,5 @@
+This project is outdated and no longer maintained. See: https://github.com/MickMelon/FRAGS
+
 | Tool  | Main branch | Testing branch |
 |----------|:-----------:|:------------------:|
 | Travis Ci    | [![Build Status](https://travis-ci.org/MickMelon/FalloutRPG.svg?branch=master)](https://travis-ci.org/MickMelon/FalloutRPG) | [![Build Status](https://travis-ci.org/MickMelon/FalloutRPG.svg?branch=testing)](https://travis-ci.org/MickMelon/FalloutRPG) |
